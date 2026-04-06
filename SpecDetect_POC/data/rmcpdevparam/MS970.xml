@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="gb2312" ?>
+<config>
+    <device name="MS970">
+        <item name="antennaselect" title="天线选择" type="enum" default="AV814(20MHz-8000MHz)" min="" max="" unit="">
+            <item title="AV814(20MHz-8000MHz)" value="AV814(20MHz-8000MHz)" />
+            <item title="AV8824(8000MHz-18000MHz)" value="AV8824(8000MHz-18000MHz)" />
+        </item>
+        <item name="frequency" title="频率" type="double" default="100000000" min="20000000" max="18000000000" unit="Hz" />
+        <item name="ifbw" title="中频带宽" type="enum" default="40000000" min="" max="" unit="Hz">
+            <item title="800Hz" value="800" />
+            <item title="1.6kHz" value="1600" />
+            <item title="3.125kHz" value="3125" />
+            <item title="6.25kHz" value="6250" />
+            <item title="12.5kHz" value="12500" />
+            <item title="25kHz" value="25000" />
+            <item title="50kHz" value="50000" />
+            <item title="100kHz" value="100000" />
+            <item title="200kHz" value="200000" />
+            <item title="400kHz" value="400000" />
+            <item title="800kHz" value="800000" />
+            <item title="1.25MHz" value="1250000" />
+            <item title="2.5MHz" value="2500000" />
+            <item title="5MHz" value="5000000" />
+            <item title="10MHz" value="10000000" />
+            <item title="20MHz" value="20000000" />
+            <item title="40MHz" value="40000000" />
+        </item>
+        <item name="gain" title="增益模式" type="enum" default="AGC" min="" max="" unit="">
+            <item title="AGC" value="AGC" />
+            <item title="MGC" value="MGC" />
+        </item>
+        <item name="rfworkmode" title="射频模式" type="enum" default="0" min="" max="" unit="">
+            <item title="常态" value="0" />
+            <item title="低噪声" value="1" />
+            <item title="低失真" value="2" />
+        </item>
+        <item name="audiotype" title="音频数据类型" type="enum" default="off" min="" max="" unit="">
+            <item title="GSM610音频数据开" value="GSM610" />
+            <item title="PCM音频数据开" value="PCM" />
+            <item title="音频关" value="off" />
+        </item>
+        <item name="demodmode" title="解调模式" type="enum" default="FM" min="" max="" unit="">
+            <item title="AM" value="AM" />
+            <item title="FM" value="FM" />
+            <item title="CW" value="CW" />
+            <item title="DSB" value="DSB" />
+            <item title="SSB" value="SSB" />
+        </item>
+        <item name="demodbw" title="解调带宽" type="enum" default="200000" min="" max="" unit="Hz">
+            <item title="0.8kHz" value="800" />
+            <item title="1.6kHz" value="1600" />
+            <item title="3.125kHz" value="3125" />
+            <item title="6.25kHz" value="6250" />
+            <item title="12.5kHz" value="12500" />
+            <item title="25kHz" value="25000" />
+            <item title="50kHz" value="50000" />
+            <item title="100kHz" value="100000" />
+            <item title="200kHz" value="200000" />
+            <item title="400kHz" value="400000" />
+            <item title="800kHz" value="800000" />
+            <item title="1.6MHz" value="1600000" />
+        </item>
+        <item name="squelchswitch" title="静噪开关" type="enum" default="ON" min="" max="" unit="">
+            <item title="ON" value="ON" />
+            <item title="OFF" value="OFF" />
+        </item>
+        <item name="squelchthreshold" title="静噪门限" type="int" default="0" min="-70" max="70" unit="dBμV" />
+        <item name="spectrumswitch" title="频谱数据开关" type="enum" default="on" min="" max="" unit="">
+            <item title="频谱关" value="off" />
+            <item title="频谱开" value="on" />
+        </item>
+        <item name="ITUSwitch" title="ITU数据开关" type="enum" default="on" min="" max="" unit="">
+            <item title="ITU关" value="off" />
+            <item title="ITU开" value="on" />
+        </item>
+        <item name="startfreq" title="起始频率" type="double" default="137000000" min="20000000" max="18000000000" unit="Hz" />
+        <item name="stopfreq" title="终止频率" type="double" default="173000000" min="20000000" max="18000000000" unit="Hz" />
+        <item name="step" title="步长" type="enum" default="25000" min="" max="" unit="Hz">
+            <item title="3.125kHz" value="3125" />
+            <item title="6.25kHz" value="6250" />
+            <item title="12.5kHz" value="12500" />
+            <item title="25kHz" value="25000" />
+            <item title="50kHz" value="50000" />
+            <item title="100kHz" value="100000" />
+        </item>
+        <item name="scanmode" title="扫描模式" type="enum" default="0" min="" max="" unit="">
+            <item title="快速" value="0" />
+            <item title="精确" value="1" />
+        </item>
+        <item name="keepmode" title="保持方式" type="enum" default="0" min="" max="" unit="">
+            <item title="最大保持" value="0" />
+            <item title="最小保持" value="1" />
+            <item title="平均保持" value="2" />
+        </item>
+        <func>
+            <items />
+        </func>
+        <func>
+            <items />
+        </func>
+        <func>
+            <items />
+        </func>
+        <func id="11" secs="1">
+            <items>
+                <item name="antennaselect" living="true" />
+                <item name="frequency" living="true" />
+                <item name="ifbw" living="true" />
+                <item name="gain" living="true" />
+                <item name="rfworkmode" living="true" />
+                <item name="audiotype" living="true" />
+                <item name="demodmode" living="true" />
+                <item name="demodbw" living="true" />
+                <item name="squelchswitch" living="true" />
+                <item name="squelchthreshold" living="true" />
+                <item name="spectrumswitch" living="true" />
+                <item name="ITUSwitch" living="true" />
+            </items>
+            <constraint>
+                <item type="hide" master="gain" mvalue="AGC" slave="ifatt" svalue="0" />
+                <item type="hide" master="gain" mvalue="MGC" slave="ifatt" svalue="0" />
+                <item type="hide" master="gain" mvalue="AGC" slave="CombinedFunc" svalue="AsIFFQ" />
+                <item type="hide" master="gain" mvalue="MGC" slave="CombinedFunc" svalue="AsIFFQ" />
+                <item type="hide" master="squelchswitch" mvalue="OFF" slave="squelchthreshold" svalue="0" />
+                <item type="hide" master="audiotype" mvalue="OFF" slave="demodmode" svalue="FM" />
+                <item type="hide" master="audiotype" mvalue="OFF" slave="demodbw" svalue="200kHz" />
+                <item type="hide" master="audiotype" mvalue="OFF" slave="demodparam" svalue="0" />
+                <item type="hide" master="demodmode" mvalue="AM" slave="demodparam" svalue="0" />
+                <item type="hide" master="demodmode" mvalue="FM" slave="demodparam" svalue="0" />
+                <item type="hide" master="demodmode" mvalue="DSB" slave="demodparam" svalue="0" />
+                <item type="hide" master="demodmode" mvalue="SSB" slave="demodparam" svalue="0" />
+            </constraint>
+        </func>
+        <func id="14" secs="200">
+            <items>
+                <item name="antennaselect" living="false" />
+                <item name="frequency" living="false" />
+                <item name="ifbw" living="false" />
+                <item name="gain" living="false" />
+                <item name="rfworkmode" living="false" />
+            </items>
+            <constraint>
+                <item type="hide" master="gain" mvalue="AGC" slave="ifatt" svalue="0" />
+                <item type="hide" master="gain" mvalue="MGC" slave="ifatt" svalue="0" />
+                <item type="hide" master="gain" mvalue="AGC" slave="CombinedFunc" svalue="AsIFFQ" />
+                <item type="hide" master="gain" mvalue="MGC" slave="CombinedFunc" svalue="AsIFFQ" />
+            </constraint>
+        </func>
+        <func id="15" secs="5">
+            <items>
+                <item name="antennaselect" living="false" />
+                <item name="startfreq" living="false" />
+                <item name="stopfreq" living="false" />
+                <item name="step" living="false" />
+                <item name="gain" living="false" />
+                <item name="rfworkmode" living="false" />
+                <item name="scanmode" living="false" />
+            </items>
+            <constraint>
+                <item type="hide" master="gain" mvalue="AGC" slave="ifatt" svalue="0" />
+                <item type="hide" master="gain" mvalue="MGC" slave="ifatt" svalue="0" />
+                <item type="hide" master="gain" mvalue="AGC" slave="CombinedFunc" svalue="AsIFFQ" />
+                <item type="hide" master="gain" mvalue="MGC" slave="CombinedFunc" svalue="AsIFFQ" />
+            </constraint>
+        </func>
+        <func id="16" secs="1">
+            <items>
+                <item name="antennaselect" living="true" />
+                <item name="startfreq" living="true" />
+                <item name="stopfreq" living="true" />
+                <item name="step" living="true" />
+                <item name="gain" living="true" />
+                <item name="rfworkmode" living="true" />
+                <item name="keepmode" living="true" />
+            </items>
+            <constraint>
+                <item type="hide" master="gain" mvalue="AGC" slave="ifatt" svalue="0" />
+                <item type="hide" master="gain" mvalue="MGC" slave="ifatt" svalue="0" />
+                <item type="hide" master="gain" mvalue="AGC" slave="CombinedFunc" svalue="AsIFFQ" />
+                <item type="hide" master="gain" mvalue="MGC" slave="CombinedFunc" svalue="AsIFFQ" />
+            </constraint>
+        </func>
+    </device>
+</config>

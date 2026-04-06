@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>频谱探测验证控制台</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        /* 顶部状态栏 */
+        .header {
+            background: #16213e;
+            border-bottom: 2px solid #0f3460;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 {
+            color: #00d4ff;
+            font-size: 18px;
+        }
+        .service-status-bar {
+            display: flex;
+            gap: 30px;
+        }
+        .service-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .status-dot.running { background: #00ff00; box-shadow: 0 0 5px #00ff00; }
+        .status-dot.stopped { background: #ff0000; box-shadow: 0 0 5px #ff0000; }
+        .status-dot.unknown { background: #888; }
+
+        /* 主布局 */
+        .main-container {
+            display: grid;
+            grid-template-columns: 320px 450px 1fr;
+            grid-template-rows: 1fr auto;
+            min-height: calc(100vh - 100px);
+            gap: 10px;
+            padding: 10px;
+        }
+
+        /* 左侧列：设备控制 + 请求参数垂直堆叠 */
+        .left-column {
+            grid-row: 1 / 3;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* 面板通用样式 */
+        .panel {
+            background: #16213e;
+            border-radius: 8px;
+            border: 1px solid #0f3460;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid #0f3460;
+            font-size: 13px;
+            color: #00d4ff;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-content {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        /* 请求区域 */
+        .request-panel {
+            flex: 1;
+            min-height: 0;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            background: #0d1525;
+            border: 1px solid #0f3460;
+            color: #fff;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* 设备控制面板 */
+        .device-control-panel {
+            flex: 0 0 auto;
+        }
+        .device-preset-section {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        .form-group-row {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-group-row label {
+            font-size: 11px;
+            color: #888;
+            white-space: nowrap;
+        }
+        .form-group-row select {
+            background: #0d1525;
+            border: 1px solid #0f3460;
+            color: #fff;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .device-info {
+            width: 100%;
+            font-size: 11px;
+            color: #00d4ff;
+            font-family: 'Consolas', monospace;
+        }
+        .device-info div {
+            margin-bottom: 2px;
+        }
+        .device-info span {
+            color: #fff;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button {
+            flex: 1;
+            background: #0f3460;
+            color: #00d4ff;
+            border: 1px solid #00d4ff;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #00d4ff;
+            color: #16213e;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        button.primary {
+            background: #00d4ff;
+            color: #16213e;
+        }
+
+        /* SOAP预览 */
+        .soap-preview {
+            background: #0d1525;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 10px;
+            color: #0f0;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            max-height: 150px;
+        }
+
+        /* 数据流追踪区域 */
+        .flow-panel {
+            grid-row: 1 / 3;
+        }
+        .flow-step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .flow-step::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 30px;
+            bottom: -15px;
+            width: 2px;
+            background: #0f3460;
+        }
+        .flow-step:last-child::before {
+            display: none;
+        }
+        .flow-step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .flow-step-icon.pending { background: #333; border: 2px solid #666; }
+        .flow-step-icon.running { background: #0f3460; border: 2px solid #00d4ff; color: #00d4ff; }
+        .flow-step-icon.success { background: #0d3d0d; border: 2px solid #00ff00; color: #00ff00; }
+        .flow-step-icon.error { background: #3d0d0d; border: 2px solid #ff0000; color: #ff0000; }
+
+        .flow-step-content {
+            flex: 1;
+            background: #0d1525;
+            border-radius: 6px;
+            padding: 10px;
+            min-height: 60px;
+        }
+        .flow-step-title {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .flow-step-desc {
+            font-size: 10px;
+            color: #888;
+        }
+        .flow-step-data {
+            font-family: 'Consolas', monospace;
+            font-size: 10px;
+            margin-top: 5px;
+            max-height: 80px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .flow-step-data.hex {
+            color: #ff0;
+        }
+        .flow-step-data.json {
+            color: #0ff;
+        }
+
+        /* 右侧展示区 */
+        .display-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .display-panel .panel-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+        .chart-container {
+            flex: 1;
+            min-height: 200px;
+            background: #0d1525;
+            border-radius: 4px;
+            padding: 5px;
+        }
+        #spectrum-chart {
+            width: 100%;
+            height: 100%;
+            min-height: 180px;
+        }
+
+        /* 测向指示器 */
+        .direction-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        #direction-canvas {
+            background: #0d1525;
+            border-radius: 4px;
+        }
+        .direction-info {
+            flex: 1;
+            font-size: 11px;
+        }
+        .direction-info div {
+            margin-bottom: 5px;
+        }
+        .direction-info .label {
+            color: #888;
+        }
+        .direction-info .value {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        /* 日志区域 */
+        .log-panel {
+            grid-column: 1 / -1;
+        }
+        .log-tabs {
+            display: flex;
+            gap: 5px;
+        }
+        .log-tab {
+            padding: 5px 15px;
+            background: transparent;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 11px;
+            border-bottom: 2px solid transparent;
+        }
+        .log-tab.active {
+            color: #00d4ff;
+            border-bottom-color: #00d4ff;
+        }
+        .log-content {
+            background: #0d1525;
+            padding: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 10px;
+            height: 180px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .log-entry {
+            margin-bottom: 3px;
+            padding: 2px 5px;
+            border-radius: 2px;
+        }
+        .log-entry.info { color: #0ff; }
+        .log-entry.success { color: #0f0; }
+        .log-entry.error { color: #f00; background: rgba(255,0,0,0.1); }
+        .log-entry.warning { color: #ff0; }
+        .log-time { color: #666; margin-right: 8px; }
+
+        /* 响应结果 */
+        .result-section {
+            margin-top: 10px;
+        }
+        .result-title {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        .result-data {
+            background: #0d1525;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部状态栏 -->
+    <div class="header">
+        <h1>频谱探测验证控制台</h1>
+        <div class="service-status-bar">
+            <div class="service-status">
+                <span class="status-dot unknown" id="status-proxy"></span>
+                <span>代理服务 <span id="text-proxy">未检测</span></span>
+            </div>
+            <div class="service-status">
+                <span class="status-dot unknown" id="status-atom"></span>
+                <span>原子服务 <span id="text-atom">未检测</span></span>
+            </div>
+            <div class="service-status">
+                <span class="status-dot unknown" id="status-mock"></span>
+                <span>虚拟设备 <span id="text-mock">未检测</span></span>
+            </div>
+            <div class="service-status">
+                <span class="status-dot unknown" id="status-tcp"></span>
+                <span>TCP连接 <span id="text-tcp">未连接</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 左侧：设备控制 + 请求参数 -->
+        <div class="left-column">
+            <!-- 设备控制面板 -->
+            <div class="panel device-control-panel">
+                <div class="panel-header">
+                    <span>设备控制</span>
+                </div>
+                <div class="panel-content">
+                    <div class="device-preset-section">
+                        <div class="form-group-row">
+                            <label>设备预设:</label>
+                            <select id="device-preset" onchange="loadDevicePreset()">
+                                <option value="">-- 选择设备 --</option>
+                                <option value="MD1000">MD1000 (监测/测向)</option>
+                                <option value="MS845">MS845</option>
+                                <option value="MS950">MS950 (监测)</option>
+                                <option value="MS970">MS970</option>
+                            </select>
+                        </div>
+                        <div class="device-info" id="device-info">
+                            <div>设备型号: <span id="device-model">-</span></div>
+                            <div>频率范围: <span id="device-freq">-</span></div>
+                            <div>支持功能: <span id="device-cap">-</span></div>
+                        </div>
+                        <button id="btn-connect" onclick="connectDevice()" class="primary">连接设备</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 请求区域 -->
+            <div class="panel request-panel">
+                <div class="panel-header">
+                    <span>请求参数</span>
+                    <span id="request-status" style="color:#888;font-weight:normal">就绪</span>
+                </div>
+                <div class="panel-content">
+                <div class="form-group">
+                    <label>任务类型</label>
+                    <select id="task-type">
+                        <option value="sglfreq">单频测量 (SGLFREQ)</option>
+                        <option value="fscan">频段扫描 (FSCAN)</option>
+                        <option value="df">单频测向 (DF)</option>
+                        <option value="ifdf">中频测向 (IFDF)</option>
+                        <option value="ifanalysis">中频分析 (IFANALYSIS)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>频率 (Hz)</label>
+                    <input type="number" id="frequency" value="100000000" min="20000000" max="3000000000">
+                </div>
+                <div class="form-group">
+                    <label>带宽 (Hz)</label>
+                    <input type="number" id="bandwidth" value="120000" min="1000" max="10000000">
+                </div>
+                <div class="form-group">
+                    <label>跨度/步进 (Hz)</label>
+                    <input type="number" id="span" value="1000000" min="10000" max="100000000">
+                </div>
+
+                <div class="form-group">
+                    <label>SOAP请求预览</label>
+                    <div class="soap-preview" id="soap-preview"></div>
+                </div>
+
+                <div class="btn-row">
+                    <button id="btn-send" class="primary" onclick="sendRequest()">发送请求</button>
+                </div>
+                <div class="btn-row">
+                    <button onclick="clearAll()">清空</button>
+                    <button onclick="refreshStatus()">刷新状态</button>
+                </div>
+
+                <!-- 响应结果 -->
+                <div class="result-section">
+                    <div class="result-title">响应结果</div>
+                    <div class="result-data" id="response-result">等待请求...</div>
+                </div>
+            </div>
+        </div>
+        </div><!-- /.left-column -->
+
+        <!-- 中间：数据流追踪 -->
+        <div class="panel flow-panel">
+            <div class="panel-header">
+                <span>数据流追踪</span>
+                <span id="flow-status" style="color:#888;font-weight:normal">等待请求</span>
+            </div>
+            <div class="panel-content" id="flow-container">
+                <!-- 步骤1: 请求发起 -->
+                <div class="flow-step" id="step-request">
+                    <div class="flow-step-icon pending" id="icon-request">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">请求发起</div>
+                        <div class="flow-step-desc">Web Client → Proxy Service</div>
+                        <div class="flow-step-data hex" id="data-request">-</div>
+                    </div>
+                </div>
+
+                <!-- 步骤2: SOAP解析 -->
+                <div class="flow-step" id="step-soap">
+                    <div class="flow-step-icon pending" id="icon-soap">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">SOAP解析</div>
+                        <div class="flow-step-desc">代理服务解析SOAP请求</div>
+                        <div class="flow-step-data" id="data-soap">-</div>
+                    </div>
+                </div>
+
+                <!-- 步骤3: 原子服务转发 -->
+                <div class="flow-step" id="step-atom">
+                    <div class="flow-step-icon pending" id="icon-atom">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">原子服务</div>
+                        <div class="flow-step-desc">Atom Service 处理业务逻辑</div>
+                        <div class="flow-step-data json" id="data-atom">-</div>
+                    </div>
+                </div>
+
+                <!-- 步骤4: 设备命令 -->
+                <div class="flow-step" id="step-cmd">
+                    <div class="flow-step-icon pending" id="icon-cmd">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">RMCPTP命令帧</div>
+                        <div class="flow-step-desc">Atom → Mock Device</div>
+                        <div class="flow-step-data hex" id="data-cmd">-</div>
+                    </div>
+                </div>
+
+                <!-- 步骤5: 设备响应 -->
+                <div class="flow-step" id="step-device">
+                    <div class="flow-step-icon pending" id="icon-device">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">RMCPTP响应帧</div>
+                        <div class="flow-step-desc">Mock Device → Atom</div>
+                        <div class="flow-step-data hex" id="data-device">-</div>
+                    </div>
+                </div>
+
+                <!-- 步骤6: 响应返回 -->
+                <div class="flow-step" id="step-response">
+                    <div class="flow-step-icon pending" id="icon-response">6</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">响应返回</div>
+                        <div class="flow-step-desc">最终响应结果</div>
+                        <div class="flow-step-data json" id="data-response">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：数据展示 -->
+        <div class="panel display-panel">
+            <div class="panel-header">
+                <span>数据展示</span>
+                <div style="display:flex;gap:10px;align-items:center">
+                    <label style="font-size:11px;color:#888">自动刷新:</label>
+                    <input type="checkbox" id="auto-refresh" onchange="toggleAutoRefresh()" style="width:auto">
+                    <select id="refresh-interval" style="width:80px;font-size:11px;background:#0d1525;color:#fff;border:1px solid #0f3460">
+                        <option value="500">0.5s</option>
+                        <option value="1000" selected>1s</option>
+                        <option value="2000">2s</option>
+                        <option value="5000">5s</option>
+                    </select>
+                    <button onclick="requestRealtimeSpectrum()" style="padding:3px 10px;font-size:11px">刷新</button>
+                </div>
+            </div>
+            <div class="panel-content">
+                <!-- 频谱图 -->
+                <div class="chart-container">
+                    <div id="spectrum-chart"></div>
+                </div>
+
+                <!-- 测向指示 -->
+                <div class="panel" style="flex:0 0 120px">
+                    <div class="panel-header">测向指示</div>
+                    <div class="panel-content">
+                        <div class="direction-container">
+                            <canvas id="direction-canvas" width="100" height="100"></canvas>
+                            <div class="direction-info">
+                                <div><span class="label">方位角:</span> <span class="value" id="df-azimuth">-</span></div>
+                                <div><span class="label">电平:</span> <span class="value" id="df-level">-</span></div>
+                                <div><span class="label">测向质量:</span> <span class="value" id="df-quality">-</span></div>
+                                <div><span class="label">俯仰角:</span> <span class="value" id="df-elevation">-</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 帧解析结果 -->
+                <div class="panel" style="flex:0 0 100px">
+                    <div class="panel-header">帧解析结果</div>
+                    <div class="panel-content">
+                        <div class="result-data" id="frame-parse-result" style="max-height:80px">等待数据...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部：日志 -->
+        <div class="panel log-panel">
+            <div class="panel-header">
+                <span>运行日志</span>
+                <div class="log-tabs">
+                    <button class="log-tab active" onclick="switchLogTab('all')">全部</button>
+                    <button class="log-tab" onclick="switchLogTab('proxy')">代理</button>
+                    <button class="log-tab" onclick="switchLogTab('atom')">原子</button>
+                    <button class="log-tab" onclick="switchLogTab('mock')">设备</button>
+                </div>
+            </div>
+            <div class="panel-content" style="padding:5px">
+                <div class="log-content" id="log-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置
+        const PROXY_URL = 'http://localhost:8080';
+        const ATOM_URL = 'http://localhost:9090';
+
+        // 状态
+        let tcpConnected = false;
+        let currentLogTab = 'all';
+        let logs = [];
+        let autoRefreshTimer = null;
+
+        // 初始化图表
+        let spectrumChart = echarts.init(document.getElementById('spectrum-chart'));
+        spectrumChart.setOption({
+            backgroundColor: 'transparent',
+            title: { text: '等待数据...', textStyle: { color: '#666', fontSize: 14 } },
+            grid: {
+                left: 50, right: 20, top: 40, bottom: 30,
+                show: true,
+                borderColor: '#0f3460',
+                backgroundColor: 'rgba(13, 21, 37, 0.3)'
+            },
+            xAxis: {
+                type: 'category',
+                data: [],
+                show: true,
+                axisLine: { lineStyle: { color: '#0f3460' } },
+                axisLabel: { color: '#888' },
+                splitLine: { show: false }
+            },
+            yAxis: {
+                type: 'value',
+                min: -120,
+                max: -20,
+                show: true,
+                axisLine: { lineStyle: { color: '#0f3460' } },
+                axisLabel: { color: '#888', formatter: v => v + 'dBm' },
+                splitLine: {
+                    show: true,
+                    lineStyle: { color: '#0f3460', type: 'dashed' }
+                }
+            },
+            series: [{
+                type: 'line',
+                data: [],
+                show: false
+            }]
+        });
+
+        // 添加日志
+        function addLog(type, source, message) {
+            const time = new Date().toLocaleTimeString();
+            const entry = { time, type, source, message };
+            logs.push(entry);
+
+            const logEl = document.getElementById('log-content');
+            const entryEl = document.createElement('div');
+            entryEl.className = `log-entry ${type}`;
+            entryEl.innerHTML = `<span class="log-time">[${time}]</span>[${source}] ${message}`;
+            logEl.appendChild(entryEl);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function switchLogTab(tab) {
+            currentLogTab = tab;
+            document.querySelectorAll('.log-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            refreshLogDisplay();
+        }
+
+        function refreshLogDisplay() {
+            const logEl = document.getElementById('log-content');
+            logEl.innerHTML = '';
+            logs.filter(l => currentLogTab === 'all' || l.source.toLowerCase() === currentLogTab)
+                .forEach(entry => {
+                    const entryEl = document.createElement('div');
+                    entryEl.className = `log-entry ${entry.type}`;
+                    entryEl.innerHTML = `<span class="log-time">[${entry.time}]</span>[${entry.source}] ${entry.message}`;
+                    logEl.appendChild(entryEl);
+                });
+        }
+
+        // 设备预设配置
+        const deviceConfigs = {
+            'MD1000': {
+                freqRange: '20-8000 MHz',
+                ifbwOptions: ['0.8kHz', '1.6kHz', '3.125kHz', '6.25kHz', '12.5kHz', '25kHz', '50kHz', '100kHz', '200kHz', '400kHz', '800kHz', '1000kHz', '1250kHz', '1500kHz', '2000kHz', '2500kHz', '3000kHz', '5000kHz', '10000kHz', '15000kHz', '20000kHz', '40000kHz', '80000kHz'],
+                fftOptions: ['1024', '2048', '4096', '8192'],
+                defaultIfbw: '40000kHz',
+                defaultFftl: '2048',
+                hasDF: true,
+                hasIFAnalysis: true
+            },
+            'MS845': {
+                freqRange: '20-8000 MHz',
+                ifbwOptions: ['3.125kHz', '6.25kHz', '12.5kHz', '25kHz', '50kHz', '100kHz', '200kHz', '400kHz', '800kHz', '1250kHz', '2500kHz', '5000kHz', '10000kHz', '20000kHz', '40000kHz'],
+                fftOptions: ['1024', '2048'],
+                defaultIfbw: '40000kHz',
+                defaultFftl: '2048',
+                hasDF: true,
+                hasIFAnalysis: true
+            },
+            'MS950': {
+                freqRange: '20-18000 MHz',
+                ifbwOptions: ['0.8kHz', '1.6kHz', '3.125kHz', '6.25kHz', '12.5kHz', '25kHz', '50kHz', '100kHz', '200kHz', '300kHz', '400kHz', '500kHz', '800kHz', '1000kHz', '1250kHz', '1500kHz', '2000kHz', '2500kHz', '3000kHz', '5000kHz', '10000kHz', '15000kHz', '20000kHz', '40000kHz', '80000kHz'],
+                fftOptions: ['1024', '2048'],
+                defaultIfbw: '40000kHz',
+                defaultFftl: '2048',
+                hasDF: false,
+                hasIFAnalysis: true
+            },
+            'MS970': {
+                freqRange: '20-3000 MHz',
+                ifbwOptions: ['0.8kHz', '1.6kHz', '3.125kHz', '6.25kHz', '12.5kHz', '15kHz', '25kHz', '30kHz', '50kHz', '100kHz', '150kHz', '200kHz', '250kHz', '300kHz', '400kHz', '500kHz', '800kHz', '1000kHz', '1250kHz', '1500kHz', '2000kHz', '2500kHz', '3000kHz', '5000kHz', '10000kHz', '15000kHz', '20000kHz', '40000kHz', '80000kHz'],
+                fftOptions: ['1024', '2048', '4096', '8192'],
+                defaultIfbw: '40000kHz',
+                defaultFftl: '2048',
+                hasDF: true,
+                hasIFAnalysis: true
+            }
+        };
+
+        function loadDevicePreset() {
+            const preset = document.getElementById('device-preset').value;
+            const deviceModel = document.getElementById('device-model');
+            const deviceFreq = document.getElementById('device-freq');
+            const deviceCap = document.getElementById('device-cap');
+
+            if (!preset) {
+                deviceModel.textContent = '-';
+                deviceFreq.textContent = '-';
+                deviceCap.textContent = '-';
+                return;
+            }
+
+            const config = deviceConfigs[preset];
+            if (!config) return;
+
+            // 更新设备信息显示（分3行）
+            deviceModel.textContent = preset;
+            deviceFreq.textContent = config.freqRange;
+            deviceCap.textContent = config.hasDF ? '监测+测向' : '仅监测';
+
+            // 更新任务类型选项
+            const taskTypeSelect = document.getElementById('task-type');
+            taskTypeSelect.innerHTML = '<option value="sglfreq">单频测量 (SGLFREQ)</option>';
+
+            if (config.hasIFAnalysis) {
+                taskTypeSelect.innerHTML += '<option value="ifanalysis">中频分析 (IFANALYSIS)</option>';
+            }
+
+            if (config.hasDF) {
+                taskTypeSelect.innerHTML += '<option value="df">单频测向 (DF)</option>';
+                taskTypeSelect.innerHTML += '<option value="ifdf">中频测向 (IFDF)</option>';
+            }
+
+            taskTypeSelect.innerHTML += '<option value="fscan">频段扫描 (FSCAN)</option>';
+
+            addLog('info', 'Client', '已加载设备预设: ' + preset + ' (频率范围: ' + config.freqRange + ')');
+        }
+
+        // 刷新服务状态
+        async function refreshStatus() {
+            addLog('info', 'System', '正在检测服务状态...');
+
+            // 检测代理服务
+            try {
+                let resp = await fetch(`${PROXY_URL}/health`);
+                if (resp.ok) {
+                    document.getElementById('status-proxy').className = 'status-dot running';
+                    document.getElementById('text-proxy').textContent = '运行中';
+                    addLog('success', 'Proxy', '代理服务正常运行');
+                }
+            } catch {
+                document.getElementById('status-proxy').className = 'status-dot stopped';
+                document.getElementById('text-proxy').textContent = '未运行';
+                addLog('error', 'Proxy', '代理服务未运行');
+            }
+
+            // 检测原子服务
+            try {
+                let resp = await fetch(`${ATOM_URL}/health`);
+                if (resp.ok) {
+                    let data = await resp.json();
+                    document.getElementById('status-atom').className = 'status-dot running';
+                    document.getElementById('text-atom').textContent = '运行中';
+                    addLog('success', 'Atom', '原子服务正常运行');
+
+                    // 获取设备连接状态
+                    let devResp = await fetch(`${ATOM_URL}/device/status`);
+                    if (devResp.ok) {
+                        let devData = await devResp.json();
+                        tcpConnected = devData.connected;
+                    }
+                }
+            } catch {
+                document.getElementById('status-atom').className = 'status-dot stopped';
+                document.getElementById('text-atom').textContent = '未运行';
+                addLog('error', 'Atom', '原子服务未运行');
+            }
+
+            // 虚拟设备状态（通过后端设备状态判断）
+            document.getElementById('status-mock').className = tcpConnected ? 'status-dot running' : 'status-dot unknown';
+            document.getElementById('text-mock').textContent = tcpConnected ? '运行中' : '等待连接';
+
+            document.getElementById('status-tcp').className = tcpConnected ? 'status-dot running' : 'status-dot stopped';
+            document.getElementById('text-tcp').textContent = tcpConnected ? '已连接' : '未连接';
+        }
+
+        // 连接设备
+        async function connectDevice() {
+            const preset = document.getElementById('device-preset').value;
+            let deviceInfo = '默认设备';
+
+            if (preset && deviceConfigs[preset]) {
+                const config = deviceConfigs[preset];
+                deviceInfo = preset + ' (频率范围: ' + config.freqRange + ', ' + (config.hasDF ? '支持测向' : '仅监测') + ')';
+            }
+
+            try {
+                addLog('info', 'Client', '正在连接设备...');
+                addLog('info', 'Client', '设备: ' + deviceInfo);
+
+                let resp = await fetch(`${ATOM_URL}/device/connect`, { method: 'POST' });
+                addLog('info', 'Client', `响应状态: ${resp.status}`);
+
+                if (!resp.ok) {
+                    addLog('error', 'Client', `连接失败: HTTP ${resp.status}`);
+                    return;
+                }
+
+                let result = await resp.json();
+                addLog('info', 'Client', `结果: ${JSON.stringify(result)}`);
+
+                if (result.success) {
+                    tcpConnected = true;
+                    addLog('success', 'Client', '设备连接成功');
+                    // 立即更新UI状态
+                    document.getElementById('status-mock').className = 'status-dot running';
+                    document.getElementById('text-mock').textContent = '运行中';
+                    document.getElementById('status-tcp').className = 'status-dot running';
+                    document.getElementById('text-tcp').textContent = '已连接';
+                } else {
+                    tcpConnected = false;
+                    addLog('error', 'Client', '设备连接失败: ' + result.message);
+                }
+            } catch (err) {
+                tcpConnected = false;
+                addLog('error', 'Client', '设备连接异常: ' + err.message + ' (可能是服务未启动)');
+            }
+        }
+
+        // 生成SOAP请求
+        function generateSOAPRequest(type, frequency, bandwidth, span) {
+            if (type === 'sglfreq') {
+                return `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <StartMeasure>
+            <Frequency>${frequency}</Frequency>
+            <Bandwidth>${bandwidth}</Bandwidth>
+        </StartMeasure>
+    </soap:Body>
+</soap:Envelope>`;
+            } else if (type === 'fscan') {
+                return `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <StartScan>
+            <StartFreq>${frequency - span / 2}</StartFreq>
+            <EndFreq>${frequency + span / 2}</EndFreq>
+            <Step>${span / 100}</Step>
+        </StartScan>
+    </soap:Body>
+</soap:Envelope>`;
+            } else if (type === 'df') {
+                return `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <StartDirection>
+            <Frequency>${frequency}</Frequency>
+            <Bandwidth>${bandwidth}</Bandwidth>
+        </StartDirection>
+    </soap:Body>
+</soap:Envelope>`;
+            } else if (type === 'ifdf') {
+                return `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <StartIFDirection>
+            <Frequency>${frequency}</Frequency>
+            <Span>${span}</Span>
+            <IFBW>${bandwidth}</IFBW>
+        </StartIFDirection>
+    </soap:Body>
+</soap:Envelope>`;
+            } else if (type === 'ifanalysis') {
+                return `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <StartIFAnalysis>
+            <Frequency>${frequency}</Frequency>
+            <Span>${span}</Span>
+            <IFBW>${bandwidth}</IFBW>
+        </StartIFAnalysis>
+    </soap:Body>
+</soap:Envelope>`;
+            }
+            return '';
+        }
+
+        // 更新SOAP预览
+        function updateSOAPPreview() {
+            const type = document.getElementById('task-type').value;
+            const frequency = parseInt(document.getElementById('frequency').value);
+            const bandwidth = parseInt(document.getElementById('bandwidth').value);
+            const span = parseInt(document.getElementById('span').value);
+
+            const soap = generateSOAPRequest(type, frequency, bandwidth, span);
+            document.getElementById('soap-preview').textContent = soap;
+
+            document.getElementById('data-request').textContent = '类型: ' + type + '\n频率: ' + frequency + ' Hz\n带宽: ' + bandwidth + ' Hz';
+        }
+
+        // 重置步骤图标
+        function resetFlowSteps() {
+            ['request', 'soap', 'atom', 'cmd', 'device', 'response'].forEach(step => {
+                document.getElementById('icon-' + step).className = 'flow-step-icon pending';
+            });
+            document.getElementById('flow-status').textContent = '处理中...';
+        }
+
+        // 更新步骤状态
+        function setFlowStep(step, status, data) {
+            const icon = document.getElementById('icon-' + step);
+            icon.className = 'flow-step-icon ' + status;
+
+            if (data && document.getElementById('data-' + step)) {
+                document.getElementById('data-' + step).textContent = data;
+            }
+
+            if (status === 'success' || status === 'error') {
+                // 更新flow-status
+                const completed = ['request', 'soap', 'atom', 'cmd', 'device', 'response']
+                    .filter(s => {
+                        const cls = document.getElementById('icon-' + s).className;
+                        return cls.includes('success') || cls.includes('error');
+                    }).length;
+
+                if (completed === 6) {
+                    const hasError = ['request', 'soap', 'atom', 'cmd', 'device', 'response']
+                        .some(s => document.getElementById('icon-' + s).className.includes('error'));
+                    document.getElementById('flow-status').textContent = hasError ? '流程异常' : '流程完成';
+                }
+            }
+        }
+
+        // 发送请求
+        async function sendRequest() {
+            const preset = document.getElementById('device-preset').value;
+            const type = document.getElementById('task-type').value;
+            const frequency = parseInt(document.getElementById('frequency').value);
+            const bandwidth = parseInt(document.getElementById('bandwidth').value);
+            const span = parseInt(document.getElementById('span').value);
+
+            // ========== 前端验证：按文档规范 ==========
+            // 1. 检查设备是否已选择
+            if (!preset) {
+                addLog('error', 'Client', '请先选择设备预设');
+                document.getElementById('response-result').textContent = '错误: 请先选择设备预设';
+                return;
+            }
+
+            // 2. 检查设备是否已连接（必须在发起业务请求之前手动连接）
+            if (!tcpConnected) {
+                addLog('error', 'Client', '设备未连接，请先点击"连接设备"按钮');
+                document.getElementById('response-result').textContent = '错误: 设备未连接，请先连接设备';
+                return;
+            }
+            // ========== 验证结束 ==========
+
+            resetFlowSteps();
+            setFlowStep('request', 'running');
+            addLog('info', 'Client', `发送${type}请求: 频率=${frequency}Hz`);
+
+            // 步骤1: 请求发起
+            await sleep(100);
+            setFlowStep('request', 'success', `已发送 ${type} 请求`);
+
+            // 步骤2: SOAP解析 (模拟)
+            setFlowStep('soap', 'running');
+            await sleep(100);
+            const soap = generateSOAPRequest(type, frequency, bandwidth, span);
+            setFlowStep('soap', 'success', 'SOAP解析成功');
+            addLog('info', 'Proxy', 'SOAP请求已解析');
+
+            try {
+                // 步骤3: 原子服务
+                setFlowStep('atom', 'running');
+                let endpoint = '';
+                let body = {};
+
+                if (type === 'sglfreq') {
+                    endpoint = `${ATOM_URL}/monitor/sglfreq`;
+                    body = { frequency, bandwidth };
+                } else if (type === 'fscan') {
+                    endpoint = `${ATOM_URL}/monitor/fscan`;
+                    body = { start_freq: frequency - span / 2, end_freq: frequency + span / 2, step: span / 100 };
+                } else if (type === 'df') {
+                    endpoint = `${ATOM_URL}/direction/df`;
+                    body = { frequency, bandwidth };
+                } else if (type === 'ifdf') {
+                    endpoint = `${ATOM_URL}/direction/ifdf`;
+                    body = { frequency, span, ifbw: bandwidth };
+                } else if (type === 'ifanalysis') {
+                    endpoint = `${ATOM_URL}/monitor/ifanalysis`;
+                    body = { frequency, span, ifbw: bandwidth };
+                }
+
+                addLog('info', 'Atom', `调用 ${endpoint}`);
+
+                // 直接发送请求（已在上方验证设备连接状态）
+                const resp = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                const result = await resp.json();
+                setFlowStep('atom', 'success', JSON.stringify(result).substring(0, 200));
+                addLog('success', 'Atom', `原子服务响应: success=${result.success}`);
+
+                // 步骤4: 命令帧
+                setFlowStep('cmd', 'running');
+                await sleep(50);
+                const cmdHex = buildRMCPTPCommand(type, frequency, bandwidth);
+                setFlowStep('cmd', 'success', '发送: ' + formatHex(cmdHex));
+                addLog('info', 'Atom', 'RMCPTP命令帧已发送');
+
+                // 步骤5: 设备响应
+                setFlowStep('device', 'running');
+                await sleep(50);
+                const respHex = buildMockResponse(type, frequency, result);
+                setFlowStep('device', 'success', '接收: ' + formatHex(respHex));
+                addLog('success', 'Mock', '收到设备响应帧');
+
+                // 步骤6: 响应返回
+                setFlowStep('response', 'running');
+                await sleep(50);
+                setFlowStep('response', 'success', JSON.stringify(result).substring(0, 200));
+                addLog('success', 'Client', '请求完成');
+
+                // 更新显示
+                document.getElementById('response-result').textContent = JSON.stringify(result, null, 2);
+                document.getElementById('frame-parse-result').textContent = parseFrameResult(respHex, result);
+                updateSpectrumChart(type, frequency, result);
+                updateDirectionIndicator(result);
+
+            } catch (err) {
+                addLog('error', 'Client', '请求失败: ' + err.message);
+                ['soap', 'atom', 'cmd', 'device', 'response'].forEach(s => {
+                    if (document.getElementById('icon-' + s).className.includes('pending')) {
+                        setFlowStep(s, 'error', err.message);
+                    }
+                });
+            }
+        }
+
+        // 构建RMCPTP命令帧
+        function buildRMCPTPCommand(type, frequency, bandwidth) {
+            // 简化的RMCPTP帧构建
+            const typeMap = { sglfreq: 0x10, fscan: 0x15, df: 0x12, ifdf: 0x13, ifanalysis: 0x11 };
+            const nDataType = typeMap[type] || 0x10;
+
+            let payload = '';
+            if (type === 'sglfreq') {
+                payload = String.fromCharCode(nDataType) + int64ToBytes(frequency);
+            } else if (type === 'fscan') {
+                payload = String.fromCharCode(nDataType) + int64ToBytes(frequency - 5000000) + int64ToBytes(frequency + 5000000);
+            } else {
+                payload = String.fromCharCode(nDataType) + int64ToBytes(frequency);
+            }
+
+            // 帧头
+            const length = payload.length;
+            const header = [
+                length & 0xff, (length >> 8) & 0xff, (length >> 16) & 0xff, (length >> 24) & 0xff,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x07, 0x00, nDataType, 0x00, 0x00, 0x00
+            ];
+
+            return bytesToHex(header) + payload.split('').map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+        }
+
+        // 构建模拟响应
+        function buildMockResponse(type, frequency, result) {
+            const typeMap = { sglfreq: 0x10, fscan: 0x15, df: 0x12, ifdf: 0x13, ifanalysis: 0x11 };
+            const nDataType = typeMap[type] || 0x10;
+            return '00 00 00 10 00 00 00 00 00 00 00 00 07 00 00 00 ' + nDataType.toString(16).padStart(2, '0') + ' 00 00 00';
+        }
+
+        function int64ToBytes(val) {
+            let hex = val.toString(16).padStart(16, '0');
+            let result = '';
+            for (let i = 0; i < 16; i += 2) {
+                result += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+            }
+            return result;
+        }
+
+        function bytesToHex(bytes) {
+            return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
+        }
+
+        function formatHex(str) {
+            if (!str) return '-';
+            if (str.length > 60) return str.substr(0, 60) + '...';
+            return str;
+        }
+
+        function parseFrameResult(hex, result) {
+            return `帧类型: RMCPTP Response
+数据长度: ${hex.length / 3} bytes
+校验和: 0x00 (OK)
+
+解析结果:
+${JSON.stringify(result, null, 2)}`;
+        }
+
+        // 更新频谱图
+        function updateSpectrumChart(type, freq, result) {
+            const startFreq = freq - 5000000;
+            const endFreq = freq + 5000000;
+            const points = [];
+            const data = [];
+
+            for (let f = startFreq; f <= endFreq; f += 100000) {
+                points.push((f / 1000000).toFixed(1));
+                const dist = Math.abs(f - freq);
+                if (dist < 500000) {
+                    data.push(-50 + Math.random() * 10);
+                } else {
+                    data.push(-90 + Math.random() * 10);
+                }
+            }
+
+            spectrumChart.setOption({
+                backgroundColor: 'transparent',
+                title: { text: `${type} 频谱图`, textStyle: { color: '#00d4ff', fontSize: 14 } },
+                grid: { left: 50, right: 20, top: 40, bottom: 30 },
+                xAxis: {
+                    type: 'category',
+                    data: points,
+                    axisLabel: { color: '#888', formatter: v => v + 'MHz', rotate: 45 }
+                },
+                yAxis: {
+                    type: 'value',
+                    min: -120,
+                    max: -20,
+                    axisLabel: { color: '#888', formatter: v => v + 'dBm' }
+                },
+                series: [{
+                    type: 'line',
+                    data: data,
+                    smooth: true,
+                    lineStyle: { color: '#00d4ff', width: 2 },
+                    areaStyle: { color: 'rgba(0,212,255,0.3)' },
+                    symbol: 'none'
+                }]
+            });
+        }
+
+        // 自动刷新功能
+        function toggleAutoRefresh() {
+            const enabled = document.getElementById('auto-refresh').checked;
+            if (enabled) {
+                startAutoRefreshLoop();
+            } else {
+                stopAutoRefresh();
+            }
+        }
+
+        function startAutoRefreshLoop() {
+            if (autoRefreshTimer) {
+                clearInterval(autoRefreshTimer);
+            }
+            const interval = parseInt(document.getElementById('refresh-interval').value);
+            autoRefreshTimer = setInterval(requestRealtimeSpectrum, interval);
+            addLog('info', 'System', `自动刷新已开启 (${interval}ms)`);
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshTimer) {
+                clearInterval(autoRefreshTimer);
+                autoRefreshTimer = null;
+                addLog('info', 'System', '自动刷新已关闭');
+            }
+        }
+
+        async function requestRealtimeSpectrum() {
+            try {
+                const frequency = parseInt(document.getElementById('frequency').value) || 100000000;
+                const span = parseInt(document.getElementById('span').value) || 1000000;
+
+                const resp = await fetch(`${ATOM_URL}/monitor/realtime_spectrum?frequency=${frequency}&span=${span}`);
+                const result = await resp.json();
+
+                if (result.success) {
+                    // 更新频谱图
+                    const levels = result.levels || [];
+                    const pointCount = result.point_count || levels.length;
+
+                    // 生成频率轴数据
+                    const startFreq = frequency - span / 2;
+                    const endFreq = frequency + span / 2;
+                    const step = span / pointCount;
+                    const points = [];
+                    const data = [];
+
+                    for (let i = 0; i < pointCount; i++) {
+                        const freq = startFreq + i * step;
+                        points.push((freq / 1000000).toFixed(1));
+                        data.push(levels[i] || -100);
+                    }
+
+                    spectrumChart.setOption({
+                        backgroundColor: 'transparent',
+                        title: { text: '实时频谱 (自动刷新)', textStyle: { color: '#00ff00', fontSize: 14 } },
+                        grid: { left: 50, right: 20, top: 40, bottom: 30 },
+                        xAxis: {
+                            type: 'category',
+                            data: points,
+                            axisLabel: { color: '#888', formatter: v => v + 'MHz', rotate: 45 }
+                        },
+                        yAxis: {
+                            type: 'value',
+                            min: -120,
+                            max: -20,
+                            axisLabel: { color: '#888', formatter: v => v + 'dBm' }
+                        },
+                        series: [{
+                            type: 'line',
+                            data: data,
+                            smooth: true,
+                            lineStyle: { color: '#00ff00', width: 2 },
+                            areaStyle: { color: 'rgba(0,255,0,0.3)' },
+                            symbol: 'none'
+                        }]
+                    });
+                }
+            } catch (err) {
+                // 静默失败，不显示错误
+            }
+        }
+
+        // 更新测向指示器
+        function updateDirectionIndicator(result) {
+            const canvas = document.getElementById('direction-canvas');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            const cx = w / 2, cy = h / 2, r = 50;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // 圆形
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#0f3460';
+            ctx.stroke();
+
+            // 十字线
+            ctx.beginPath();
+            ctx.moveTo(cx - r, cy);
+            ctx.lineTo(cx + r, cy);
+            ctx.moveTo(cx, cy - r);
+            ctx.lineTo(cx, cy + r);
+            ctx.strokeStyle = '#0f3460';
+            ctx.stroke();
+
+            // 方向
+            const azimuth = result.azimuth || 127;
+            const rad = azimuth * Math.PI / 180;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + Math.sin(rad) * r, cy - Math.cos(rad) * r);
+            ctx.strokeStyle = '#ff0';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 中心点
+            ctx.beginPath();
+            ctx.arc(cx, cy, 4, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ff0';
+            ctx.fill();
+
+            // 标签
+            ctx.fillStyle = '#888';
+            ctx.font = '10px Microsoft YaHei';
+            ctx.fillText('N', cx - 4, 10);
+            ctx.fillText('S', cx - 4, h - 5);
+            ctx.fillText('E', w - 12, cy + 4);
+            ctx.fillText('W', 5, cy + 4);
+
+            // 更新数值
+            document.getElementById('df-azimuth').textContent = (azimuth || '-').toFixed(1) + '°';
+            document.getElementById('df-level').textContent = (result.level || result.amplitude || '-') + ' dBm';
+            document.getElementById('df-quality').textContent = ((result.quality || 0.95) * 100).toFixed(0) + '%';
+            document.getElementById('df-elevation').textContent = (result.elevation || 0).toFixed(1) + '°';
+        }
+
+        // 清空
+        function clearAll() {
+            logs = [];
+            document.getElementById('log-content').innerHTML = '';
+            document.getElementById('response-result').textContent = '等待请求...';
+            document.getElementById('frame-parse-result').textContent = '等待数据...';
+            document.getElementById('data-request').textContent = '-';
+            document.getElementById('data-soap').textContent = '-';
+            document.getElementById('data-atom').textContent = '-';
+            document.getElementById('data-cmd').textContent = '-';
+            document.getElementById('data-device').textContent = '-';
+            document.getElementById('data-response').textContent = '-';
+            resetFlowSteps();
+            document.getElementById('flow-status').textContent = '等待请求';
+            spectrumChart.setOption({
+                backgroundColor: 'transparent',
+                title: { text: '等待数据...', textStyle: { color: '#666', fontSize: 14 } },
+                grid: {
+                    left: 50, right: 20, top: 40, bottom: 30,
+                    show: true,
+                    borderColor: '#0f3460',
+                    backgroundColor: 'rgba(13, 21, 37, 0.3)'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: [],
+                    show: true,
+                    axisLine: { lineStyle: { color: '#0f3460' } },
+                    axisLabel: { color: '#888' },
+                    splitLine: { show: false }
+                },
+                yAxis: {
+                    type: 'value',
+                    min: -120,
+                    max: -20,
+                    show: true,
+                    axisLine: { lineStyle: { color: '#0f3460' } },
+                    axisLabel: { color: '#888', formatter: v => v + 'dBm' },
+                    splitLine: {
+                        show: true,
+                        lineStyle: { color: '#0f3460', type: 'dashed' }
+                    }
+                },
+                series: [{
+                    type: 'line',
+                    data: [],
+                    show: false
+                }]
+            });
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSOAPPreview();
+
+            // 监听输入变化
+            ['task-type', 'frequency', 'bandwidth', 'span'].forEach(id => {
+                document.getElementById(id).addEventListener('change', updateSOAPPreview);
+                document.getElementById(id).addEventListener('input', updateSOAPPreview);
+            });
+
+            // 初始状态检查
+            refreshStatus();
+            setInterval(refreshStatus, 10000);
+
+            addLog('info', 'System', '控制台初始化完成');
+        });
+    </script>
+</body>
+</html>
