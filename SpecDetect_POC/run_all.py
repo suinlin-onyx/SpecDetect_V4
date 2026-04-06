@@ -149,7 +149,7 @@ def main():
         logger.info("  - 原子服务: 127.0.0.1:9090")
         logger.info("  - 代理服务: 0.0.0.0:8080")
         logger.info("=" + "=" * 49)
-        logger.info("向量数据库(ChromaDB): 请运行 services/chromadb/run_chromadb.bat")
+        logger.info("向量数据库(Qdrant): Docker运行中（端口6333）")
         logger.info("打开聚合页面: http://localhost:8080/dashboard")
         logger.info("日志文件: logs/service_*.log")
         logger.info("按 Ctrl+C 停止所有服务")

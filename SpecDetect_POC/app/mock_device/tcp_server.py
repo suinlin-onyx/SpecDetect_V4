@@ -235,78 +235,78 @@ class MockDeviceServer:
         logger.info("虚拟设备已停止")
 
     async def handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
-        """处理客户端连接"""
+        """处理客户端连接（短连接模式）
+
+        原始协议规定：
+        - 每执行一功能，均单独建立一连接
+        - 客户端发起连接 → 发送请求命令 → 服务端应答 → 双方断开连接
+
+        因此每个连接只处理一个命令，响应发送完成后立即断开连接。
+        """
         addr = writer.get_extra_info('peername')
         logger.info(f"客户端连接: {addr}")
-        self.clients.add(writer)
 
         try:
-            while self.running:
-                try:
-                    # 读取18字节帧头
-                    header_data = await asyncio.wait_for(
-                        reader.read(18),
-                        timeout=30.0
-                    )
+            # 读取18字节帧头
+            header_data = await asyncio.wait_for(
+                reader.read(18),
+                timeout=10.0
+            )
 
-                    if not header_data:
-                        break
+            if not header_data:
+                return
 
-                    # 解析帧头获取数据长度
-                    try:
-                        dw_length = struct.unpack('!I', header_data[:4])[0]
-                    except:
-                        continue
+            # 解析帧头获取数据长度
+            try:
+                dw_length = struct.unpack('!I', header_data[:4])[0]
+            except:
+                return
 
-                    # 读取业务数据
-                    payload = b''
-                    if dw_length > 0 and dw_length < 10000:  # 安全限制
-                        payload = await asyncio.wait_for(
-                            reader.read(dw_length),
-                            timeout=5.0
-                        )
+            # 读取业务数据
+            payload = b''
+            if dw_length > 0 and dw_length < 10000:  # 安全限制
+                payload = await asyncio.wait_for(
+                    reader.read(dw_length),
+                    timeout=5.0
+                )
 
-                    full_frame = header_data + payload
-                    logger.debug(f"收到命令帧: {len(full_frame)} 字节")
+            full_frame = header_data + payload
+            logger.debug(f"收到命令帧: {len(full_frame)} 字节")
 
-                    # 解析命令
-                    try:
-                        header_info, business_data = self.command_parser.parse_frame(full_frame)
-                        business_type = self._extract_business_type(business_data)
+            # 解析命令并生成响应
+            try:
+                header_info, business_data = self.command_parser.parse_frame(full_frame)
+                business_type = self._extract_business_type(business_data)
 
-                        logger.info(
-                            f"命令: type={hex(business_type)}, "
-                            f"length={dw_length}, version={hex(header_info['n_version'])}"
-                        )
+                logger.info(
+                    f"命令: type={hex(business_type)}, "
+                    f"length={dw_length}, version={hex(header_info['n_version'])}"
+                )
 
-                        # 生成响应
-                        response_frame = await self.generate_response(
-                            business_type, business_data
-                        )
+                # 生成响应
+                response_frame = await self.generate_response(
+                    business_type, business_data
+                )
 
-                        if response_frame:
-                            writer.write(response_frame)
-                            await writer.drain()
-                            logger.debug(f"发送响应帧: {len(response_frame)} 字节")
+                if response_frame:
+                    writer.write(response_frame)
+                    await writer.drain()
+                    logger.debug(f"发送响应帧: {len(response_frame)} 字节")
 
-                    except ChecksumError as e:
-                        logger.warning(f"校验和错误: {e}")
-                    except ProtocolParseError as e:
-                        logger.warning(f"协议解析错误: {e}")
+            except ChecksumError as e:
+                logger.warning(f"校验和错误: {e}")
+            except ProtocolParseError as e:
+                logger.warning(f"协议解析错误: {e}")
 
-                except asyncio.TimeoutError:
-                    continue
-                except Exception as e:
-                    logger.error(f"处理客户端数据异常: {e}")
-                    break
-
+        except asyncio.TimeoutError:
+            logger.debug(f"读取超时，客户端: {addr}")
         except Exception as e:
-            logger.error(f"客户端异常: {e}")
+            logger.error(f"处理客户端数据异常: {e}")
         finally:
-            self.clients.discard(writer)
+            # 短连接模式：响应发送完成后立即断开连接
             writer.close()
             await writer.wait_closed()
-            logger.info(f"客户端断开: {addr}")
+            logger.info(f"短连接已断开: {addr}")
 
     def _extract_business_type(self, business_data: bytes) -> int:
         """从业务数据中提取业务类型"""

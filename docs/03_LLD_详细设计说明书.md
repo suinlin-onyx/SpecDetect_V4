@@ -313,6 +313,16 @@ namespace ProxyService.Routing
 
 #### 2.2.1 设备通信类
 
+> **连接模式说明**
+>
+> 原始 RMCPTP v2.0 协议规定的通信模式为**短连接**：
+> - "每执行一功能，均单独建立一连接"
+> - "客户端发起连接 → 发送请求命令 → 服务端应答 → 业务处理 → 双方断开连接"
+>
+> 本 LLD 中描述的心跳保活机制（HEARTBEAT_INTERVAL_MS = 30000）是 **Python POC 的设计选择**，用于在长连接场景下维持连接活跃。
+>
+> 如按原始协议实现短连接，则无需心跳机制。
+
 ```csharp
 // 命名空间: AtomService.Device
 namespace AtomService.Device
@@ -1477,7 +1487,8 @@ private double CalculateOccupancy(long occValue)
          │
          ▼
 ┌─────────────────┐
-│ 启动心跳线程    │
+│ 启动心跳线程    │ （可选，长连接模式）
+（短连接模式无需此步骤）
 └────────┬────────┘
          │
          ▼
