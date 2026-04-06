@@ -54,15 +54,21 @@ BUSINESS_DATA_TYPE = {
     0x16: 'DSCAN',        # 数字扫描
     0x17: 'PSCAN',        # 频谱扫描
     0x18: 'SPANALYSIS',   # 频谱分析
-    0x19: 'TDANALYSIS',   # 时域分析
-    0x1C: 'WMON',         # 宽带监测
+    0x19: 'WBMONDF',      # 宽带监测测向
+    0x1A: 'TDANALYSIS',   # 时域分析
+    0x1C: 'WBFFTMon',     # 宽带FFT观测
     0x1D: 'DIGDEM',       # IQ数字解调
     0x1E: 'WBMSCAN',      # 宽带扫描
     0x1F: 'EDETN',        # 能量探测
     0x22: 'MODREC',       # 信号识别
+    0x23: 'SINA',         # 信号告警
+    0x24: 'ITUMEAS',      # ITU测量
     0x26: 'DDCDEM',       # DDC解调
     0x27: 'SSDF',         # 空间谱测向
     0x28: 'MULTICHAN',    # 多信道监听
+    0x29: 'ACDF',         # 旋转云台
+    0x2B: 'DEMREC',       # 调制模式识别
+    0x2C: 'MULCHANANA',   # 双/多信道分析
     0x31: 'DPX',          # 荧光谱
     0x33: 'FREQMEAS',     # 频点分析
 }

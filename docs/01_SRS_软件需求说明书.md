@@ -111,7 +111,7 @@
 | 服务ID | 服务名称 | 功能描述 | 数据类型ID |
 |--------|----------|----------|------------|
 | F-001 | SglFreqMeasure | 单频测量服务，ITU建议的测量内容 | 0x10 |
-| F-002 | WBFFTMon | 宽带FFT频谱观测，多FFT带宽拼接频谱 | 0x28 |
+| F-002 | WBFFTMon | 宽带FFT频谱观测，多FFT带宽拼接频谱 | 0x1C |
 | F-003 | FScan | 扫频频谱观测，频段扫描数据 | 0x15 |
 | F-004 | MScan | 频率表扫描，离散频点测量 | 0x14 |
 
@@ -121,7 +121,7 @@
 |--------|----------|----------|------------|
 | D-001 | IFDF | 中频FFT测向，来波方向测定 | 0x13 |
 | D-002 | SglFreqDF | 单频测向，固定频点测向 | 0x12 |
-| D-003 | WBDF | 宽带FFT测向，频段内测向 | 0x25 |
+| D-003 | WBDF | 宽带FFT测向，频段内测向 | 0x19 |
 | D-004 | FScanDF | 扫频测向，扫描步进测向 | 0x21 |
 
 #### 3.1.3 信号分析类服务
@@ -129,9 +129,9 @@
 | 服务ID | 服务名称 | 功能描述 | 数据类型ID |
 |--------|----------|----------|------------|
 | S-001 | OccupancyMeas | 占用度测量 | 0x14/0x15 |
-| S-002 | DigitalSignalRecDecode | 数字信号识别解调 | 0x34 |
-| S-003 | ModRec | 调制模式识别 | 0x43 |
-| S-004 | DigDem | 数字解调 | 0x29 |
+| S-002 | DigitalSignalRecDecode | 数字信号识别解调 | 0x1D |
+| S-003 | ModRec | 调制模式识别 | 0x2B |
+| S-004 | DigDem | 数字解调 | 0x1D |
 
 #### 3.1.4 设备管理类服务
 
@@ -342,13 +342,13 @@ SOAP 1.2: http://{host}:{port}/services/MonitorService/v1
 #### 5.1.2 SOAPAction头
 
 ```
-SOAPAction: "http://monitoring.example.com/services/{OperationName}"
+SOAPAction: "http://monitor.rrmp.gov.cn/services/{OperationName}"
 ```
 
 #### 5.1.3 命名空间
 
 ```
-xmlns:mon="http://monitoring.example.com/schema/monitoring/v1"
+xmlns:mon="http://monitor.rrmp.gov.cn/services/"
 xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
 ```
 
@@ -434,21 +434,21 @@ typedef struct tagRmcpFrame {
 | 0x22 | MSEARCH | 离散信号搜索 | - |
 | 0x23 | FSEARCH | 频段信号搜索 | - |
 | 0x24 | ITU | ITU测量 | - |
+| 0x1C | WMON | 宽带监测 | - |
+| 0x1E | WBMSCAN | 宽带扫描 | - |
 | 0x25 | WBMONDF | 宽带监测测向 | - |
-| 0x28 | WMON | 宽带监测 | - |
 | 0x29 | DIGDEM | IQ数字解调 | - |
 | 0x31 | EDETN | 能量探测 | - |
 | 0x32 | DDF | 离散测向 | - |
-| 0x33 | SIGNALMEAS | 信号测量 | - |
+| 0x33 | FREQMEAS | 频点分析 | 通用协议 |
 | 0x34 | MODREC | 信号识别 | - |
 | 0x35 | SINA | 信号告警 | - |
 | 0x38 | DDCDEM | DDC解调 | - |
 | 0x39 | SSDF | 空间谱测向 | - |
-| 0x40 | MULTICHAN | 多信道监听 | - |
-| 0x41 | ACDF | 旋转云台 | - |
-| 0x43 | DEMREC | 调制模式识别 | - |
+| 0x28 | MULTICHAN | 多信道监听 | - |
+| 0x29 | ACDF | 旋转云台 | - |
+| 0x2B | DEMREC | 调制模式识别 | - |
 | 0x44 | MULCHANANA | 双/多信道分析 | - |
-| 0x51 | FREQMEAS | 频点分析 | 通用协议 |
 
 ### 6.2 调制模式定义
 

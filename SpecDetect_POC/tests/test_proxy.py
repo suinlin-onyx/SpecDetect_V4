@@ -34,25 +34,31 @@ class TestSOAPHandler:
         assert result['params']['Bandwidth'] == '120000'
 
     def test_build_response(self):
-        """测试构建SOAP响应"""
+        """测试构建SOAP响应（符合文档规范）"""
         response = self.handler.build_response(
             success=True,
             data={'Result': 'OK', 'TaskID': '001'}
         )
 
         assert 'soap:Envelope' in response
-        assert 'success="true"' in response
-        assert '<Result>OK</Result>' in response
+        assert 'mon:Response' in response or 'http://monitor.rrmp.gov.cn/services/' in response
+        assert 'ResultCode>0</mon:ResultCode>' in response or 'ResultCode>0<' in response
+        assert 'ResultMessage>Success</mon:ResultMessage>' in response or 'ResultMessage>Success<' in response
 
     def test_build_error_response(self):
-        """测试构建错误响应"""
+        """测试构建错误响应（SOAP Fault 格式）"""
         response = self.handler.build_response(
             success=False,
-            error='Invalid frequency'
+            error='Invalid frequency',
+            error_code=4001
         )
 
-        assert 'success="false"' in response
-        assert '<Error>Invalid frequency</Error>' in response
+        assert 'soap:Envelope' in response
+        assert 'soap:Fault' in response
+        assert 'faultcode>soap:Server' in response
+        assert 'Invalid frequency' in response
+        # ErrorCode 在 SOAP Fault detail 中，命名空间前缀可能是 ns0 或 mon
+        assert 'ErrorCode' in response and '4001' in response
 
     def test_parse_invalid_xml(self):
         """测试解析无效XML"""
