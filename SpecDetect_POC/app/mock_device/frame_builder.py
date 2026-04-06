@@ -196,11 +196,15 @@ class MockFrameBuilder:
 
         freq_part = struct.pack('!Q', frequency)
 
+        # 协议 Table 71: level/itu_value 为 short (2字节), 实际值×100
+        itu_scaled = int(itu_value * 100)
+        occ = 0
+        thr = int(-100 * 100)  # 门限 -100 dBm 缩放
         dynamic = struct.pack(
-            '!f h h',
-            itu_value,                    # value
-            0,                            # occ
-            int(-100 * 100)              # thr (门限)
+            '!h h h',
+            itu_scaled,    # value (short × 100)
+            occ,           # occ
+            thr            # thr (门限, short × 100)
         )
 
         return self.build_response_frame(
