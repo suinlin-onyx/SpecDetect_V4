@@ -1,10 +1,16 @@
-"""一键启动所有服务"""
+"""一键启动所有服务
+
+支持模式:
+    python run_all.py           # 单Proxy模式 (原有链路)
+    python run_all.py --dual    # 双Proxy模式 (新增Proxy-B指向Real Atom)
+"""
 import sys
 import os
 import subprocess
 import time
 import signal
 import re
+import argparse
 
 # 添加项目根目录到路径
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -17,7 +23,7 @@ logger = setup_logger('run_all')
 processes = []
 
 # 需要清理的端口
-PORTS_TO_CHECK = [9000, 9090, 8080, 19000]
+PORTS_TO_CHECK = [9000, 9090, 8080, 8081, 19000]  # 添加 8081 用于 Proxy-B
 
 
 def cleanup_residual_processes():
@@ -65,11 +71,17 @@ def cleanup_residual_processes():
         pass
 
 
-def start_service(script_name: str, service_name: str, port: int):
+def start_service(script_name: str, service_name: str, port: int, env: dict = None):
     """启动单个服务
 
     注意：不再捕获stdout/stderr到管道，因为管道缓冲区满会导致服务阻塞。
     输出重定向到日志文件。
+
+    Args:
+        script_name: 脚本文件名
+        service_name: 服务名称
+        port: 端口号
+        env: 额外的环境变量字典
     """
     logger.info(f"启动{service_name}...")
 
@@ -77,6 +89,11 @@ def start_service(script_name: str, service_name: str, port: int):
     log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, f'service_{port}.log')
+
+    # 准备环境变量
+    process_env = os.environ.copy()
+    if env:
+        process_env.update(env)
 
     # 重定向输出到文件，不再使用管道
     with open(log_file, 'w', encoding='utf-8') as f:
@@ -86,7 +103,8 @@ def start_service(script_name: str, service_name: str, port: int):
             stdout=f,
             stderr=subprocess.STDOUT,
             bufsize=1,
-            text=True
+            text=True,
+            env=process_env
         )
 
     processes.append((service_name, process, log_file))
@@ -116,8 +134,18 @@ def stop_all():
 
 def main():
     """主函数"""
+    # 解析命令行参数
+    parser = argparse.ArgumentParser(description='频谱探测系统快速验证')
+    parser.add_argument('--dual', action='store_true',
+                        help='双Proxy模式：同时启动 Proxy-A(8080) 和 Proxy-B(8081)')
+    args = parser.parse_args()
+
     logger.info("=" + "=" * 49)
     logger.info("  频谱探测系统 - Python快速验证")
+    if args.dual:
+        logger.info("  模式: 双Proxy并行")
+    else:
+        logger.info("  模式: 单Proxy")
     logger.info("=" + "=" * 49)
 
     # 启动前先清理残留进程
@@ -126,7 +154,7 @@ def main():
     # 等待端口释放
     time.sleep(1)
 
-    # 启动顺序: Mock Device -> Atom Service -> Proxy Service
+    # 启动顺序: Mock Device -> Atom Service -> Proxy Service(s)
     try:
         # 启动虚拟设备
         start_service('main_mock.py', '虚拟设备', 9000)
@@ -143,14 +171,27 @@ def main():
         # 启动代理服务
         start_service('main_proxy.py', '代理服务', 8080)
 
+        logger.info("-" * 50)
+
+        # 如果是双Proxy模式，启动 Proxy-B
+        if args.dual:
+            logger.info("启动 Proxy-B (Real Atom 链路)...")
+            start_service('main_proxy_b.py', '代理服务-B', 8081, env={'PROXY_MODE': 'B'})
+            logger.info("  Proxy-B: 0.0.0.0:8081 -> Real Atom (PROXY_MODE=B)")
+
         logger.info("=" + "=" * 49)
         logger.info("所有服务已启动!")
         logger.info("  - 虚拟设备: 127.0.0.1:9000")
         logger.info("  - 原子服务: 127.0.0.1:9090")
-        logger.info("  - 代理服务: 0.0.0.0:8080")
+        logger.info("  - 代理服务: 0.0.0.0:8080 (Mock Atom)")
+        if args.dual:
+            logger.info("  - 代理服务-B: 0.0.0.0:8081 (Real Atom)")
         logger.info("=" + "=" * 49)
         logger.info("向量数据库(Qdrant): Docker运行中（端口6333）")
-        logger.info("打开聚合页面: http://localhost:8080/dashboard")
+        logger.info("打开聚合页面:")
+        logger.info("  - Mock Atom链路: http://localhost:8080/dashboard")
+        if args.dual:
+            logger.info("  - Real Atom链路: http://localhost:8081/dashboard")
         logger.info("日志文件: logs/service_*.log")
         logger.info("按 Ctrl+C 停止所有服务")
 
