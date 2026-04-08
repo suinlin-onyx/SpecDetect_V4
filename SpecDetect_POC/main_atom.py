@@ -473,7 +473,12 @@ def build_soap_response(success: bool, data: dict = None, error: str = None) -> 
 
 @app.route('/services', methods=['POST'])
 def handle_soap():
-    """处理SOAP请求 - 原子服务接收来自代理服务的SOAP请求"""
+    """处理SOAP请求 - 原子服务接收来自代理服务的SOAP请求
+
+    支持两种格式:
+    1. Mock Atom 格式: <mon:StartMeasure>...</mon:StartMeasure>
+    2. Real Atom 格式: <srrc:requestbody><srrc:equpara>...</srrc:equpara></srrc:requestbody>
+    """
     xml_data = request.data.decode('utf-8')
     logger.info(f"收到SOAP请求")
 
@@ -491,17 +496,23 @@ def handle_soap():
     if len(body) == 0:
         return build_soap_response(False, error="SOAP Body为空"), 400, {'Content-Type': 'text/xml; charset=utf-8'}
 
-    operation = body[0]
-    operation_name = operation.tag.split('}')[1] if '}' in operation.tag else operation.tag
+    # 判断请求格式
+    first_child = body[0]
+    first_child_tag = first_child.tag.split('}')[1] if '}' in first_child.tag else first_child.tag
+
+    if first_child_tag == 'requestbody':
+        # Real Atom 格式解析
+        soap_action = request.headers.get('SOAPAction', '')
+        operation_name, params = _parse_real_atom_request(first_child, soap_action)
+    else:
+        # Mock Atom 格式解析 (兼容旧格式)
+        operation_name = first_child_tag
+        params = {}
+        for child in first_child:
+            tag_name = child.tag.split('}')[1] if '}' in child.tag else child.tag
+            params[tag_name] = child.text
 
     logger.info(f"SOAP操作: {operation_name}")
-
-    # 提取参数
-    params = {}
-    for child in operation:
-        tag_name = child.tag.split('}')[1] if '}' in child.tag else child.tag
-        params[tag_name] = child.text
-
     logger.info(f"参数: {params}")
 
     # 执行对应的业务操作
@@ -514,6 +525,116 @@ def handle_soap():
     )
 
     return soap_response, 200, {'Content-Type': 'text/xml; charset=utf-8'}
+
+
+def _parse_real_atom_request(requestbody_elem, soap_action: str = '') -> tuple:
+    """解析 Real Atom 格式的 requestbody
+
+    Real Atom 请求结构:
+    <srrc:requestbody>
+        <srrc:mfid>...</srrc:mfid>
+        <srrc:equid>...</srrc:equid>
+        <srrc:equpara>
+            <srrc:items> 或 <srrc:groupitems>
+                ...
+            </srrc:items> 或 </srrc:groupitems>
+        </srrc:equpara>
+        <srrc:appid>...</srrc:appid>
+        <srrc:userid>...</srrc:userid>
+        <srrc:taskid>...</srrc:taskid>  (可选)
+        <srrc:outputchannel>...</srrc:outputchannel>  (可选)
+    </srrc:requestbody>
+
+    Args:
+        requestbody_elem: requestbody XML元素
+        soap_action: SOAPAction header 值
+
+    Returns:
+        (operation_name, params_dict)
+    """
+    params = {}
+
+    # 从传入的 soap_action 参数获取操作名
+    operation_name = soap_action.strip('"')
+    # SOAPAction 可能是 "B_SglFreqMeas" 或带引号的 "B_SglFreqMeas"
+    operation_name = soap_action.strip('"')
+
+    # 解析 requestbody 中的字段
+    for child in requestbody_elem:
+        tag_name = child.tag.split('}')[1] if '}' in child.tag else child.tag
+
+        if tag_name == 'equpara':
+            # 解析 equpara 内的参数
+            _parse_equpara(child, params)
+        elif tag_name == 'outputchannel':
+            # 解析 outputchannel
+            for oc in child:
+                oc_name = oc.tag.split('}')[1] if '}' in oc.tag else oc.tag
+                if oc_name not in ('mode', 'datachannel', 'host', 'port', 'stc'):
+                    params[oc_name] = oc.text
+        elif tag_name == 'taskid':
+            params['taskid'] = child.text
+        elif tag_name in ('appid', 'userid', 'priority', 'executetime', 'mfid', 'equid'):
+            params[tag_name] = child.text
+
+    # 如果 SOAPAction 为空，尝试从 equpara 结构推断操作类型
+    if not operation_name:
+        if 'frequency' in params and 'dfmode' not in params:
+            operation_name = 'B_SglFreqMeas'
+        elif 'frequency' in params and 'dfmode' in params:
+            operation_name = 'B_SglFreqDF'
+        elif 'startfreq' in params and 'stopfreq' in params and 'step' in params:
+            operation_name = 'B_FScan'
+        else:
+            operation_name = 'Unknown'
+
+    return operation_name, params
+
+
+def _parse_equpara(equpara_elem, params: dict):
+    """解析 equpara 元素，提取参数"""
+    for child in equpara_elem:
+        tag_name = child.tag.split('}')[1] if '}' in child.tag else child.tag
+
+        if tag_name == 'items':
+            # items 结构：<item><paraname>...</paraname><paravalue>...</paravalue></item>
+            for item in child:
+                item_name = item.tag.split('}')[1] if '}' in item.tag else item.tag
+                if item_name == 'item':
+                    paraname = None
+                    paravalue = None
+                    for sub in item:
+                        sub_name = sub.tag.split('}')[1] if '}' in sub.tag else sub.tag
+                        if sub_name == 'paraname':
+                            paraname = sub.text
+                        elif sub_name == 'paravalue':
+                            paravalue = sub.text
+                    if paraname:
+                        # 尝试转换为数值
+                        try:
+                            if paravalue and paravalue.isdigit():
+                                params[paraname] = int(paravalue)
+                            elif paravalue:
+                                try:
+                                    params[paraname] = float(paravalue)
+                                except ValueError:
+                                    params[paraname] = paravalue
+                        except (ValueError, AttributeError):
+                            params[paraname] = paravalue
+
+        elif tag_name == 'groupitems':
+            # groupitems 结构
+            for groupitem in child:
+                group_name = groupitem.tag.split('}')[1] if '}' in groupitem.tag else groupitem.tag
+                if group_name == 'groupitem':
+                    group_id = None
+                    for gi_child in groupitem:
+                        gi_tag = gi_child.tag.split('}')[1] if '}' in gi_child.tag else gi_child.tag
+                        if gi_tag == 'groupid':
+                            group_id = gi_child.text
+                        elif gi_tag == 'items':
+                            # 递归解析 items
+                            _parse_equpara(gi_child, params)
 
 
 def dispatch_soap_operation(operation: str, params: dict) -> dict:

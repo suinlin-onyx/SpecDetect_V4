@@ -557,6 +557,10 @@ def dispatch_to_atom_service(operation: str, params: dict) -> dict:
     """
     将SOAP操作分发到原子服务（使用SOAP/XML协议）
 
+    注意：统一使用 Real Atom 格式构建请求，与目标无关
+    - Proxy-A → Mock Atom: 使用 Real Atom 格式请求
+    - Proxy-B → Real Atom: 使用 Real Atom 格式请求
+
     Args:
         operation: SOAP操作名
         params: 参数字典
@@ -567,19 +571,21 @@ def dispatch_to_atom_service(operation: str, params: dict) -> dict:
     try:
         atom_base_url = get_atom_base_url()
 
-        # 根据目标选择不同的请求格式
+        # 统一使用 Real Atom 格式构建请求
+        soap_request = build_real_atom_request(operation, params)
+
+        # 根据目标决定 URL 端点
         if is_real_atom():
-            # Real Atom 格式
-            soap_request = build_real_atom_request(operation, params)
+            # Real Atom 端点
             endpoint = get_real_atom_endpoint(operation)
-            # 空endpoint表示使用根路径
             url = atom_base_url if not endpoint else f"{atom_base_url}/{endpoint}"
             logger.info(f"发送请求到 Real Atom: {operation} -> {endpoint or '/'}")
         else:
-            # Mock Atom 格式
-            soap_request = build_soap_request_to_atom(operation, params)
+            # Mock Atom 端点（/services）
+            endpoint = get_real_atom_endpoint(operation)
+            # Mock Atom 也支持 Real Atom 格式的请求
             url = f"{atom_base_url}/services"
-            logger.info(f"发送请求到 Mock Atom: {operation}")
+            logger.info(f"发送请求到 Mock Atom (Real Atom格式): {operation}")
 
         logger.debug(f"SOAP请求内容:\n{soap_request}")
 
@@ -593,8 +599,8 @@ def dispatch_to_atom_service(operation: str, params: dict) -> dict:
 
         logger.info(f"收到原子服务响应: HTTP {response.status_code}")
 
-        # 解析响应
-        result = parse_soap_response_from_atom(response.text, is_real=is_real_atom())
+        # 解析响应（统一按 Real Atom 格式解析）
+        result = parse_soap_response_from_atom(response.text, is_real=True)
 
         logger.info(f"解析结果: success={result.get('success')}")
 

@@ -10,8 +10,8 @@ SERVICES = {
     'atom': {
         'host': '127.0.0.1',
         'port': 9090,
-        'device_host': '127.0.0.1',
-        'device_port': 9000
+        'device_host': '172.18.114.33',  # Real Device RMCPTP 地址
+        'device_port': 9999              # Real Device RMCPTP 端口
     },
     'mock_device': {
         'host': '127.0.0.1',

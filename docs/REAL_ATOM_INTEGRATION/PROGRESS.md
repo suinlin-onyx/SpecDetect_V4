@@ -19,6 +19,16 @@
 ### 任务目标
 基于 Real Atom 实测数据，改造 Mock Atom 实现所有 SOAP 接口与功能，适配 SOAP-to-RMCPTP v2.0 协议转换。
 
+### Proxy-A 改造进度
+
+| # | 步骤 | 文件 | 状态 |
+|---|------|------|------|
+| 1 | Mock Atom 响应格式改造 | `main_atom.py` | ✅ |
+| 2 | Mock Atom 接口名称改造 | `main_atom.py` | ✅ |
+| 3 | Mock Atom 请求解析改造 (srrc命名空间) | `main_atom.py` | ✅ |
+| 4 | device_client 配置指向 Real Device | `settings.py` | ✅ |
+| 5 | Proxy-A 请求构建统一 | `routes.py` | ✅ |
+
 ### 目标架构
 ```
 Client → Proxy-A(8080) → Mock Atom(9090) → Real Device(172.18.114.33:9999)
