@@ -61,11 +61,11 @@ class SOAPHandler:
     def build_response(self, success: bool = True, data: Optional[Dict] = None,
                        error: Optional[str] = None, error_code: Optional[int] = None) -> str:
         """
-        构建SOAP响应（符合文档规范格式）
+        构建SOAP响应（Real Atom格式）
 
         Args:
             success: 是否成功
-            data: 响应数据（将放入 mon:Data 下）
+            data: 响应数据
             error: 错误信息
             error_code: 错误码
 
@@ -86,27 +86,39 @@ class SOAPHandler:
             nsmap=self.SOAP_NS
         )
 
+        # SOAP Header with bizResCd
+        header = etree.SubElement(root, '{http://schemas.xmlsoap.org/soap/envelope/}Header')
+        SRRC_NS = 'http://www.srrc.org.cn'
+        provider_response = etree.SubElement(header, f'{{{SRRC_NS}}}ProviderResponse')
+        biz_res_cd = etree.SubElement(provider_response, f'{{{SRRC_NS}}}bizResCd')
+        biz_res_cd.text = 'BIZ-000001' if success else 'BIZ-000002'
+        biz_res_text = etree.SubElement(provider_response, f'{{{SRRC_NS}}}bizResText')
+        biz_res_text.text = '调用成功' if success else str(error)
+
         # SOAP Body
         body = etree.SubElement(root, '{http://schemas.xmlsoap.org/soap/envelope/}Body')
 
-        # mon:Response（使用 mon: 命名空间）
-        MON_NS = 'http://monitor.rrmp.gov.cn/services/'
-        response = etree.SubElement(body, f'{{{MON_NS}}}Response')
+        # srrc:responsebody
+        SRRC_NS = 'http://www.srrc.org.cn'
+        response_body = etree.SubElement(body, f'{{{SRRC_NS}}}responsebody')
 
-        # mon:ResultCode
-        result_code = etree.SubElement(response, f'{{{MON_NS}}}ResultCode')
-        result_code.text = '0'
-
-        # mon:ResultMessage
-        result_message = etree.SubElement(response, f'{{{MON_NS}}}ResultMessage')
-        result_message.text = 'Success'
-
-        # mon:Data（包装业务数据）
         if data:
-            data_elem = etree.SubElement(response, f'{{{MON_NS}}}Data')
+            result = etree.SubElement(response_body, f'{{{SRRC_NS}}}result')
             for key, value in data.items():
-                child = etree.SubElement(data_elem, f'{{{MON_NS}}}{key}')
-                child.text = str(value)
+                if isinstance(value, dict):
+                    item = etree.SubElement(result, f'{{{SRRC_NS}}}{key}')
+                    for k, v in value.items():
+                        child = etree.SubElement(item, f'{{{SRRC_NS}}}{k}')
+                        if isinstance(v, list):
+                            child.text = str(v)
+                        else:
+                            child.text = str(v) if v is not None else ''
+                elif isinstance(value, list):
+                    item = etree.SubElement(result, f'{{{SRRC_NS}}}{key}')
+                    item.text = str(value)
+                else:
+                    child = etree.SubElement(result, f'{{{SRRC_NS}}}{key}')
+                    child.text = str(value) if value is not None else ''
 
         return etree.tostring(root, pretty_print=True, encoding='utf-8').decode('utf-8')
 
