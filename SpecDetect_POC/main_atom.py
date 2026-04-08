@@ -555,9 +555,12 @@ def _parse_real_atom_request(requestbody_elem, soap_action: str = '') -> tuple:
     params = {}
 
     # 从传入的 soap_action 参数获取操作名
-    operation_name = soap_action.strip('"')
-    # SOAPAction 可能是 "B_SglFreqMeas" 或带引号的 "B_SglFreqMeas"
-    operation_name = soap_action.strip('"')
+    soap_action = soap_action.strip('"')
+    # SOAPAction 可能是 "B_SglFreqMeas" 或 "{namespace}B_SglFreqMeas"
+    if '}' in soap_action:
+        operation_name = soap_action.split('}')[1]
+    else:
+        operation_name = soap_action
 
     # 解析 requestbody 中的字段
     for child in requestbody_elem:

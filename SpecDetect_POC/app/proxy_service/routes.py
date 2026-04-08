@@ -535,7 +535,12 @@ def _extract_fields_from_element(element, result: dict) -> None:
         tag_name = child.tag.split('}')[1] if '}' in child.tag else child.tag
 
         # 跳过特定标签
-        if tag_name in ('Error', 'error', 'result', 'responsebody'):
+        if tag_name in ('Error', 'error', 'responsebody'):
+            continue
+
+        # 递归处理嵌套的 result 元素
+        if tag_name == 'result':
+            _extract_fields_from_element(child, result)
             continue
 
         try:
@@ -589,11 +594,14 @@ def dispatch_to_atom_service(operation: str, params: dict) -> dict:
 
         logger.debug(f"SOAP请求内容:\n{soap_request}")
 
-        # 发送 SOAP 请求
+        # 发送 SOAP 请求（传递 SOAPAction 以便 Atom 正确解析操作）
         response = requests.post(
             url,
             data=soap_request,
-            headers={'Content-Type': 'text/xml; charset=utf-8'},
+            headers={
+                'Content-Type': 'text/xml; charset=utf-8',
+                'SOAPAction': operation
+            },
             timeout=30
         )
 

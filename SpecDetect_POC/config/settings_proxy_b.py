@@ -25,7 +25,7 @@ PROXY_B_CONFIG = {
 #   Real Atom: 127.0.0.1:8282
 #   Mock Atom: 127.0.0.1:8288
 REAL_ATOM_HOST = '127.0.0.1'
-REAL_ATOM_PORT = 8282
+REAL_ATOM_PORT = 8888
 
 SERVICES = {
     'proxy': {
