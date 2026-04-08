@@ -262,6 +262,123 @@ class RMCPTPBuilder:
 
         return self.build_command_frame(business_type=0x11, params=header)
 
+    def build_mscan_command(self, frequency: int, ifbw: int = 120000) -> bytes:
+        """
+        构建多信道扫描命令 MSCAN (0x14)
+
+        命令格式:
+        - nBdType: 1字节 - 0x14
+        - nArrays: 4字节 - 扫描段数
+        动态部分:
+        - startfreq: 8字节 - 开始频率
+        - endfreq: 8字节 - 结束频率
+        - step: 8字节 - 步长频率
+        - nPoints: 4字节 - 本段点数
+
+        Args:
+            frequency: 中心频率(Hz)
+            ifbw: 中频带宽(Hz)
+
+        Returns:
+            命令帧字节数据
+        """
+        n_arrays = 1
+        # 使用frequency作为中心点，计算起止频率
+        start_freq = frequency - ifbw // 2
+        end_freq = frequency + ifbw // 2
+        step = max(10000, ifbw // 100)
+        n_points = max(100, (end_freq - start_freq) // step)
+
+        header = struct.pack('!B I', 0x14, n_arrays)
+
+        segment = struct.pack(
+            '! Q Q Q I',
+            start_freq,  # startfreq
+            end_freq,    # endfreq
+            step,        # step
+            n_points     # nPoints
+        )
+
+        payload = header + segment
+        return self.build_command_frame(business_type=0x14, params=payload)
+
+    def build_pscan_command(self, start_freq: int, end_freq: int, step: int) -> bytes:
+        """
+        构建频谱扫描命令 PSCAN (0x17)
+
+        命令格式:
+        - nBdType: 1字节 - 0x17
+        - nArrays: 4字节 - 扫描段数
+        动态部分:
+        - startfreq: 8字节 - 开始频率
+        - endfreq: 8字节 - 结束频率
+        - step: 8字节 - 步长频率
+        - nPoints: 4字节 - 本段点数
+
+        Args:
+            start_freq: 起始频率(Hz)
+            end_freq: 终止频率(Hz)
+            step: 步进(Hz)
+
+        Returns:
+            命令帧字节数据
+        """
+        n_arrays = 1
+        n_points = max(100, (end_freq - start_freq) // step)
+
+        header = struct.pack('!B I', 0x17, n_arrays)
+
+        segment = struct.pack(
+            '! Q Q Q I',
+            start_freq,  # startfreq
+            end_freq,    # endfreq
+            step,        # step
+            n_points     # nPoints
+        )
+
+        payload = header + segment
+        return self.build_command_frame(business_type=0x17, params=payload)
+
+    def build_wbdf_command(self, frequency: int, ifbw: int = 40000000) -> bytes:
+        """
+        构建宽带测向命令 WBDF (0x19)
+
+        命令格式:
+        - nBdType: 1字节 - 0x19
+        - nArrays: 4字节 - 动态数组数目
+        - freq: 8字节 - 频率
+        - ifbw: 8字节 - 中频带宽
+
+        Args:
+            frequency: 频率(Hz)
+            ifbw: 中频带宽(Hz)
+
+        Returns:
+            命令帧字节数据
+        """
+        header = struct.pack(
+            '!B I Q Q',
+            0x19,        # nBdType (WBDF)
+            0,           # nArrays
+            frequency,   # freq
+            ifbw         # ifbw
+        )
+
+        return self.build_command_frame(business_type=0x19, params=header)
+
+    def build_stop_command(self, task_id: str) -> bytes:
+        """
+        构建停止测量命令
+
+        Args:
+            task_id: 任务ID
+
+        Returns:
+            命令帧字节数据
+        """
+        # 停止命令不发送到设备，由本地处理
+        return b''
+
 
 class BusinessDataBuilder:
     """业务数据构建器"""

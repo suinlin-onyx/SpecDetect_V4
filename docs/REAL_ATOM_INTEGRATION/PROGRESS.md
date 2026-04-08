@@ -1,7 +1,7 @@
 # 测试进度追踪
 
 > 创建日期：2026-04-06
-> 更新日期：2026-04-06
+> 更新日期：2026-04-08
 > 文档策略：临时工作目录，联调完成后合并到主文档
 
 ---
@@ -11,6 +11,196 @@
 - [x] 确认文档策略：临时目录 + 最终合并
 - [ ] 联调完成后：合并到主文档
 - [ ] 删除临时目录
+
+---
+
+## 🔴 当前阶段：Mock Atom 改造
+
+### 任务目标
+基于 Real Atom 实测数据，改造 Mock Atom 实现所有 SOAP 接口与功能，适配 SOAP-to-RMCPTP v2.0 协议转换。
+
+### 已完成工作 (2026-04-08)
+
+1. **归档文档** ✅
+   - 创建 `ARCHIVE_20260408.md` - 联调成果归档
+
+2. **SOAP 接口实现** ✅
+   - `main_atom.py` 添加所有 B_XXX 接口处理函数
+   - 支持：查询接口(B_QueryDeviceInfo, B_QueryFaciDevStat)
+   - 支持：控制接口(B_StopMeas, B_TaskModification)
+   - 支持：执行接口(B_SglFreqMeas, B_SglFreqDF, B_FScan, B_FScanDF, B_MScan, B_MScanDF, B_PScan, B_WBDF)
+
+3. **RMCPTP 命令构建器** ✅
+   - `protocol_builder.py` 添加缺失命令构建器
+   - 添加：build_mscan_command (0x14)
+   - 添加：build_pscan_command (0x17)
+   - 添加：build_wbdf_command (0x19)
+   - 添加：build_stop_command
+
+4. **Proxy 路由更新** ✅
+   - `routes.py` 更新 build_real_atom_request 函数
+   - 使用实测格式构建每个接口的请求
+   - 修正 equpara 结构（items / groupitems / xsi:nil）
+   - 更新 OPERATION_TO_REAL_ATOM 映射表
+
+5. **响应格式更新** ✅
+   - `main_atom.py` build_soap_response 改为 Real Atom 格式
+   - 添加 bizResCd Header
+   - 使用 srrc 命名空间
+
+---
+
+## 2026-04-08 任务归档
+
+### 接口测试结果 (10/11)
+
+| # | 接口 | 状态 | 端点 | SOAPAction |
+|---|------|------|------|------------|
+| 0 | 监测功能查询 (B_QueryDeviceInfo) | ✅ | `/` | B_QueryDeviceInfo |
+| 1 | B_QueryFaciDevStat | ✅ | `/` | B_QueryFaciDevStat |
+| 2 | B_StopMeas | ✅ | `/` | B_StopMeas |
+| 3 | B_FScan | ✅ | `/B_FScan` | B_FScan |
+| 4 | B_FScanDF | ✅ | `/B_FScanDF` | B_FScanDF |
+| 5 | B_MScan | ✅ | `/B_MScan` | B_MScan |
+| 6 | B_MScanDF | ✅ | `/B_MScanDF` | B_MScanDF |
+| 7 | B_PScan | ✅ | `/B_PScan` | B_PScan |
+| 8 | B_SglFreqDF | ✅ | `/B_SglFreqDF` | B_SglFreqDF |
+| 9 | B_SglFreqMeas | ✅ | `/B_SglFreqMeas` | B_SglFreqMeas |
+| 10 | B_WBDF | ✅ | `/B_WBDF` | B_WBDF |
+| 11 | B_TaskModification | ⏸️ | - | - |
+
+### 关键发现
+
+1. **请求格式**
+   - 基础字段：appid, userid, priority, executetime, mfid, equid
+   - equpara 格式：items / groupitems / xsi:nil="true"
+   - outputchannel：执行接口需要 source + stream
+
+2. **B_StopMeas**
+   - equpara 使用 xsi:nil="true"
+   - 需要 taskid 字段
+
+3. **Real Atom 配置**
+   - mfid: 53090001140012
+   - equid: 51cd8dfe-e543-40c9-bdc3-a292766fee7f
+
+### 2026-04-08 测试进度
+
+| # | 接口 | 状态 | taskid | 时间 |
+|---|------|------|--------|------|
+| 0 | 监测功能查询 (B_QueryDeviceInfo) | ✅ | - | - |
+| 1 | B_QueryFaciDevStat | ✅ | - | - |
+| 2 | B_SglFreqMeas | ✅ 成功 | 获取成功 | 2026-04-08 |
+| 3 | B_SglFreqDF | ✅ 成功 | 获取成功 | 2026-04-08 |
+| 4 | B_FScan | ✅ 成功 | 获取成功 | 2026-04-08 |
+| 5 | B_PScan | ✅ 成功 | 获取成功 | 2026-04-08 |
+| 6 | B_WBDF | ✅ 成功 | 获取成功 | 2026-04-08 |
+| 7 | B_MScan | ✅ 成功 | 获取成功 | 2026-04-08 |
+| 8 | B_MScanDF | ✅ 成功 | 获取成功 | 2026-04-08 |
+| 9 | B_FScanDF | ✅ 成功 | 获取成功 | 2026-04-08 |
+
+### 接口测试状态
+
+| # | 接口 | 状态 | 备注 |
+|---|------|------|------|
+| 1 | 监测功能查询 (B_QueryDeviceInfo) | ✅ 已验证 | 获取设备功能列表 |
+| 2 | B_QueryFaciDevStat | ✅ 成功 | 设备状态查询 |
+| 3 | B_StopMeas | ✅ 已验证 | 停止测量 |
+| 4 | B_SglFreqMeas | ✅ 成功 | 单频测量 |
+| 5 | B_SglFreqDF | ✅ 成功 | 单频测向 |
+| 6 | B_FScan | ✅ 成功 | 频段扫描 |
+| 7 | B_FScanDF | ✅ 成功 | 频段扫描测向 |
+| 8 | B_MScan | ✅ 成功 | 多信道扫描 |
+| 9 | B_MScanDF | ✅ 成功 | 多信道扫描测向 |
+| 10 | B_PScan | ✅ 成功 | 频谱扫描 |
+| 11 | B_WBDF | ✅ 成功 | 宽带测向 |
+| 12 | B_TaskModification | ⏸️ 暂不解决 | 任务修改 |
+
+**完成率**: 10/11 (91%)
+
+### 待解决问题
+
+| 问题 | 优先级 |
+|------|--------|
+| 验证"监测功能查询"对应接口 | ✅ 已完成 |
+| B_TaskModification 超时问题 | ⏸️ 暂不解决 |
+
+---
+
+## 2026-04-07 联调结果（第二阶段 - 远端Atom）
+
+### 崩溃事件
+
+| 项目 | 值 |
+|------|------|
+| 发生时间 | 2026-04-07 21:49:57 |
+| 崩溃文件 | `D:\arvin\claude_workspace\RXAtomSvcV3\远端的crash\[2026-04-07 21：49：57]AtomSvcV3_crash.dmp` |
+| 文件大小 | 120,927 bytes |
+| 进程 | AtomSvcV3.exe |
+
+### 崩溃分析结果
+
+**分析工具**: Python minidump parser (Windbg安装失败)
+
+**发现**:
+- 文件签名: MDMP (有效MiniDuMP格式)
+- .NET运行时字符串: ".vb_release.191206-1406" (VB.NET 6.0应用)
+- ExceptionStream存在但数据全为0，疑似未完成写入
+- 崩溃可能原因: 请求间隔过短(3秒)导致远程Atom资源耗尽
+
+### 建议改进
+
+1. **增加请求间隔**: 5-10秒代替3秒
+2. **单独测试接口**: 不使用--sequence模式，改为逐个接口测试
+3. **监控资源**: 关注远程Atom的CPU/内存使用
+
+---
+
+## 2026-04-07 联调结果（已归档）
+
+### 问题发现
+
+| 问题 | 描述 | 结论 |
+|------|------|------|
+| ISSUE-001 | Real Atom SOAP 处理崩溃 | Access Violation, NULL 指针访问 |
+| ISSUE-002 | streamsrc 与 devinfo 关系 | streamsrc 是监听端口，devinfo 是设备配置 |
+| ISSUE-003 | Real Atom 不主动连接 station | 通过 ping 判断连接，不建立 TCP 连接 |
+| ISSUE-004 | 端口绑定冲突 | streamsrc port 非空时与 Mock Device 冲突 |
+
+### 崩溃分析结果
+
+```
+崩溃类型: Access Violation (0xC0000005)
+崩溃地址: 0x7BCBB9F0
+根因: NULL pointer dereference (尝试读取 0x00000000)
+```
+
+### 关键架构发现
+
+```
+Real Atom 架构：
+  - streamsrc 端口 (18012): 监听等待设备主动连接
+  - station 配置: 通过 ping 判断设备在线状态
+  - SOAP 端口 (8282): 接收业务请求
+
+Mock Device 当前角色：服务器（监听 9000）
+正确角色应该是：客户端（连接 Real Atom streamsrc）
+```
+
+### 详细分析见
+
+- `ARCHIVE_20260407.md` - 问题归档文档
+
+---
+
+## 2026-04-06 联调结果
+
+### 阶段3：Real Atom 联调测试
+
+**重要发现（2026-04-06）**：
+- Real Atom 没有物理设备时会**阻塞等待**，不是崩溃
+- 进程正常，端口正常，持续 ping 设备但无响应
+- 收到 SOAP 请求后阻塞等待设备响应，curl 超时
 
 ---
 

@@ -21,17 +21,32 @@ SRRC_NS = 'http://www.srrc.org.cn'
 
 # 内部操作名到 Real Atom 端点名 的映射
 # 注意: Real Atom 使用 gSOAP 框架，端点路径为 /B_XXX 格式（如 /B_SglFreqMeas）
-# 有效端点见: D:\arvin\vhf_monitoring_ws\RXAtomSvcV3\wsdl\8282\
+# Real Atom 所有接口都使用根路径 "/" (2026-04-08 实测)
 OPERATION_TO_REAL_ATOM = {
-    'StartMeasure': 'B_SglFreqMeas',     # 单频测量
-    'StartScan': 'B_FScan',              # 频段扫描
-    'StartDirection': 'B_DirectionMeas', # 测向功能 (待确认)
-    'StartIFAnalysis': 'B_IFAnalysis',   # 中频分析 (待确认)
-    'StartIFDirection': 'B_IFDirectionMeas', # 中频测向 (待确认)
-    'B_QueryDeviceInfo': 'B_QueryDeviceInfo', # 设备信息查询
-    'B_QueryFaciDevStat': 'B_QueryFaciDevStat', # 设备状态查询
-    'B_StopMeas': 'B_StopMeas',           # 停止测量
-    # B_SelfTest 已移除: Real Atom 不支持此端点，WSDL文件中不存在
+    # 查询接口
+    'B_QueryDeviceInfo': '',              # 设备信息查询 - 根路径
+    'B_QueryFaciDevStat': '',             # 设备状态查询 - 根路径
+
+    # 控制接口
+    'B_StopMeas': '',                     # 停止测量 - 根路径
+    'B_TaskModification': '',             # 任务修改 - 根路径
+
+    # 执行接口
+    'StartMeasure': 'B_SglFreqMeas',      # 单频测量
+    'B_SglFreqMeas': 'B_SglFreqMeas',    # 单频测量
+    'B_SglFreqDF': 'B_SglFreqDF',        # 单频测向
+    'StartScan': 'B_FScan',               # 频段扫描
+    'B_FScan': 'B_FScan',                 # 频段扫描
+    'B_FScanDF': 'B_FScanDF',            # 频段扫描测向
+    'B_MScan': 'B_MScan',                 # 多信道扫描
+    'B_MScanDF': 'B_MScanDF',            # 多信道扫描测向
+    'B_PScan': 'B_PScan',                 # 频谱扫描
+    'B_WBDF': 'B_WBDF',                  # 宽带测向
+
+    # 兼容旧名称
+    'StartDirection': 'B_SglFreqDF',       # 单频测向
+    'StartIFAnalysis': 'B_IFAnalysis',     # 中频分析
+    'StartIFDirection': 'B_IFDirection',   # 中频测向
 }
 
 
@@ -118,10 +133,10 @@ def handle_soap():
 
 def build_real_atom_request(operation: str, params: dict) -> str:
     """
-    构建发送到 Real Atom 的 SOAP 请求（符合 soap_api.md 格式）
+    构建发送到 Real Atom 的 SOAP 请求（符合实测格式）
 
     Args:
-        operation: SOAP操作名（如 StartMeasure）
+        operation: SOAP操作名（如 B_SglFreqMeas）
         params: 参数字典
 
     Returns:
@@ -138,68 +153,140 @@ def build_real_atom_request(operation: str, params: dict) -> str:
     # 构建 requestbody
     request_body = etree.SubElement(body, f'{{{SRRC_NS}}}requestbody')
 
-    # 基础字段
-    etree.SubElement(request_body, f'{{{SRRC_NS}}}userid').text = 'RX_admin'
-    etree.SubElement(request_body, f'{{{SRRC_NS}}}appid').text = '123456'
-    etree.SubElement(request_body, f'{{{SRRC_NS}}}executetime').text = '0'
-    etree.SubElement(request_body, f'{{{SRRC_NS}}}priority').text = '9'
+    # 设备ID (Real Atom 配置)
+    etree.SubElement(request_body, f'{{{SRRC_NS}}}mfid').text = '53090001140012'
+    etree.SubElement(request_body, f'{{{SRRC_NS}}}equid').text = '51cd8dfe-e543-40c9-bdc3-a292766fee7f'
 
-    # 设备ID（使用配置中的值或默认值）
-    etree.SubElement(request_body, f'{{{SRRC_NS}}}mfid').text = '53090001140007'
-    etree.SubElement(request_body, f'{{{SRRC_NS}}}equid').text = '8f1b953d-d618-4d4f-a106-81c47183af3c'
+    # 根据操作类型处理 equpara 和其他字段
+    # 查询接口和停止接口：equpara 使用 xsi:nil="true"
+    if operation in ('B_QueryDeviceInfo', 'B_QueryFaciDevStat'):
+        # equpara 空
+        equpara = etree.SubElement(request_body, f'{{{SRRC_NS}}}equpara')
+        equpara.set('{http://www.w3.org/2001/XMLSchema-instance}nil', 'true')
 
-    # 构建 equpara 参数
-    equpara = etree.SubElement(request_body, f'{{{SRRC_NS}}}equpara')
-    items = etree.SubElement(equpara, f'{{{SRRC_NS}}}items')
+    elif operation == 'B_StopMeas':
+        # 停止测量：equpara 空 + taskid
+        equpara = etree.SubElement(request_body, f'{{{SRRC_NS}}}equpara')
+        equpara.set('{http://www.w3.org/2001/XMLSchema-instance}nil', 'true')
+        taskid = params.get('taskid', '')
+        etree.SubElement(request_body, f'{{{SRRC_NS}}}taskid').text = taskid
 
-    # 根据操作类型添加参数
-    if operation == 'StartMeasure' or operation == 'B_SglFreqMeas':
-        frequency = int(params.get('Frequency', params.get('frequency', 100_000_000)))
-        add_equpara_item(items, 'frequency', frequency)
-        add_equpara_item(items, 'ifbw', 40000000)
-        add_equpara_item(items, 'gain', 'AGC')
+    elif operation == 'B_TaskModification':
+        # 任务修改：equpara 空
+        equpara = etree.SubElement(request_body, f'{{{SRRC_NS}}}equpara')
+        equpara.set('{http://www.w3.org/2001/XMLSchema-instance}nil', 'true')
 
-    elif operation == 'StartScan' or operation == 'B_FScan':
-        start_freq = int(params.get('StartFreq', params.get('startfreq', 100_000_000)))
-        end_freq = int(params.get('EndFreq', params.get('endfreq', 200_000_000)))
-        step = int(params.get('Step', params.get('step', 1_000_000)))
+    elif operation in ('B_SglFreqMeas', 'B_SglFreqDF', 'B_WBDF'):
+        # 单频测量/单频测向/宽带测向：使用 items 结构
+        equpara = etree.SubElement(request_body, f'{{{SRRC_NS}}}equpara')
+        item_list = etree.SubElement(equpara, f'{{{SRRC_NS}}}items')
 
-        # FSCAN 使用 groupitems 结构
+        if operation == 'B_SglFreqMeas':
+            frequency = int(params.get('frequency', 100_000_000))
+            add_equpara_item(item_list, 'frequency', frequency)
+            add_equpara_item(item_list, 'ifbw', 40000000)
+            add_equpara_item(item_list, 'gain', 'AGC')
+            add_equpara_item(item_list, 'rfworkmode', '0')
+            add_equpara_item(item_list, 'audiotype', 'off')
+            add_equpara_item(item_list, 'demodmode', 'FM')
+            add_equpara_item(item_list, 'demodbw', 200000)
+            add_equpara_item(item_list, 'spectrumswitch', 'on')
+            add_equpara_item(item_list, 'ITUSwitch', 'on')
+
+        elif operation == 'B_SglFreqDF':
+            frequency = int(params.get('frequency', 100_000_000))
+            add_equpara_item(item_list, 'frequency', frequency)
+            add_equpara_item(item_list, 'dfmode', 1)
+            add_equpara_item(item_list, 'ifbw', 40000000)
+            add_equpara_item(item_list, 'gain', 'AGC')
+            add_equpara_item(item_list, 'rfworkmode', '0')
+            add_equpara_item(item_list, 'dftype', 0)
+            add_equpara_item(item_list, 'spectrumswitch', 'on')
+
+        elif operation == 'B_WBDF':
+            frequency = int(params.get('frequency', 100_000_000))
+            add_equpara_item(item_list, 'frequency', frequency)
+            add_equpara_item(item_list, 'ifbw', 40000000)
+            add_equpara_item(item_list, 'gain', 'AGC')
+            add_equpara_item(item_list, 'rfworkmode', '0')
+
+        # outputchannel (执行接口需要)
+        outputchannel = etree.SubElement(request_body, f'{{{SRRC_NS}}}outputchannel')
+        etree.SubElement(outputchannel, f'{{{SRRC_NS}}}mode').text = 'source'
+        etree.SubElement(outputchannel, f'{{{SRRC_NS}}}datachannel').text = 'stream'
+
+    elif operation in ('B_FScan', 'B_FScanDF', 'B_MScan', 'B_MScanDF'):
+        # 频段扫描/频段扫描测向/多信道扫描：使用 groupitems 结构
+        equpara = etree.SubElement(request_body, f'{{{SRRC_NS}}}equpara')
         groupitems = etree.SubElement(equpara, f'{{{SRRC_NS}}}groupitems')
         groupitem = etree.SubElement(groupitems, f'{{{SRRC_NS}}}groupitem')
         etree.SubElement(groupitem, f'{{{SRRC_NS}}}groupid').text = '1'
-        group_items = etree.SubElement(groupitem, f'{{{SRRC_NS}}}items')
-        add_equpara_item(group_items, 'startfreq', start_freq)
-        add_equpara_item(group_items, 'stopfreq', end_freq)
-        add_equpara_item(group_items, 'step', step)
-        add_equpara_item(group_items, 'gain', 'AGC')
+        group_item_list = etree.SubElement(groupitem, f'{{{SRRC_NS}}}items')
 
-    elif operation == 'StartDirection' or operation == 'B_DirectionMeas':
-        frequency = int(params.get('Frequency', params.get('frequency', 100_000_000)))
-        add_equpara_item(items, 'frequency', frequency)
-        add_equpara_item(items, 'ifbw', 40000000)
+        if operation == 'B_FScan':
+            start_freq = int(params.get('startfreq', 137_000_000))
+            stop_freq = int(params.get('stopfreq', 173_000_000))
+            add_equpara_item(group_item_list, 'startfreq', start_freq)
+            add_equpara_item(group_item_list, 'stopfreq', stop_freq)
+            add_equpara_item(group_item_list, 'step', 25000)
+            add_equpara_item(group_item_list, 'gain', 'AGC')
+            add_equpara_item(group_item_list, 'rfworkmode', '0')
+            add_equpara_item(group_item_list, 'scanmode', 0)
 
-    elif operation == 'StartIFAnalysis' or operation == 'B_IFAnalysis':
-        frequency = int(params.get('Frequency', params.get('frequency', 100_000_000)))
-        span = int(params.get('Span', params.get('span', 1_000_000)))
-        add_equpara_item(items, 'frequency', frequency)
-        add_equpara_item(items, 'span', span)
+        elif operation == 'B_FScanDF':
+            start_freq = int(params.get('startfreq', 137_000_000))
+            stop_freq = int(params.get('stopfreq', 173_000_000))
+            add_equpara_item(group_item_list, 'startfreq', start_freq)
+            add_equpara_item(group_item_list, 'stopfreq', stop_freq)
+            add_equpara_item(group_item_list, 'step', 25000)
+            add_equpara_item(group_item_list, 'rfworkmode', '0')
+            add_equpara_item(group_item_list, 'gain', 'AGC')
 
-    elif operation == 'StartIFDirection' or operation == 'B_IFDirectionMeas':
-        frequency = int(params.get('Frequency', params.get('frequency', 100_000_000)))
-        span = int(params.get('Span', params.get('span', 1_000_000)))
-        add_equpara_item(items, 'frequency', frequency)
-        add_equpara_item(items, 'span', span)
+        elif operation == 'B_MScan':
+            frequency = int(params.get('frequency', 100_000_000))
+            ifbw = int(params.get('ifbw', 40000000))
+            add_equpara_item(group_item_list, 'frequency', frequency)
+            add_equpara_item(group_item_list, 'ifbw', ifbw)
+            add_equpara_item(group_item_list, 'gain', 'AGC')
+            add_equpara_item(group_item_list, 'rfworkmode', '0')
 
-    # resulttype
-    resulttype = etree.SubElement(request_body, f'{{{SRRC_NS}}}resulttype')
-    if operation.startswith('StartScan') or operation == 'B_FScan':
-        etree.SubElement(resulttype, f'{{{SRRC_NS}}}FSCAN')
+        elif operation == 'B_MScanDF':
+            frequency = int(params.get('frequency', 100_000_000))
+            ifbw = int(params.get('ifbw', 40000000))
+            add_equpara_item(group_item_list, 'frequency', frequency)
+            add_equpara_item(group_item_list, 'dfmode', 1)
+            add_equpara_item(group_item_list, 'ifbw', ifbw)
+            add_equpara_item(group_item_list, 'gain', 'AGC')
+            add_equpara_item(group_item_list, 'rfworkmode', '0')
 
-    # outputchannel
-    outputchannel = etree.SubElement(request_body, f'{{{SRRC_NS}}}outputchannel')
-    etree.SubElement(outputchannel, f'{{{SRRC_NS}}}mode').text = 'source'
-    etree.SubElement(outputchannel, f'{{{SRRC_NS}}}datachannel').text = 'stream'
+        # outputchannel
+        outputchannel = etree.SubElement(request_body, f'{{{SRRC_NS}}}outputchannel')
+        etree.SubElement(outputchannel, f'{{{SRRC_NS}}}mode').text = 'source'
+        etree.SubElement(outputchannel, f'{{{SRRC_NS}}}datachannel').text = 'stream'
+
+    elif operation == 'B_PScan':
+        # 频谱扫描：使用 items 结构
+        equpara = etree.SubElement(request_body, f'{{{SRRC_NS}}}equpara')
+        item_list = etree.SubElement(equpara, f'{{{SRRC_NS}}}items')
+        start_freq = int(params.get('startfreq', 137_000_000))
+        stop_freq = int(params.get('stopfreq', 173_000_000))
+        add_equpara_item(item_list, 'startfreq', start_freq)
+        add_equpara_item(item_list, 'stopfreq', stop_freq)
+        add_equpara_item(item_list, 'step', 25000)
+        add_equpara_item(item_list, 'gain', 'AGC')
+        add_equpara_item(item_list, 'rfworkmode', '0')
+        add_equpara_item(item_list, 'keepmode', 0)
+
+        # outputchannel
+        outputchannel = etree.SubElement(request_body, f'{{{SRRC_NS}}}outputchannel')
+        etree.SubElement(outputchannel, f'{{{SRRC_NS}}}mode').text = 'source'
+        etree.SubElement(outputchannel, f'{{{SRRC_NS}}}datachannel').text = 'stream'
+
+    # 基础字段（所有接口都需要）
+    etree.SubElement(request_body, f'{{{SRRC_NS}}}appid').text = '123456'
+    etree.SubElement(request_body, f'{{{SRRC_NS}}}userid').text = 'RX_admin'
+    etree.SubElement(request_body, f'{{{SRRC_NS}}}priority').text = '9'
+    etree.SubElement(request_body, f'{{{SRRC_NS}}}executetime').text = '0'
 
     return etree.tostring(root, pretty_print=True, encoding='utf-8', xml_declaration=True).decode('utf-8')
 
@@ -485,8 +572,9 @@ def dispatch_to_atom_service(operation: str, params: dict) -> dict:
             # Real Atom 格式
             soap_request = build_real_atom_request(operation, params)
             endpoint = get_real_atom_endpoint(operation)
-            url = f"{atom_base_url}/{endpoint}"
-            logger.info(f"发送请求到 Real Atom: {operation} -> {endpoint}")
+            # 空endpoint表示使用根路径
+            url = atom_base_url if not endpoint else f"{atom_base_url}/{endpoint}"
+            logger.info(f"发送请求到 Real Atom: {operation} -> {endpoint or '/'}")
         else:
             # Mock Atom 格式
             soap_request = build_soap_request_to_atom(operation, params)
