@@ -15,7 +15,7 @@
 ## 目标架构
 
 ```
-Client → Proxy-A(8080) → Mock Atom(9090) → Real Device(172.18.114.33:9999)
+Client → Proxy-A(8080) → Mock Atom(9090) → Real Device(172.18.114.33:9998)
                                          ↓
                                     RMCPTP v2.0 二进制协议
 ```
@@ -25,9 +25,9 @@ Client → Proxy-A(8080) → Mock Atom(9090) → Real Device(172.18.114.33:9999)
 | 服务 | 地址 | 说明 |
 |------|------|------|
 | Real Atom | 172.18.114.33:8282 | SOAP 服务（远程） |
-| Real Device | 172.18.114.33:9999 | RMCPTP 设备（远程） |
+| Real Device | 172.18.114.33:9998 | RMCPTP 设备（远程） |
 | Mock Atom | 127.0.0.1:9090 | 本地 SOAP 服务 |
-| Real Device (目标) | 172.18.114.33:9999 | Mock Atom 转发目标 |
+| Real Device (目标) | 172.18.114.33:9998 | Mock Atom 转发目标 |
 
 **关键点**：Mock Atom 接收 SOAP 请求，转换为 RMCPTP 命令，直接发送给 Real Device。
 
@@ -80,7 +80,7 @@ Client → Proxy-A(8080) → Mock Atom(9090) → Real Device(172.18.114.33:9999)
 SERVICES = {
     'atom': {
         'device_host': '172.18.114.33',  # Real Device 地址
-        'device_port': 9999              # Real Device RMCPTP 端口
+        'device_port': 9998              # Real Device RMCPTP 端口
     }
 }
 ```
@@ -102,7 +102,7 @@ SERVICES = {
 ## 预期结果
 
 改造完成后：
-- Proxy-A (8080) → Mock Atom (9090) → Real Device (172.18.114.33:9999)
+- Proxy-A (8080) → Mock Atom (9090) → Real Device (172.18.114.33:9998)
 - Mock Atom 等价于 Real Atom（只做 SOAP → RMCPTP 转换）
 
 ---
