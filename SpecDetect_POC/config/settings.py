@@ -11,7 +11,7 @@ SERVICES = {
         'host': '127.0.0.1',
         'port': 9090,
         'device_host': '172.18.114.33',  # Real Device RMCPTP 地址
-        'device_port': 9998              # Real Device RMCPTP 端口
+        'device_port': 8282               # Real Device RMCPTP 端口
     },
     'mock_device': {
         'host': '127.0.0.1',
@@ -23,7 +23,7 @@ SERVICES = {
 # 协议配置
 PROTOCOL = {
     'rmcp_version': 0x0007,
-    'timeout': 5.0,
+    'timeout': 10.0,
     'retry': 3
 }
 

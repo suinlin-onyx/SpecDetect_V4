@@ -24,8 +24,8 @@ PROXY_B_CONFIG = {
 # 从 VHFMonitor_Python/flask_proxy.py 确认：
 #   Real Atom: 127.0.0.1:8282
 #   Mock Atom: 127.0.0.1:8288
-REAL_ATOM_HOST = '127.0.0.1'
-REAL_ATOM_PORT = 8888
+REAL_ATOM_HOST = '172.18.114.33'
+REAL_ATOM_PORT = 8282
 
 SERVICES = {
     'proxy': {

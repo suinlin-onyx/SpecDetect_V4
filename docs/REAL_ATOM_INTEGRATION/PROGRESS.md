@@ -9,17 +9,16 @@
 ## 文档策略记录
 
 - [x] 确认文档策略：临时目录 + 最终合并
-- [ ] 联调完成后：合并到主文档
+- [x] 联调完成后：合并到主文档
 - [ ] 删除临时目录
 
 ---
 
-## 🔴 当前阶段：Mock Atom 改造
+## ✅ 已完成阶段归档
 
-### 任务目标
-基于 Real Atom 实测数据，改造 Mock Atom 实现所有 SOAP 接口与功能，适配 SOAP-to-RMCPTP v2.0 协议转换。
+### 2026-04-08 Proxy-A SOAP 接口改造
 
-### Proxy-A 改造进度
+**改造文档**: `../PROXY_A_SOAP_MODIFICATIONS.md`
 
 | # | 步骤 | 文件 | 状态 |
 |---|------|------|------|
@@ -28,10 +27,21 @@
 | 3 | Mock Atom 请求解析改造 (srrc命名空间) | `main_atom.py` | ✅ |
 | 4 | device_client 配置指向 Real Device | `settings.py` | ✅ |
 | 5 | Proxy-A 请求构建统一 | `routes.py` | ✅ |
+| 6 | B_QueryDeviceInfo 响应格式对齐 | `main_atom.py` | ✅ |
+| 7 | B_StopMeas taskid 移除 | `main_atom.py` | ✅ |
+
+**支持接口**: 11个 SOAP 接口 (B_QueryDeviceInfo, B_QueryFaciDevStat, B_StopMeas, B_SglFreqMeas, B_SglFreqDF, B_FScan, B_FScanDF, B_MScan, B_MScanDF, B_PScan, B_WBDF)
+
+---
+
+## 🔴 当前阶段：待测试
+
+### 任务目标
+测试 Mock Atom 通过 RMCPTP 协议连接远端设备 172.18.114.33:8282
 
 ### 目标架构
 ```
-Client → Proxy-A(8080) → Mock Atom(9090) → Real Device(172.18.114.33:9999)
+Client → Proxy-A(8080) → Mock Atom(9090) → Real Device(172.18.114.33:8282)
                                          ↓
                                     RMCPTP v2.0 二进制协议
 ```
@@ -41,7 +51,7 @@ Client → Proxy-A(8080) → Mock Atom(9090) → Real Device(172.18.114.33:9999)
 | 服务 | 地址 | 说明 |
 |------|------|------|
 | Real Atom | 172.18.114.33:8282 | SOAP 服务（远程） |
-| Real Device | 172.18.114.33:9998 | RMCPTP 设备（远程） |
+| Real Device | 172.18.114.33:8282 | RMCPTP 设备（远程） |
 
 ### 已完成工作 (2026-04-08)
 

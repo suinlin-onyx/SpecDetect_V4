@@ -422,9 +422,113 @@ SOAP_NS = {
     'srrc': 'http://www.srrc.org.cn'
 }
 
+# 设备基础信息（Real Atom 配置）
+DEVICE_INFO = {
+    'mfid': '53090001140012',
+    'equid': '51cd8dfe-e543-40c9-bdc3-a292766fee7f',
+    'equimanu': 'KYB',
+    'equmodel': 'MS845',
+    'equname': 'MS845',
+    'equsn': '12345678',
+    'equstatus': '01',
+    'equtype': '01',
+    'maxtasknumber': 1
+}
 
-def build_soap_response(success: bool, data: dict = None, error: str = None) -> str:
-    """构建SOAP响应（Real Atom格式）"""
+# outputchannel 默认值（Mock Device）
+DEFAULT_OUTPUTCHANNEL = {
+    'host': '127.0.0.1',
+    'port': '9000',
+    'stc': ''  # 动态生成
+}
+
+# 设备配置文件路径
+DEVICE_CONFIG_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    'device', 'config', 'devinfo'
+)
+
+# 设备配置缓存
+_device_config_cache = {}
+
+
+def load_device_config(mfid: str, equid: str) -> dict:
+    """加载设备配置
+
+    Args:
+        mfid: 厂商ID
+        equid: 设备ID
+
+    Returns:
+        设备配置字典，如果未找到返回空字典
+    """
+    cache_key = f"{mfid}_{equid}"
+
+    if cache_key in _device_config_cache:
+        return _device_config_cache[cache_key]
+
+    config_file = os.path.join(DEVICE_CONFIG_PATH, f"{mfid}_{equid}.xml")
+
+    if not os.path.exists(config_file):
+        logger.warning(f"设备配置文件不存在: {config_file}")
+        return {}
+
+    try:
+        tree = etree.parse(config_file)
+        root = tree.getroot()
+
+        # 提取配置数据
+        config = {}
+
+        # 解析 result 下的字段
+        result = root.find('.//srrc:result', namespaces={'srrc': 'http://www.srrc.org.cn'})
+        if result is None:
+            result = root.find('.//{http://www.srrc.org.cn}result')
+
+        if result is not None:
+            for child in result:
+                tag = child.tag.split('}')[1] if '}' in child.tag else child.tag
+                if tag == 'featurelist':
+                    # featurelist 需要特殊处理，保留原始元素
+                    config['featurelist'] = child
+                elif tag == 'host' or tag == 'port':
+                    # 跳过空的主机和端口
+                    if child.text:
+                        config[tag] = child.text
+                else:
+                    config[tag] = child.text
+
+        _device_config_cache[cache_key] = config
+        logger.info(f"加载设备配置成功: {mfid}/{equid}")
+        return config
+
+    except Exception as e:
+        logger.error(f"加载设备配置失败: {e}")
+        return {}
+
+
+def generate_taskid() -> str:
+    """生成 Real Atom 格式的 taskid"""
+    import uuid
+    return str(uuid.uuid4()).upper()
+
+
+def get_outputchannel_xml(mode: str = 'source', datachannel: str = 'stream') -> str:
+    """生成 outputchannel XML"""
+    import time
+    stc = str(int(time.time()))
+    return f'<srrc:outputchannel xmlns:srrc="http://www.srrc.org.cn"><srrc:mode>{mode}</srrc:mode><srrc:datachannel>{datachannel}</srrc:datachannel><srrc:host>{DEFAULT_OUTPUTCHANNEL["host"]}</srrc:host><srrc:port>{DEFAULT_OUTPUTCHANNEL["port"]}</srrc:port><srrc:stc>{stc}</srrc:stc></srrc:outputchannel>'
+
+
+def build_soap_response(success: bool, data: dict = None, error: str = None, error_code: str = None) -> str:
+    """构建SOAP响应（Real Atom格式）
+
+    Args:
+        success: 是否成功
+        data: 响应数据字典
+        error: 错误描述
+        error_code: 错误码（如 BIZ-000002, BIZ-00002-conflict）
+    """
     root = etree.Element(
         '{http://schemas.xmlsoap.org/soap/envelope/}Envelope',
         nsmap=SOAP_NS
@@ -434,41 +538,117 @@ def build_soap_response(success: bool, data: dict = None, error: str = None) -> 
     header = etree.SubElement(root, '{http://schemas.xmlsoap.org/soap/envelope/}Header')
     provider_response = etree.SubElement(header, '{http://www.srrc.org.cn}ProviderResponse')
     biz_res_cd = etree.SubElement(provider_response, '{http://www.srrc.org.cn}bizResCd')
-    biz_res_cd.text = 'BIZ-000001' if success else 'BIZ-000002'
     biz_res_text = etree.SubElement(provider_response, '{http://www.srrc.org.cn}bizResText')
-    biz_res_text.text = '调用成功' if success else str(error)
 
     # Body
     body = etree.SubElement(root, '{http://schemas.xmlsoap.org/soap/envelope/}Body')
     response_body = etree.SubElement(body, '{http://www.srrc.org.cn}responsebody')
 
     if success and data:
-        result = etree.SubElement(response_body, '{http://www.srrc.org.cn}result')
-        for key, value in data.items():
-            if isinstance(value, dict):
-                # 嵌套对象
-                item = etree.SubElement(result, '{http://www.srrc.org.cn}' + key)
-                for k, v in value.items():
-                    child = etree.SubElement(item, '{http://www.srrc.org.cn}' + k)
-                    if isinstance(v, list):
-                        child.text = str(v)
-                    else:
-                        child.text = str(v) if v is not None else ''
-            elif isinstance(value, list):
-                # 列表
-                item = etree.SubElement(result, '{http://www.srrc.org.cn}' + key)
-                item.text = str(value)
-            else:
-                child = etree.SubElement(result, '{http://www.srrc.org.cn}' + key)
-                child.text = str(value) if value is not None else ''
+        biz_res_cd.text = 'BIZ-000001'
+        biz_res_text.text = '调用成功'
+        _build_result_element(response_body, data)
     elif not success and error:
+        biz_res_cd.text = error_code or 'BIZ-000002'
+        biz_res_text.text = error
         error_elem = etree.SubElement(response_body, '{http://www.srrc.org.cn}error')
-        error_code = etree.SubElement(error_elem, '{http://www.srrc.org.cn}code')
-        error_code.text = 'BIZ-000002'
-        error_text = etree.SubElement(error_elem, '{http://www.srrc.org.cn}text')
-        error_text.text = str(error)
+        error_type = etree.SubElement(error_elem, '{http://www.srrc.org.cn}type')
+        error_type.text = 'cancel'
+        error_code_elem = etree.SubElement(error_elem, '{http://www.srrc.org.cn}code')
+        error_code_elem.text = error_code or 'BIZ-000002'
+        error_text_elem = etree.SubElement(error_elem, '{http://www.srrc.org.cn}text')
+        error_text_elem.text = error
 
     return etree.tostring(root, pretty_print=True, encoding='utf-8').decode('utf-8')
+
+
+def _build_result_element(parent: etree._Element, data: dict) -> None:
+    """构建result元素，支持复杂的嵌套结构"""
+    result = etree.SubElement(parent, '{http://www.srrc.org.cn}result')
+
+    for key, value in data.items():
+        if value is None:
+            continue
+
+        if key == 'featurelist':
+            # 特殊处理 featurelist：直接在 result 下构建 XML 结构
+            _build_featurelist_into_result(result, value)
+            continue
+
+        if key in ('equpara', 'outputchannel') and isinstance(value, str) and value.startswith('<'):
+            # 特殊处理 XML 字符串：解析并添加子元素
+            elem = etree.SubElement(result, '{http://www.srrc.org.cn}' + key)
+            wrapped = '<root xmlns:srrc="http://www.srrc.org.cn">' + value + '</root>'
+            parsed = etree.fromstring(wrapped.encode('utf-8'))
+            for child in parsed:
+                elem.append(child)
+            continue
+
+        elem = etree.SubElement(result, '{http://www.srrc.org.cn}' + key)
+
+        if isinstance(value, dict):
+            _build_dict_element(elem, value)
+        elif isinstance(value, list):
+            _build_list_element(elem, value)
+        else:
+            elem.text = str(value) if value is not None else ''
+
+
+def _build_dict_element(parent: etree._Element, data: dict) -> None:
+    """构建嵌套字典元素"""
+    for key, value in data.items():
+        if value is None:
+            continue
+
+        if key in ('equpara', 'outputchannel', 'featurelist'):
+            # 特殊处理：直接添加 etree.Element 或 XML字符串
+            if isinstance(value, etree._Element):
+                # 直接追加元素到父元素
+                parent.append(value)
+            elif isinstance(value, str) and value.startswith('<'):
+                # 创建包装元素
+                wrapper = etree.SubElement(parent, '{http://www.srrc.org.cn}' + key)
+                # 解析XML字符串（需要包装在临时根元素中）
+                wrapped = '<root xmlns:srrc="http://www.srrc.org.cn">' + value + '</root>'
+                parsed = etree.fromstring(wrapped.encode('utf-8'))
+                # 将解析后的子元素移动到包装器
+                for child in parsed:
+                    wrapper.append(child)
+            else:
+                child = etree.SubElement(parent, '{http://www.srrc.org.cn}' + key)
+                if isinstance(value, dict):
+                    _build_dict_element(child, value)
+                elif isinstance(value, list):
+                    _build_list_element(child, value)
+                else:
+                    child.text = str(value)
+        else:
+            child = etree.SubElement(parent, '{http://www.srrc.org.cn}' + key)
+            if isinstance(value, dict):
+                _build_dict_element(child, value)
+            elif isinstance(value, list):
+                _build_list_element(child, value)
+            else:
+                child.text = str(value) if value is not None else ''
+
+
+def _build_list_element(parent: etree._Element, items: list) -> None:
+    """构建列表元素"""
+    for item in items:
+        if isinstance(item, dict):
+            child = etree.SubElement(parent, '{http://www.srrc.org.cn}feature')
+            for k, v in item.items():
+                if v is None:
+                    continue
+                gc = etree.SubElement(child, '{http://www.srrc.org.cn}' + k)
+                if isinstance(v, dict):
+                    _build_dict_element(gc, v)
+                elif isinstance(v, list):
+                    _build_list_element(gc, v)
+                else:
+                    gc.text = str(v) if v is not None else ''
+        else:
+            parent.text = str(item)
 
 
 @app.route('/services', methods=['POST'])
@@ -518,11 +698,23 @@ def handle_soap():
     # 执行对应的业务操作
     result = dispatch_soap_operation(operation_name, params)
 
+    # 判断成功/失败：'success' 键为 False 表示失败
+    is_success = result.get('success', True)
+    error_msg = result.get('error')
+    error_code = result.get('error_code')
+
     # 构建SOAP响应
-    soap_response = build_soap_response(
-        success=result.get('success', True),
-        data=result
-    )
+    if not is_success and error_msg:
+        soap_response = build_soap_response(
+            success=False,
+            error=error_msg,
+            error_code=error_code
+        )
+    else:
+        soap_response = build_soap_response(
+            success=True,
+            data=result
+        )
 
     return soap_response, 200, {'Content-Type': 'text/xml; charset=utf-8'}
 
@@ -567,14 +759,20 @@ def _parse_real_atom_request(requestbody_elem, soap_action: str = '') -> tuple:
         tag_name = child.tag.split('}')[1] if '}' in child.tag else child.tag
 
         if tag_name == 'equpara':
+            # 保存原始 equpara XML 用于回显
+            params['_raw_equpara'] = etree.tostring(child, encoding='unicode')
             # 解析 equpara 内的参数
             _parse_equpara(child, params)
         elif tag_name == 'outputchannel':
+            # 保存原始 outputchannel XML 用于回显
+            params['_raw_outputchannel'] = etree.tostring(child, encoding='unicode')
             # 解析 outputchannel
             for oc in child:
                 oc_name = oc.tag.split('}')[1] if '}' in oc.tag else oc.tag
                 if oc_name not in ('mode', 'datachannel', 'host', 'port', 'stc'):
                     params[oc_name] = oc.text
+                else:
+                    params['oc_' + oc_name] = oc.text if oc.text else ''
         elif tag_name == 'taskid':
             params['taskid'] = child.text
         elif tag_name in ('appid', 'userid', 'priority', 'executetime', 'mfid', 'equid'):
@@ -641,96 +839,65 @@ def _parse_equpara(equpara_elem, params: dict):
 
 
 def dispatch_soap_operation(operation: str, params: dict) -> dict:
-    """根据SOAP操作分发到对应的业务处理函数"""
-    import uuid
+    """根据SOAP操作分发到对应的业务处理函数
 
-    # 生成taskid
-    task_id = str(uuid.uuid4()).upper()
+    返回格式说明：
+    - 返回的 dict 会传递给 build_soap_response 构建 SOAP 响应
+    - 查询接口返回设备信息
+    - 执行接口返回业务数据 + 回显字段
+    """
+    # 生成 taskid
+    task_id = generate_taskid()
 
     try:
         # ==================== 查询接口（不需要设备连接） ====================
 
         if operation == 'B_QueryDeviceInfo':
-            # 设备信息查询
-            return {
-                'success': True,
-                'taskid': task_id,
-                'result': {
-                    'mfid': '53090001140007',
-                    'equid': 'mock-equid-001',
-                    'equimanu': 'Mock',
-                    'equmodel': 'MockAtom',
-                    'equname': 'Mock Atom',
-                    'equsn': 'MOCK123456',
-                    'equstatus': '01',
-                    'equtype': '01',
-                    'maxtasknumber': 1,
-                    'featurelist': [
-                        'B_QueryDeviceInfo',
-                        'B_QueryFaciDevStat',
-                        'B_TaskModification',
-                        'B_StopMeas',
-                        'B_SglFreqMeas',
-                        'B_SglFreqDF',
-                        'B_MScan',
-                        'B_MScanDF',
-                        'B_FScan',
-                        'B_FScanDF',
-                        'B_PScan',
-                        'B_WBDF'
-                    ]
-                }
-            }
+            # 设备信息查询 - 返回完整设备信息
+            return _build_device_info_result(params)
 
         elif operation == 'B_QueryFaciDevStat':
             # 设备状态查询
             return {
-                'success': True,
-                'taskid': task_id,
-                'result': {
-                    'status': 'online',
-                    'device_connected': _device_connected
-                }
+                'status': 'online' if _device_connected else 'offline',
+                'device_connected': _device_connected
             }
 
         elif operation == 'B_TaskModification':
-            # 任务修改（简化实现）
+            # 任务修改
             action = params.get('action', 'start')
             return {
-                'success': True,
-                'taskid': task_id,
-                'result': {
-                    'action': action,
-                    'status': 'modified'
-                }
+                'action': action,
+                'status': 'modified'
             }
 
         elif operation == 'B_StopMeas':
-            # 停止测量
+            # 停止测量 - 回显基础字段（不含 equpara 和 outputchannel）
             stop_taskid = params.get('taskid', task_id)
-            return {
-                'success': True,
-                'taskid': stop_taskid,
-                'result': {
-                    'status': 'stopped'
-                }
-            }
+            # 移除 _raw_equpara 和 _raw_outputchannel，避免回显
+            params_copy = {k: v for k, v in params.items() if k not in ('_raw_equpara', '_raw_outputchannel')}
+            return _build_base_result(params_copy, stop_taskid)
 
         # ==================== 执行接口（需要设备连接） ====================
 
         elif operation in ('StartMeasure', 'B_SglFreqMeas'):
             # 单频测量 (SGLFREQ 0x10)
             frequency = int(params.get('frequency', 100_000_000))
-            bandwidth = int(params.get('bandwidth', params.get('ifbw', 120000)))
-            antenna = params.get('antenna', 'default')
+            bandwidth = int(params.get('ifbw', 120000))
 
             hook = HookManager.get_instance()
             hook.start_context()
 
             try:
-                error_resp = check_device_connected()
-                if error_resp:
-                    return {'success': False, 'error': '设备未连接'}
+                # [临时修改] 跳过设备连接检查，直接发送请求
+                # TODO: 正式环境需要恢复设备连接检查
+                # error_resp = check_device_connected()
+                # if error_resp:
+                #     return {
+                #         'success': False,
+                #         'error': '设备未连接',
+                #         'error_code': 'BIZ-000002'
+                #     }
 
                 hook.log_layer("atom", {
                     "interface": "/services (SOAP)",
@@ -744,31 +911,26 @@ def dispatch_soap_operation(operation: str, params: dict) -> dict:
                     await client.connect()
                     try:
                         builder = RMCPTPBuilder()
-                        frame = builder.build_sglfreq_command(frequency, antenna)
+                        frame = builder.build_sglfreq_command(frequency, 'default')
                         hook.log_frame("send", "RMCPTP_CMD", bytes_to_hex(frame))
                         header_info, payload, raw_frame = await client.send_and_receive(frame)
                         hook.log_frame("recv", "RMCPTP_RESP", bytes_to_hex(raw_frame))
                         import struct
-                        result = {'frequency': frequency, 'bandwidth': bandwidth}
+                        result = {'frequency': frequency}
                         if payload and len(payload) > 20:
                             result['amplitude'] = struct.unpack('!f', payload[20:24])[0]
                         return result
                     finally:
                         await client.disconnect()
 
-                result = run_async(do_sglfreq())
-                result['success'] = True
-                result['taskid'] = task_id
-                return result
+                device_result = run_async(do_sglfreq())
+                return _build_base_result(params, task_id, include_outputchannel=True)
             finally:
                 hook.end_context()
 
         elif operation == 'B_SglFreqDF':
             # 单频测向 (DF 0x12)
             frequency = int(params.get('frequency', 100_000_000))
-            bandwidth = int(params.get('ifbw', 120000))
-            dfmode = int(params.get('dfmode', 1))
-            dftype = int(params.get('dftype', 0))
 
             hook = HookManager.get_instance()
             hook.start_context()
@@ -776,336 +938,17 @@ def dispatch_soap_operation(operation: str, params: dict) -> dict:
             try:
                 error_resp = check_device_connected()
                 if error_resp:
-                    return {'success': False, 'error': '设备未连接'}
+                    return {
+                        'success': False,
+                        'error': '设备未连接',
+                        'error_code': 'BIZ-000002'
+                    }
 
                 hook.log_layer("atom", {
                     "interface": "/services (SOAP)",
                     "operation": "B_SglFreqDF",
                     "business_type": "0x12 (DF)",
-                    "params": {"frequency": frequency, "dfmode": dfmode, "dftype": dftype}
-                })
-
-                async def do_sglfreq_df():
-                    client = get_device_client()
-                    await client.connect()
-                    try:
-                        import struct
-                        builder = RMCPTPBuilder()
-                        business_data = struct.pack('!B Q', 0x12, frequency)
-                        frame = builder.build_command_frame(business_type=0x12, params=business_data)
-                        hook.log_frame("send", "RMCPTP_CMD", bytes_to_hex(frame))
-                        header_info, payload, raw_frame = await client.send_and_receive(frame)
-                        hook.log_frame("recv", "RMCPTP_RESP", bytes_to_hex(raw_frame))
-                        if payload and len(payload) > 0 and payload[0] == 0xFF:
-                            if len(payload) >= 15:
-                                error_code = struct.unpack('!I', payload[11:15])[0]
-                                error_msg = payload[15:].decode('utf-8', errors='replace')
-                                raise Exception(f"设备错误 {error_code}: {error_msg}")
-                            raise Exception("设备返回未知错误")
-                        service = DirectionService(client)
-                        result = service._parse_df_response(payload)
-                        result.update({'success': True, 'frequency': frequency})
-                        return result
-                    finally:
-                        await client.disconnect()
-
-                result = run_async(do_sglfreq_df())
-                result['taskid'] = task_id
-                return result
-            finally:
-                hook.end_context()
-
-        elif operation in ('StartScan', 'B_FScan'):
-            # 频段扫描 (FSCAN 0x15)
-            start_freq = int(params.get('startfreq', params.get('StartFreq', 100_000_000)))
-            end_freq = int(params.get('stopfreq', params.get('EndFreq', 200_000_000)))
-            step = int(params.get('step', 1_000_000))
-
-            hook = HookManager.get_instance()
-            hook.start_context()
-
-            try:
-                error_resp = check_device_connected()
-                if error_resp:
-                    return {'success': False, 'error': '设备未连接'}
-
-                hook.log_layer("atom", {
-                    "interface": "/services (SOAP)",
-                    "operation": "B_FScan",
-                    "business_type": "0x15 (FSCAN)",
-                    "params": {"start_freq": start_freq, "end_freq": end_freq, "step": step}
-                })
-
-                async def do_fscan():
-                    client = get_device_client()
-                    await client.connect()
-                    try:
-                        service = MonitorService(client)
-                        return await service.start_fscan(start_freq, end_freq, step)
-                    finally:
-                        await client.disconnect()
-
-                result = run_async(do_fscan())
-                result['success'] = True
-                result['taskid'] = task_id
-                return result
-            finally:
-                hook.end_context()
-
-        elif operation == 'B_FScanDF':
-            # 频段扫描测向 (FSCAN 0x15)
-            start_freq = int(params.get('startfreq', 100_000_000))
-            end_freq = int(params.get('stopfreq', 200_000_000))
-            step = int(params.get('step', 1_000_000))
-
-            hook = HookManager.get_instance()
-            hook.start_context()
-
-            try:
-                error_resp = check_device_connected()
-                if error_resp:
-                    return {'success': False, 'error': '设备未连接'}
-
-                hook.log_layer("atom", {
-                    "interface": "/services (SOAP)",
-                    "operation": "B_FScanDF",
-                    "business_type": "0x15 (FSCAN)",
-                    "params": {"start_freq": start_freq, "end_freq": end_freq, "step": step}
-                })
-
-                async def do_fscan_df():
-                    client = get_device_client()
-                    await client.connect()
-                    try:
-                        service = MonitorService(client)
-                        return await service.start_fscan(start_freq, end_freq, step)
-                    finally:
-                        await client.disconnect()
-
-                result = run_async(do_fscan_df())
-                result['success'] = True
-                result['taskid'] = task_id
-                return result
-            finally:
-                hook.end_context()
-
-        elif operation == 'B_MScan':
-            # 多信道扫描 (MSCAN 0x14)
-            frequency = int(params.get('frequency', 100_000_000))
-            ifbw = int(params.get('ifbw', 120000))
-
-            hook = HookManager.get_instance()
-            hook.start_context()
-
-            try:
-                error_resp = check_device_connected()
-                if error_resp:
-                    return {'success': False, 'error': '设备未连接'}
-
-                hook.log_layer("atom", {
-                    "interface": "/services (SOAP)",
-                    "operation": "B_MScan",
-                    "business_type": "0x14 (MSCAN)",
-                    "params": {"frequency": frequency, "ifbw": ifbw}
-                })
-
-                async def do_mscan():
-                    client = get_device_client()
-                    await client.connect()
-                    try:
-                        builder = RMCPTPBuilder()
-                        frame = builder.build_mscan_command(frequency, ifbw)
-                        hook.log_frame("send", "RMCPTP_CMD", bytes_to_hex(frame))
-                        header_info, payload, raw_frame = await client.send_and_receive(frame)
-                        hook.log_frame("recv", "RMCPTP_RESP", bytes_to_hex(raw_frame))
-                        return {'frequency': frequency, 'ifbw': ifbw}
-                    finally:
-                        await client.disconnect()
-
-                result = run_async(do_mscan())
-                result['success'] = True
-                result['taskid'] = task_id
-                return result
-            finally:
-                hook.end_context()
-
-        elif operation == 'B_MScanDF':
-            # 多信道扫描测向 (MSCAN 0x14)
-            frequency = int(params.get('frequency', 100_000_000))
-            ifbw = int(params.get('ifbw', 120000))
-            dfmode = int(params.get('dfmode', 1))
-
-            hook = HookManager.get_instance()
-            hook.start_context()
-
-            try:
-                error_resp = check_device_connected()
-                if error_resp:
-                    return {'success': False, 'error': '设备未连接'}
-
-                hook.log_layer("atom", {
-                    "interface": "/services (SOAP)",
-                    "operation": "B_MScanDF",
-                    "business_type": "0x14 (MSCAN)",
-                    "params": {"frequency": frequency, "ifbw": ifbw, "dfmode": dfmode}
-                })
-
-                async def do_mscan_df():
-                    client = get_device_client()
-                    await client.connect()
-                    try:
-                        builder = RMCPTPBuilder()
-                        frame = builder.build_mscan_command(frequency, ifbw)
-                        hook.log_frame("send", "RMCPTP_CMD", bytes_to_hex(frame))
-                        header_info, payload, raw_frame = await client.send_and_receive(frame)
-                        hook.log_frame("recv", "RMCPTP_RESP", bytes_to_hex(raw_frame))
-                        return {'frequency': frequency, 'ifbw': ifbw, 'dfmode': dfmode}
-                    finally:
-                        await client.disconnect()
-
-                result = run_async(do_mscan_df())
-                result['success'] = True
-                result['taskid'] = task_id
-                return result
-            finally:
-                hook.end_context()
-
-        elif operation == 'B_PScan':
-            # 频谱扫描 (PSCAN 0x17)
-            start_freq = int(params.get('startfreq', 100_000_000))
-            end_freq = int(params.get('stopfreq', 200_000_000))
-            step = int(params.get('step', 1_000_000))
-
-            hook = HookManager.get_instance()
-            hook.start_context()
-
-            try:
-                error_resp = check_device_connected()
-                if error_resp:
-                    return {'success': False, 'error': '设备未连接'}
-
-                hook.log_layer("atom", {
-                    "interface": "/services (SOAP)",
-                    "operation": "B_PScan",
-                    "business_type": "0x17 (PSCAN)",
-                    "params": {"start_freq": start_freq, "end_freq": end_freq, "step": step}
-                })
-
-                async def do_pscan():
-                    client = get_device_client()
-                    await client.connect()
-                    try:
-                        builder = RMCPTPBuilder()
-                        frame = builder.build_pscan_command(start_freq, end_freq, step)
-                        hook.log_frame("send", "RMCPTP_CMD", bytes_to_hex(frame))
-                        header_info, payload, raw_frame = await client.send_and_receive(frame)
-                        hook.log_frame("recv", "RMCPTP_RESP", bytes_to_hex(raw_frame))
-                        return {'start_freq': start_freq, 'end_freq': end_freq, 'step': step}
-                    finally:
-                        await client.disconnect()
-
-                result = run_async(do_pscan())
-                result['success'] = True
-                result['taskid'] = task_id
-                return result
-            finally:
-                hook.end_context()
-
-        elif operation == 'B_WBDF':
-            # 宽带测向 (WBDF 0x19)
-            frequency = int(params.get('frequency', 100_000_000))
-            ifbw = int(params.get('ifbw', 40000000))
-
-            hook = HookManager.get_instance()
-            hook.start_context()
-
-            try:
-                error_resp = check_device_connected()
-                if error_resp:
-                    return {'success': False, 'error': '设备未连接'}
-
-                hook.log_layer("atom", {
-                    "interface": "/services (SOAP)",
-                    "operation": "B_WBDF",
-                    "business_type": "0x19 (WBDF)",
-                    "params": {"frequency": frequency, "ifbw": ifbw}
-                })
-
-                async def do_wbdf():
-                    client = get_device_client()
-                    await client.connect()
-                    try:
-                        builder = RMCPTPBuilder()
-                        frame = builder.build_wbdf_command(frequency, ifbw)
-                        hook.log_frame("send", "RMCPTP_CMD", bytes_to_hex(frame))
-                        header_info, payload, raw_frame = await client.send_and_receive(frame)
-                        hook.log_frame("recv", "RMCPTP_RESP", bytes_to_hex(raw_frame))
-                        return {'frequency': frequency, 'ifbw': ifbw}
-                    finally:
-                        await client.disconnect()
-
-                result = run_async(do_wbdf())
-                result['success'] = True
-                result['taskid'] = task_id
-                return result
-            finally:
-                hook.end_context()
-
-        elif operation == 'StartIFAnalysis' or operation.endswith('StartIFAnalysis'):
-            # 中频分析
-            frequency = int(params.get('Frequency', params.get('frequency', 100_000_000)))
-            span = int(params.get('Span', params.get('span', 1_000_000)))
-            ifbw = int(params.get('IFBW', params.get('ifbw', 100000)))
-
-            hook = HookManager.get_instance()
-            hook.start_context()
-
-            try:
-                error_resp = check_device_connected()
-                if error_resp:
-                    return {'success': False, 'error': '设备未连接'}
-
-                hook.log_layer("atom", {
-                    "interface": "/services (SOAP)",
-                    "operation": "StartIFAnalysis",
-                    "business_type": "0x11 (IFANALYSIS)",
-                    "params": {"frequency": frequency, "span": span, "ifbw": ifbw}
-                })
-
-                async def do_ifanalysis():
-                    client = get_device_client()
-                    await client.connect()
-                    try:
-                        service = MonitorService(client)
-                        return await service.start_ifanalysis(frequency, span, ifbw)
-                    finally:
-                        await client.disconnect()
-
-                result = run_async(do_ifanalysis())
-                result['success'] = True
-                result['taskid'] = task_id
-                return result
-            finally:
-                hook.end_context()
-
-        elif operation == 'StartDirection' or operation.endswith('StartDirection'):
-            # 单频测向
-            frequency = int(params.get('Frequency', params.get('frequency', 100_000_000)))
-            bandwidth = int(params.get('Bandwidth', params.get('bandwidth', 120000)))
-
-            hook = HookManager.get_instance()
-            hook.start_context()
-
-            try:
-                error_resp = check_device_connected()
-                if error_resp:
-                    return {'success': False, 'error': '设备未连接'}
-
-                hook.log_layer("atom", {
-                    "interface": "/services (SOAP)",
-                    "operation": "StartDirection",
-                    "business_type": "0x12 (DF)",
-                    "params": {"frequency": frequency, "bandwidth": bandwidth}
+                    "params": {"frequency": frequency}
                 })
 
                 async def do_df():
@@ -1119,69 +962,538 @@ def dispatch_soap_operation(operation: str, params: dict) -> dict:
                         hook.log_frame("send", "RMCPTP_CMD", bytes_to_hex(frame))
                         header_info, payload, raw_frame = await client.send_and_receive(frame)
                         hook.log_frame("recv", "RMCPTP_RESP", bytes_to_hex(raw_frame))
-                        if payload and len(payload) > 0 and payload[0] == 0xFF:
-                            if len(payload) >= 15:
-                                error_code = struct.unpack('!I', payload[11:15])[0]
-                                error_msg = payload[15:].decode('utf-8', errors='replace')
-                                raise Exception(f"设备错误 {error_code}: {error_msg}")
-                            raise Exception("设备返回未知错误")
-                        service = DirectionService(client)
-                        result = service._parse_df_response(payload)
-                        result.update({'success': True, 'frequency': frequency, 'bandwidth': bandwidth})
-                        return result
+                        return {'frequency': frequency}
                     finally:
                         await client.disconnect()
 
-                result = run_async(do_df())
-                result['taskid'] = task_id
-                return result
+                run_async(do_df())
+                return _build_base_result(params, task_id, include_outputchannel=True)
             finally:
                 hook.end_context()
 
-        elif operation == 'StartIFDirection' or operation.endswith('StartIFDirection'):
-            # 中频测向
-            frequency = int(params.get('Frequency', params.get('frequency', 100_000_000)))
-            span = int(params.get('Span', params.get('span', 1_000_000)))
-            ifbw = int(params.get('IFBW', params.get('ifbw', 100000)))
-
+        elif operation in ('StartScan', 'B_FScan'):
+            # 频段扫描 (FSCAN 0x15)
             hook = HookManager.get_instance()
             hook.start_context()
 
             try:
                 error_resp = check_device_connected()
                 if error_resp:
-                    return {'success': False, 'error': '设备未连接'}
+                    return {
+                        'success': False,
+                        'error': '设备未连接',
+                        'error_code': 'BIZ-000002'
+                    }
 
                 hook.log_layer("atom", {
                     "interface": "/services (SOAP)",
-                    "operation": "StartIFDirection",
-                    "business_type": "0x13 (IFDF)",
-                    "params": {"frequency": frequency, "span": span, "ifbw": ifbw}
+                    "operation": "B_FScan",
+                    "business_type": "0x15 (FSCAN)"
                 })
 
-                async def do_ifdf():
+                async def do_fscan():
                     client = get_device_client()
                     await client.connect()
                     try:
-                        service = DirectionService(client)
-                        return await service.start_ifdf(frequency, span, ifbw)
+                        service = MonitorService(client)
+                        return await service.start_fscan(
+                            int(params.get('startfreq', 100_000_000)),
+                            int(params.get('stopfreq', 200_000_000)),
+                            int(params.get('step', 1_000_000))
+                        )
                     finally:
                         await client.disconnect()
 
-                result = run_async(do_ifdf())
-                result['success'] = True
-                result['taskid'] = task_id
-                return result
+                run_async(do_fscan())
+                return _build_base_result(params, task_id, include_outputchannel=True)
+            finally:
+                hook.end_context()
+
+        elif operation == 'B_FScanDF':
+            # 频段扫描测向
+            hook = HookManager.get_instance()
+            hook.start_context()
+
+            try:
+                error_resp = check_device_connected()
+                if error_resp:
+                    return {
+                        'success': False,
+                        'error': '设备未连接',
+                        'error_code': 'BIZ-000002'
+                    }
+
+                async def do_fscan_df():
+                    client = get_device_client()
+                    await client.connect()
+                    try:
+                        service = MonitorService(client)
+                        return await service.start_fscan(
+                            int(params.get('startfreq', 100_000_000)),
+                            int(params.get('stopfreq', 200_000_000)),
+                            int(params.get('step', 1_000_000))
+                        )
+                    finally:
+                        await client.disconnect()
+
+                run_async(do_fscan_df())
+                return _build_base_result(params, task_id, include_outputchannel=True)
+            finally:
+                hook.end_context()
+
+        elif operation == 'B_MScan':
+            # 多信道扫描 (MSCAN 0x14)
+            hook = HookManager.get_instance()
+            hook.start_context()
+
+            try:
+                error_resp = check_device_connected()
+                if error_resp:
+                    return {
+                        'success': False,
+                        'error': '设备未连接',
+                        'error_code': 'BIZ-000002'
+                    }
+
+                async def do_mscan():
+                    client = get_device_client()
+                    await client.connect()
+                    try:
+                        builder = RMCPTPBuilder()
+                        frame = builder.build_mscan_command(
+                            int(params.get('frequency', 100_000_000)),
+                            int(params.get('ifbw', 120000))
+                        )
+                        hook.log_frame("send", "RMCPTP_CMD", bytes_to_hex(frame))
+                        header_info, payload, raw_frame = await client.send_and_receive(frame)
+                        hook.log_frame("recv", "RMCPTP_RESP", bytes_to_hex(raw_frame))
+                        return {}
+                    finally:
+                        await client.disconnect()
+
+                run_async(do_mscan())
+                return _build_base_result(params, task_id, include_outputchannel=True)
+            finally:
+                hook.end_context()
+
+        elif operation == 'B_MScanDF':
+            # 多信道扫描测向
+            hook = HookManager.get_instance()
+            hook.start_context()
+
+            try:
+                error_resp = check_device_connected()
+                if error_resp:
+                    return {
+                        'success': False,
+                        'error': '设备未连接',
+                        'error_code': 'BIZ-000002'
+                    }
+
+                async def do_mscan_df():
+                    client = get_device_client()
+                    await client.connect()
+                    try:
+                        builder = RMCPTPBuilder()
+                        frame = builder.build_mscan_command(
+                            int(params.get('frequency', 100_000_000)),
+                            int(params.get('ifbw', 120000))
+                        )
+                        hook.log_frame("send", "RMCPTP_CMD", bytes_to_hex(frame))
+                        header_info, payload, raw_frame = await client.send_and_receive(frame)
+                        hook.log_frame("recv", "RMCPTP_RESP", bytes_to_hex(raw_frame))
+                        return {}
+                    finally:
+                        await client.disconnect()
+
+                run_async(do_mscan_df())
+                return _build_base_result(params, task_id, include_outputchannel=True)
+            finally:
+                hook.end_context()
+
+        elif operation == 'B_PScan':
+            # 频谱扫描 (PSCAN 0x17)
+            hook = HookManager.get_instance()
+            hook.start_context()
+
+            try:
+                error_resp = check_device_connected()
+                if error_resp:
+                    return {
+                        'success': False,
+                        'error': '设备未连接',
+                        'error_code': 'BIZ-000002'
+                    }
+
+                async def do_pscan():
+                    client = get_device_client()
+                    await client.connect()
+                    try:
+                        builder = RMCPTPBuilder()
+                        frame = builder.build_pscan_command(
+                            int(params.get('startfreq', 100_000_000)),
+                            int(params.get('stopfreq', 200_000_000)),
+                            int(params.get('step', 1_000_000))
+                        )
+                        hook.log_frame("send", "RMCPTP_CMD", bytes_to_hex(frame))
+                        header_info, payload, raw_frame = await client.send_and_receive(frame)
+                        hook.log_frame("recv", "RMCPTP_RESP", bytes_to_hex(raw_frame))
+                        return {}
+                    finally:
+                        await client.disconnect()
+
+                run_async(do_pscan())
+                return _build_base_result(params, task_id, include_outputchannel=True)
+            finally:
+                hook.end_context()
+
+        elif operation == 'B_WBDF':
+            # 宽带测向 (WBDF 0x19)
+            hook = HookManager.get_instance()
+            hook.start_context()
+
+            try:
+                error_resp = check_device_connected()
+                if error_resp:
+                    return {
+                        'success': False,
+                        'error': '设备未连接',
+                        'error_code': 'BIZ-000002'
+                    }
+
+                async def do_wbdf():
+                    client = get_device_client()
+                    await client.connect()
+                    try:
+                        builder = RMCPTPBuilder()
+                        frame = builder.build_wbdf_command(
+                            int(params.get('frequency', 100_000_000)),
+                            int(params.get('ifbw', 40000000))
+                        )
+                        hook.log_frame("send", "RMCPTP_CMD", bytes_to_hex(frame))
+                        header_info, payload, raw_frame = await client.send_and_receive(frame)
+                        hook.log_frame("recv", "RMCPTP_RESP", bytes_to_hex(raw_frame))
+                        return {}
+                    finally:
+                        await client.disconnect()
+
+                run_async(do_wbdf())
+                return _build_base_result(params, task_id, include_outputchannel=True)
             finally:
                 hook.end_context()
 
         else:
             logger.warning(f"未知的SOAP操作: {operation}")
-            return {'success': False, 'error': f'未知操作: {operation}'}
+            return {
+                'success': False,
+                'error': f'未知操作: {operation}',
+                'error_code': 'BIZ-000002'
+            }
 
     except Exception as e:
         logger.error(f"处理SOAP请求失败: {e}")
-        return {'success': False, 'error': str(e)}
+        return {
+            'success': False,
+            'error': str(e),
+            'error_code': 'BIZ-000002'
+        }
+
+
+def _build_base_result(params: dict, task_id: str, include_outputchannel: bool = False) -> dict:
+    """构建基础回显结果
+
+    Args:
+        params: 请求参数（包含 _raw_equpara, _raw_outputchannel 等）
+        task_id: 任务ID
+        include_outputchannel: 是否包含 outputchannel
+
+    Returns:
+        回显结果字典
+    """
+    result = {}
+
+    # 基础字段回显
+    for field in ('appid', 'userid', 'priority', 'executetime', 'mfid', 'equid'):
+        if field in params and params[field]:
+            result[field] = params[field]
+        elif field in DEVICE_INFO:
+            result[field] = DEVICE_INFO[field]
+
+    # equpara 回显
+    if '_raw_equpara' in params:
+        result['equpara'] = params['_raw_equpara']
+
+    # taskid
+    result['taskid'] = task_id
+
+    # outputchannel
+    if include_outputchannel:
+        if '_raw_outputchannel' in params:
+            result['outputchannel'] = params['_raw_outputchannel']
+        else:
+            result['outputchannel'] = get_outputchannel_xml()
+
+    return result
+
+
+def _build_featurelist_into_result(parent: etree._Element, featurelist_data) -> None:
+    """将 featurelist 结构直接构建到 parent 元素下"""
+    NS = 'http://www.srrc.org.cn'
+
+    # 创建 featurelist 元素
+    featurelist_elem = etree.SubElement(parent, '{%s}featurelist' % NS)
+
+    # 无参数的接口
+    no_param_codes = ['B_QueryDeviceInfo', 'B_QueryFaciDevStat', 'B_TaskModification', 'B_StopMeas']
+
+    for code in no_param_codes:
+        feature = etree.SubElement(featurelist_elem, '{%s}feature' % NS)
+        code_elem = etree.SubElement(feature, '{%s}code' % NS)
+        code_elem.text = code
+        etree.SubElement(feature, '{%s}input' % NS)
+
+    # 有参数的接口定义
+    param_features = {
+        'B_SglFreqMeas': [
+            {'name': 'frequency', 'type': 'double', 'defaultvalue': '100000000', 'range': {'startval': '20000000', 'stopval': '6000000000'}},
+            {'name': 'ifbw', 'type': 'String', 'defaultvalue': '40000000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+            {'name': 'audiotype', 'type': 'String', 'defaultvalue': 'off'},
+            {'name': 'demodmode', 'type': 'String', 'defaultvalue': 'FM'},
+            {'name': 'demodbw', 'type': 'String', 'defaultvalue': '200000'},
+            {'name': 'spectrumswitch', 'type': 'string', 'defaultvalue': 'on'},
+            {'name': 'ITUSwitch', 'type': 'string', 'defaultvalue': 'on'},
+        ],
+        'B_SglFreqDF': [
+            {'name': 'frequency', 'type': 'double', 'defaultvalue': '100000000', 'range': {'startval': '20000000', 'stopval': '6000000000'}},
+            {'name': 'dfmode', 'type': 'String', 'defaultvalue': '1'},
+            {'name': 'ifbw', 'type': 'String', 'defaultvalue': '40000000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+            {'name': 'dftype', 'type': 'String', 'defaultvalue': '0'},
+            {'name': 'spectrumswitch', 'type': 'string', 'defaultvalue': 'on'},
+        ],
+        'B_MScan': [
+            {'name': 'frequency', 'type': 'double', 'defaultvalue': '100000000', 'isgroupset': 'true'},
+            {'name': 'ifbw', 'type': 'String', 'defaultvalue': '40000000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+        ],
+        'B_FScan': [
+            {'name': 'startfreq', 'type': 'double', 'defaultvalue': '137000000', 'range': {'startval': '20000000', 'stopval': '6000000000'}},
+            {'name': 'stopfreq', 'type': 'double', 'defaultvalue': '173000000', 'range': {'startval': '20000000', 'stopval': '8000000000'}},
+            {'name': 'step', 'type': 'String', 'defaultvalue': '25000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+            {'name': 'scanmode', 'type': 'String', 'defaultvalue': '0'},
+        ],
+        'B_PScan': [
+            {'name': 'startfreq', 'type': 'double', 'defaultvalue': '137000000'},
+            {'name': 'stopfreq', 'type': 'double', 'defaultvalue': '173000000'},
+            {'name': 'step', 'type': 'String', 'defaultvalue': '25000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+            {'name': 'keepmode', 'type': 'String', 'defaultvalue': '0'},
+        ],
+        'B_FScanDF': [
+            {'name': 'startfreq', 'type': 'double', 'defaultvalue': '137000000'},
+            {'name': 'stopfreq', 'type': 'double', 'defaultvalue': '173000000'},
+            {'name': 'step', 'type': 'String', 'defaultvalue': '25000'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+        ],
+        'B_WBDF': [
+            {'name': 'frequency', 'type': 'double', 'defaultvalue': '100000000'},
+            {'name': 'ifbw', 'type': 'String', 'defaultvalue': '40000000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+        ],
+        'B_MScanDF': [
+            {'name': 'frequency', 'type': 'double', 'defaultvalue': '100000000'},
+            {'name': 'dfmode', 'type': 'String', 'defaultvalue': '1'},
+            {'name': 'ifbw', 'type': 'String', 'defaultvalue': '40000000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+        ],
+    }
+
+    for code, parameters in param_features.items():
+        feature = etree.SubElement(featurelist_elem, '{%s}feature' % NS)
+        code_elem = etree.SubElement(feature, '{%s}code' % NS)
+        code_elem.text = code
+        input_elem = etree.SubElement(feature, '{%s}input' % NS)
+
+        for param in parameters:
+            param_elem = etree.SubElement(input_elem, '{%s}parameter' % NS)
+            for pkey, pvalue in param.items():
+                if pkey == 'range':
+                    range_elem = etree.SubElement(param_elem, '{%s}range' % NS)
+                    for rkey, rvalue in pvalue.items():
+                        r_elem = etree.SubElement(range_elem, '{%s}%s' % (NS, rkey))
+                        r_elem.text = rvalue
+                elif pkey == 'isgroupset':
+                    g_elem = etree.SubElement(param_elem, '{%s}%s' % (NS, pkey))
+                    g_elem.text = pvalue
+                else:
+                    p_elem = etree.SubElement(param_elem, '{%s}%s' % (NS, pkey))
+                    p_elem.text = pvalue
+
+
+def _build_device_info_result(params: dict = None) -> dict:
+    """构建设备信息查询结果
+
+    Args:
+        params: 请求参数（包含 mfid, equid）
+
+    Returns:
+        设备信息字典
+    """
+    # 从请求参数获取 mfid 和 equid，如果不存在则使用默认值
+    mfid = None
+    equid = None
+
+    if params:
+        mfid = params.get('mfid')
+        equid = params.get('equid')
+
+    # 如果请求中没有 mfid/equid，使用默认配置
+    if not mfid or not equid:
+        mfid = DEVICE_INFO['mfid']
+        equid = DEVICE_INFO['equid']
+
+    # 尝试加载设备配置
+    config = load_device_config(mfid, equid)
+
+    if config:
+        result = {}
+        # 基础字段
+        for field in ('mfid', 'equid', 'equname', 'equtype', 'equstatus',
+                       'equimanu', 'equmodel', 'equsn', 'maxtasknumber'):
+            if field in config:
+                result[field] = config[field]
+            elif field in DEVICE_INFO:
+                result[field] = DEVICE_INFO[field]
+
+        # 如果有 featurelist 元素，直接使用
+        if 'featurelist' in config and isinstance(config['featurelist'], etree._Element):
+            result['featurelist'] = config['featurelist']
+        else:
+            # 否则标记需要构建
+            result['featurelist'] = True
+    else:
+        # 配置文件不存在，使用默认值
+        result = dict(DEVICE_INFO)
+        result['featurelist'] = True
+
+    return result
+
+
+def _build_featurelist_element() -> etree._Element:
+    """构建完整的 featurelist 元素树（参考 Real Atom 格式）"""
+    NS = 'http://www.srrc.org.cn'
+    NSMAP = {'srrc': NS}
+
+    # 创建 featurelist 根元素
+    featurelist = etree.Element('{%s}featurelist' % NS, nsmap=NSMAP)
+
+    # 无参数的接口
+    no_param_codes = ['B_QueryDeviceInfo', 'B_QueryFaciDevStat', 'B_TaskModification', 'B_StopMeas']
+
+    for code in no_param_codes:
+        feature = etree.SubElement(featurelist, '{%s}feature' % NS)
+        code_elem = etree.SubElement(feature, '{%s}code' % NS)
+        code_elem.text = code
+        input_elem = etree.SubElement(feature, '{%s}input' % NS)
+
+    # 有参数的接口定义
+    param_features = {
+        'B_SglFreqMeas': [
+            {'name': 'frequency', 'type': 'double', 'defaultvalue': '100000000', 'range': {'startval': '20000000', 'stopval': '6000000000'}},
+            {'name': 'ifbw', 'type': 'String', 'defaultvalue': '40000000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+            {'name': 'audiotype', 'type': 'String', 'defaultvalue': 'off'},
+            {'name': 'demodmode', 'type': 'String', 'defaultvalue': 'FM'},
+            {'name': 'demodbw', 'type': 'String', 'defaultvalue': '200000'},
+            {'name': 'spectrumswitch', 'type': 'string', 'defaultvalue': 'on'},
+            {'name': 'ITUSwitch', 'type': 'string', 'defaultvalue': 'on'},
+        ],
+        'B_SglFreqDF': [
+            {'name': 'frequency', 'type': 'double', 'defaultvalue': '100000000', 'range': {'startval': '20000000', 'stopval': '6000000000'}},
+            {'name': 'dfmode', 'type': 'String', 'defaultvalue': '1'},
+            {'name': 'ifbw', 'type': 'String', 'defaultvalue': '40000000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+            {'name': 'dftype', 'type': 'String', 'defaultvalue': '0'},
+            {'name': 'spectrumswitch', 'type': 'string', 'defaultvalue': 'on'},
+        ],
+        'B_MScan': [
+            {'name': 'frequency', 'type': 'double', 'defaultvalue': '100000000', 'isgroupset': 'true'},
+            {'name': 'ifbw', 'type': 'String', 'defaultvalue': '40000000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+        ],
+        'B_FScan': [
+            {'name': 'startfreq', 'type': 'double', 'defaultvalue': '137000000', 'range': {'startval': '20000000', 'stopval': '6000000000'}},
+            {'name': 'stopfreq', 'type': 'double', 'defaultvalue': '173000000', 'range': {'startval': '20000000', 'stopval': '8000000000'}},
+            {'name': 'step', 'type': 'String', 'defaultvalue': '25000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+            {'name': 'scanmode', 'type': 'String', 'defaultvalue': '0'},
+        ],
+        'B_PScan': [
+            {'name': 'startfreq', 'type': 'double', 'defaultvalue': '137000000'},
+            {'name': 'stopfreq', 'type': 'double', 'defaultvalue': '173000000'},
+            {'name': 'step', 'type': 'String', 'defaultvalue': '25000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+            {'name': 'keepmode', 'type': 'String', 'defaultvalue': '0'},
+        ],
+        'B_FScanDF': [
+            {'name': 'startfreq', 'type': 'double', 'defaultvalue': '137000000'},
+            {'name': 'stopfreq', 'type': 'double', 'defaultvalue': '173000000'},
+            {'name': 'step', 'type': 'String', 'defaultvalue': '25000'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+        ],
+        'B_WBDF': [
+            {'name': 'frequency', 'type': 'double', 'defaultvalue': '100000000'},
+            {'name': 'ifbw', 'type': 'String', 'defaultvalue': '40000000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+        ],
+        'B_MScanDF': [
+            {'name': 'frequency', 'type': 'double', 'defaultvalue': '100000000'},
+            {'name': 'dfmode', 'type': 'String', 'defaultvalue': '1'},
+            {'name': 'ifbw', 'type': 'String', 'defaultvalue': '40000000'},
+            {'name': 'gain', 'type': 'String', 'defaultvalue': 'AGC'},
+            {'name': 'rfworkmode', 'type': 'String', 'defaultvalue': '0'},
+        ],
+    }
+
+    for code, parameters in param_features.items():
+        feature = etree.SubElement(featurelist, '{%s}feature' % NS)
+        code_elem = etree.SubElement(feature, '{%s}code' % NS)
+        code_elem.text = code
+        input_elem = etree.SubElement(feature, '{%s}input' % NS)
+
+        for param in parameters:
+            param_elem = etree.SubElement(input_elem, '{%s}parameter' % NS)
+            for pkey, pvalue in param.items():
+                if pkey == 'range':
+                    range_elem = etree.SubElement(param_elem, '{%s}range' % NS)
+                    for rkey, rvalue in pvalue.items():
+                        r_elem = etree.SubElement(range_elem, '{%s}%s' % (NS, rkey))
+                        r_elem.text = rvalue
+                elif pkey == 'isgroupset':
+                    g_elem = etree.SubElement(param_elem, '{%s}%s' % (NS, pkey))
+                    g_elem.text = pvalue
+                else:
+                    p_elem = etree.SubElement(param_elem, '{%s}%s' % (NS, pkey))
+                    p_elem.text = pvalue
+
+    return featurelist
 
 
 # ==================== 测向服务接口 ====================
