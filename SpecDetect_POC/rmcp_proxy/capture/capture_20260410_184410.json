@@ -1,0 +1,514 @@
+[
+  {
+    "timestamp": "2026-04-10 18:44:20.583",
+    "direction": "C->S",
+    "src": "127.0.0.1",
+    "src_port": 7050,
+    "size": 699,
+    "hex": "bb02000050010a0b1ac9dc0100075a01f4253c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d2267623233313222203f3e0a3c616374696f6e2069643d2231223e0a202020203c706172616d657465722067726f7570733d2231222073746174696f6e69643d223533303930303031222064657669636569643d22303031303622206465766963656e616d653d224d53383435222066756e6369643d223135223e0a20202020202020203c67726f757020696e6465783d2230223e0a2020202020202020202020203c6974656d206e616d653d22737461727466726571222076616c75653d223133374d487a22202f3e0a2020202020202020202020203c6974656d206e616d653d2273746f7066726571222076616c75653d223137334d487a22202f3e0a2020202020202020202020203c6974656d206e616d653d2273746570222076616c75653d2232356b487a22202f3e0a2020202020202020202020203c6974656d206e616d653d226761696e6374726c222076616c75653d2241474322202f3e0a2020202020202020202020203c6974656d206e616d653d227266776f726b6d6f6465222076616c75653d223022202f3e0a2020202020202020202020203c6974656d206e616d653d227363616e6d6f6465222076616c75653d223022202f3e0a2020202020202020202020203c6974656d206e616d653d22616e74706f6c222076616c75653d22b4b9d6b122202f3e0a2020202020202020202020203c6974656d206e616d653d22616e746574797065222076616c75653d224f464622202f3e0a2020202020202020202020203c6974656d206e616d653d226966617474222076616c75653d223022202f3e0a20202020202020203c2f67726f75703e0a202020203c2f706172616d657465723e0a202020203c6f746865725f706172616d202f3e0a3c2f616374696f6e3e00",
+    "header": {
+      "dwLength": 699,
+      "nVersion": 7,
+      "nMsgType": 90,
+      "nMsgTypeName": "REQUEST",
+      "nFlags": 1,
+      "nCheckSum": 9716,
+      "timestamp": "2026-04-11 02:44:20.581"
+    },
+    "data_type": "XML_REQUEST",
+    "xml_content": "<?xml version=\"1.0\" encoding=\"gb2312\" ?>\n<action id=\"1\">\n    <parameter groups=\"1\" stationid=\"53090001\" deviceid=\"00106\" devicename=\"MS845\" funcid=\"15\">\n        <group index=\"0\">\n            <item name=\"startfreq\" value=\"137MHz\" />\n            <item name=\"stopfreq\" value=\"173MHz\" />\n            <item name=\"step\" value=\"25kHz\" />\n            <item name=\"gainctrl\" value=\"AGC\" />\n            <item name=\"rfworkmode\" value=\"0\" />\n            <item name=\"scanmode\" value=\"0\" />\n            <item name=\""
+  },
+  {
+    "timestamp": "2026-04-10 18:44:20.586",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 51,
+    "hex": "33000000907837851ac9dc01000706000e370f0100000040742a080000000040c54f0a00000000a861000000000000a1050000",
+    "header": {
+      "dwLength": 51,
+      "nVersion": 7,
+      "nMsgType": 6,
+      "nMsgTypeName": "RESPONSE",
+      "nFlags": 0,
+      "nCheckSum": 14094,
+      "timestamp": "2026-04-11 02:47:45.561"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:20.870",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d04000010a364851ac9dc010007000177080f0100000200000000000083fdaafdf8fd31fdb8fde9fde6fd30feabfdfbfc70fdf3fc2ffd55fd44fe86fd29fe1efd47fd18fd06fd85fd71fd38febffd34fda1fcfffd88fd94fd53fd38fdacfcdafc3ffdcffc47fda2fdf0fd8bfda7fdebfd4bfd7bfc67fda4fd1bfd3afe05fe91fed3fdbdfdf2fd2dfe5bfe84feaffd4cfe3afd59fc89fcdbfd9efd4bfd3bfed1fd57fd6bfd35fd4dfd80fdd4fd6afd21fd4ffe4bfd95fdacfcfdfd61feaafd99fdf1fc61fd14febcfdb4fd68fd20fefafd31fd47fd44fd82fd01fee1fc9ffda6fd60fd1afd2cfdfefda0fddbfd15fed4fd3efd23fd3efed2fdc4fd83fdd3fd9cfcf5fda1fd82fdb2fc5dfe85fdb1fdd5fd4dfd3cfd41fd6bfdb8fdbefdb4fd5bfd7ffc81fd8cfcf6fc5ffd8cfdb0fd53fdbefd82fd21fdb7fd49fefbfdbafd8dfd16fd86fd89fd1afd0efd25fdb6fe93fdcefd5efdcafcedfd3cfdd9fd13fea3fc56fe1ffd6efd74fc1efdeefc1dfdcdfd32fd47fd83fc62fd8efdfbfcfcfdc7fd65fca6fd56fd0afd71fd6efdf4fd54fcf4fc37fda9fce5fc67fdbcfd73fd3afd7dfd75fde7fba1fd7cfd09fe54fda0fde8fc67fd2bfdacfd80fd8afd64fd8efd8ffd48fd8efd38fe83fd20fde1fd76fda3fd76fdc4fdeffc26fdfafd6efda4fd3dfd08fd89fc5efdb5fd9efcdbfc36fd9dfceefde1fdcffd1cfd4bfebbfda1fd19fd24fd20fc5cfda1fd55fd6ffe05fe90fdfefde3fc23fed8fde1fddffd1afed5fd4bfde2fd9cfd9dfd95fdf6fda4fd33fd74fd43fdebfc8bfd7dfdb4fd00fd6efcd9fda8fc40fd7ffc38fdfafc39fde9fc17fd18fdeefc34fd63fe12fe12fef3fd1cfd62fd0dfea8fd88fd55fd3bfe29fc2cfd22fd95fd46fed7fdd0fd7afcddfd82fdfdfc4efd3bfd2dfdabfd8cfda3fdd9fc49fdccfda0fc49fe31fdb6fd8bfd96fd06fd45fd9ffd2dfefffccdfde2fda0fcaafd08fe4dfdecfd7efe7afd15fdd6fcc1fc32fddafce5fd95fe9ffdc1fdc7fc74fdf1fd76fd93fc65fd28fea2fda9fb29fd3cfd7dfdc9fdbbfdf8fc93fd8bfdf5fc1ffd03fd16fe35fe9dfd6ffd83fcb8fdbbfdcdfd28fe5ffd49fd54fd9dfdb7fc81fdf4fd45fe12fe08fe52fd80fc94fdccfdfbfcd6fc18fdcefda0fd71fcc4fdf7fce9fca2fd2efec3fddafd4efd38fd02fdeffc91fdf7fc7cfdc4fca7fc0cfd60fddbfdb1fddefdfffd72fd7ffdf5fc70fdd9fc2dfe3cfe6afdd0fceefcebfce3fc81fd53fef4fc77fd84fd6ffd25fc25fd91fd85fde5fd72fd67fd63fda9fc1bfe1bfd54fd3ffe1cfd9cfd73fd00fed3fc9ffdd9fd34fd52fda9fd89fda8fcbefd0afdddfc86fd40fd72fd20fd2cfdfdfc3ffe2cfe5cfd0bfe78fdacfc4bfd88fd55fe1dfdf1fd00fe78fd93fdecfc36fde4fd94fdc5fd75fcf6fcbbfc09fdf8fde6fd07fee9fdd3fd9efd23fd4afd7cfdebfdabfd41fdf9fcb9fd10fde2fc6efd07fea1fd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 2167,
+      "timestamp": "2026-04-11 02:47:45.857"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:21.012",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d040000e0267a851ac9dc010007000191840f0100000200000002000054fd36fdd5fd77fdcafdd2fd2cfe28fedbfd16fddefdf2fc23fd6afd0ffd81fde7fda7fd00fd1afd5dfd76fcaafd71fd1cfecbfd8bfd32fdbffcf1fc5afd1efdcbfd75fd0cfdb7fd81fdfdfc39fd97fe5dfe56fdb4fcc6fde5fc51fd2afda1fdb7fdb5fd93fdb1fde0fc6afd02fde2fd36fd5bfdeafc3ffc49fc89fd9dfd60fde6fc1bfda9fd7dfd6dfcfbfc26fd32fe58fd0efd30fdf7fc44fdc5fc8dfd4dfde8fd4cfdcefd5ffd7afd89fd42fd56fd0dfe86fd51fd55fc8dfc79fc01fe86fd32fd88fdc4fc62fdaafce6fc62fd72fd82fdd6fc5ffd1dfdd1fc41fea4fd87fc21fe89fd25fca2fca6fc22fed2fe3afe3efed5fdc9fc9ffcdbfc5afd89fd78fcf9fcd1fde3fc4afd23fdc9fc50fdf2fdc5fd0efe98fc3dfd18fdb1fcf5fce0fda3fd6ffd86fd87fcecfc6bfd7bfd80fd53fdbbfcdcfc0cfef1fc21fd79fd18fdfefd5afda5fd6efd44fd24fd7afd8ffdf1fd69fdd1fdabfcdafc58fd90fda7fd07fdb6fde4fd16fde8fc93fd24fe18fe21fd6ffccffcf8fc75fd35fd55fd2afd2bfd36fd0afef4fdeefc3bfd7dfd09fdd2fd84fdcbfc5ffd12fda8fc7efde2fdd5fcfcfc9bfd70fdfffcdcfda0fd38fe68fdb6fd4dfd7bfd57fc7bfd31fdc8fd86fd6efd69fce9fc51fdb0fdb5fd35fd27fd6bfd27fdfafc22fdaffc90fd22fe3dfea8fc79fd9ffc56fdd0fd8efda3fd5dfd60fd8ffdbffc53fdbdfd50fe71fd04fd46fd9efd86fca1fc32fd73fdc9fd59fdd1fc3efd12fd6dfd85fd0afd6afdeffc69fd68fdfafd95fcccfd39fd4afe66fd25fd1efdbffdcefc82fd1dfea5fd14fe82fda0fd1bfd6cfdedfc03fe7ffd39fd5ffd57fd80fdedfc27fdaafd94fd8cfd06fdebfc83fbebfcd2fd90fd49feecfdcffd70fdc9fcf8fdbbfc12fe6dfd22fdf9fc4dfdb4fcadfd7bfd84fdf1fcd8fdb0fccefd10fdecfc86fde8fcd0fc67fd1dfdb7fc02fd98fd70fc4bfdb0fd5ffd56fd5ffd8afc14fcaafddefcfbfd5afd4ffdbcfc63fd56fd4ffd43fd4afdbdfd58fd13fdcefd8efd3afd7cfd3bfda6fe5bfd52fd3bfde9fcebfc11fec1fd2afeddfd30fd08fd7afc0cfdb1fd2dfdd7fdc0fcb4fd62fd5afde1fc98fd8afdbffd88fc8afd1cfd2ffdbffc85fd7bfda5fd47fd1dfda6fc19fdc8fcdcfd2afe5efd77fd84fddefc5cfdcffd4efdb9fd95fd37fd41fd53fdb9fd2dfd0afe66fd52fd56fdb4fd71fd4bfd5dfd0bfdf0fde2fd3cfdc7fcb2fc91fc49fdaefd90fdebfd20feedfd22fd33fdbdfde4fd12fda1feacfd3efd54fd9bfd18feabfd58fe93fd5efd94fd02fdbffc9cfdcdfc8dfd81fd41fd42fdc1fcd8fc34fd9afc56fd39fd1bfe4cfd70fd3cfd8dfdd9fd13feacfde4fdc1fcb0fcdcfd31fdfcfc06fd68fd13fec9fd38fcc4fde5fd37fd5dfec0fd7efdbbfd61fd49fd34fd86fe73fe1bfe5dfe16fddefd2afda7fd8cfdb1fd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 33937,
+      "timestamp": "2026-04-11 02:47:45.998"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:21.121",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 863,
+    "hex": "5f030000b0c88a851ac9dc01000700016ee30f0100a10100000004000048fee9fd87fcecfc6bfdfbfc91fde5fd94fdc1fd0ffc4ffd33fcaefd3dfd54feaffdcffcccfd1bfda9fd1bfd6bfdabfd91fd3ffdf2fd67fd6ffd4ffd47fdd6fd7ffda1fdfcfcb0fc3ffdf1fc04fe1afe4cfe6afdbefcb2fc7cfdb3fd9efdddfdabfdc9fdd2fc1dfddefc09fd2afee1fca0fddbfe95fd79fda8fdb9fdc1fdd2fd60fd1dfd23feddfc5afd7bfdaefd34fe0bfd7afdadfd3ffd46fd13fd9cfd1efe8ffd80fc5ffde2fd54fdc8fd11fdd9fda7fd88fd08fdedfcdefc04fd58fed5fd93fdbcfc52fd9efcb4fce7fca1fdeffde3fd4ffdc6fc94fc37fdc5fd82fd75fd4efd6bfd96fd17fd49fd09fe4ffd68fdf0fd7ffd91fd4efdadfc81fd36fef4fcf5fdeafd8efd12fd18fd75fdbafd26fe12fe06fde3fd99fd8afdf4fcfefd0dfd65fd5cfd7afdadfcacfdaafdf1fc1efe02fec7fd37fdc0fd27fdaffd2efed3fd77fd0efe42fea2fca0fde9fd28fd13fe50fd42fdcefd63fc80fd90fd64fd1cfe35fd62fd47fdd6fca9fc09fe0efddefdd7fc0dfe40fe18fd51fd35fd41fdd3fd32feabfd32fd53fd42fd79fd96fd07fde0fd65fda1fd8cfdc3fc33fd68fd21fe92fda8fc26fd14fdbcfc83fdedfcb7fdb6fd77fe07fd73fd2ffd08fd9dfd27fee4fd8ffd49fd67fdd0fcd4fdb8fdd9fd6bfdcafdaafd42fdd0fdf9fddbfc73fed5fd7bfdcbfc71fdcffc9dfd8ffdfbfdbffdaffd27fdfbfc24fd39fd78fd97fd51fe79fd4cfd60fda4fda1fd5ffd3afd27fde5fc1bfd0ffd45fde8fc20fd0efdccfd47fd5afdeefcb5fdb0fdeffcc5fdcbfdbdfd89fd07fdb3fdb9fd88fdb5fdfcfc42fd98fd3bfd2afd74fc1cfd16fe6ffeb9fdc1fc1afdc3fd5cfd37fdcffd1dfe72fd58fd38fdd6fb87fd26fd46feb6fdcafdcefd2ffdabfd9dfdfcfd40fdeafd78fc34fd89fd7cfd45fd7ffd1afec5fd41fd3bfef6fc4bfda9fdddfdedfd14fe9efd00fe6efd94fdcbfda8fd3bfdc6fdfdfdd9fcd5fcccfde4fc46fdaefd85fd5ffda0fd6afdabfde3fcbefd74fdf1fcd5fdc0fd12fdebfde1fca9fdd8fe69fe6ffdb0fd2dfdd4fd1cfe9efe7ffd82fd9bfd6afd1afd0ffd3cfd22fdc7fdbcfd7ffdc3fd0dfd1bfc48fdf6fd74fd99fdfdfd9dfd85fc71fc53fd81fdc7fd52fec6fc63fd4afdf8fcc2fdfcfc06fe69fdb3fd13fdf4fca3fce0fd45fdf8fdfcfd",
+    "header": {
+      "dwLength": 863,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 58222,
+      "timestamp": "2026-04-11 02:47:46.107"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:21.230",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d040000806a9b851ac9dc0100070001d0400f010000020000000000008efd93fd9dfde9fcd5fc9ffddbfdf1fdb2fdbafd69fd77fd2ffd5dfd69fd76fd22fed5fdcffdf4fc45fdc7fc82fda4fd88fdbffd5afea4fdd2fb61fd7dfd6cfd28fee7fceafcfefc32fd40fdbcfdcafdecfd0ffdd3fcdefc5afd24fd7dfd43fe35fefbfc4efd0efd5efd3ffd02fe04fd91fc0cfeeffcebfc4cfd48fde7fdd2fdc1fdccfce0fd41fd7ffc2cfdb7fee9fdc1fdf0fc19fd09fdc9fc09fe11fdcefd41fd34fda5fc29fdd2fcc4fca1fda9fd57fdfdfd78fdc4fc4bfd72fd78fd2cfe86fd65fe3ffd20fd0ffdb9fd0efeb1fe9cfd62fd30fdc3fc80fd2cfdccfd57fdc6fd53fe36fdbefc93fda1fdc9fd09fe72fd42fd53fd85fc89fdddfd3cfd18fd7afd13fdfafdb6fdb0fcc0fc42fe7efd4afd08fee7fd09fdd7fc68fd7dfdeafd78fdc9fd84fc17fd4bfd02fd46fe35fe7bfde3fd8ffc6bfc05fda7fd6efd56fdacfd91fdb0fc5afd8dfc84fdb5fde5fde4fd28fed8fc48fd33fd86fdf4fd3afea5fd95fd8afd05fdc0fc22fd4dfda8fd92fd13fd95fd1bfd94fddefccffd7efddefd32fecffd9dfdd9fc98fd55fd26fe1cfd1efd8ffd79fdaafc72fdaefcdafd22fedefc7dfd05fd59fd62fd66fda9fd1dfd82fd5bfd7ffcdbfc62fd42fe36fe46fe8bfd72fcfffc2cfd06fe68fd4bfdabfd3cfd13fd3cfd60fde2fc76fd7bfd84fd39fd4dfc18fd8cfd86fd6ffe82fee5fdccfd4bfe52fd74fd4bfd67fdcefd23fec4fd5efd4ffcd8fc1efe58fdebfd40fe63fd8bfd36fd5dfd39fdb2fd7afe85fd72fdecfcb5fdf5fcc4fcc2fd05febffdccfd02fd1ffd15fd40fcd9fd16fd82fd66fd66fd17fd2afd3cfdf9fd2afec2fdb2fd45fd86fc64fd0afeeffd71fd23fe1efe44fd97fd5dfcf2fcc9fd41fe80fdd5fda7fd19fd65fd66fdeffc69fe29fea4fde7fc2dfd41fd53fd12fe96fd79fd19fea7fd0ffd5efd10fdc3fd6cfdc2fdfdfc33fd36fd72fd2dfebefdfcfd16fe6bfd2ffd48fd57fd38fda3fd62fdb9fde2fdfdfd7bfc11fdd9fd03fd85fd0dfd1efdf1fc00feb2fc79fd66fd1bfd7bfd30fe1afdeafd98fd0cfe4bfd52fd1bfd59fd39fef2fc18fd49fdf9fc13fd05fe49fdc3fd9ffdeafd41fd71fdb1fda3fd25fdcbfd01fd37fd54fc96fd7cfd55fde1fc1efec5fd9efdbbfd52fc7efdf3fdc4fd9cfd39fc2efd7bfd37fdc7fd33fdfbfc3afeb9fc67fd91fd60fdf4fdd5fd4dfda2fd1bfddcfce5fd14fe93fd42fdb4fdcdfd55fd6efd68fdf5fc8afd7ffdc3fd5ffd28fd0bfdd6fcf9fc2bfe67fda0fdf0fc0afd7afc20fd96fde7fd7bfd49fdacfc3cfde2fc89fc04fd9efd63fd25feeffc1ffd44fd7afd9ffdcafdedfc4afd98fd86fde1fd8efe02fd87fdf1fde9fc2bfd1afdc5fcadfd40fd81fe7ffc54fd29fdc8fd41fdc9fcd0fdf1fdddfd7bfcc1fc0bfdb4fd95fc9efd20fd40fdc2fdc8fc92fd83fd34fd12fde4fd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 16592,
+      "timestamp": "2026-04-11 02:47:46.216"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:21.354",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d040000507dae851ac9dc0100070001ed2d0f010000020000000200001afe82fddefc41fcf7fc7bfd27fd32fd48fd12fdcbfdf6fc67fcdafcc2fdc3fdfcfd90fd63fdb2fde7fc8dfd83fd12fe9bfd07fd37fdf8fc61fd9afd60fd25fdc0fd78fddefd9dfd26fd88fc8dfd96fd11fe71fdf6fcf2fc21fd76fd09fef5fde1fc18fe83fc14fd76fd11fd09fe75fd9efdfffc40fd5efd86fd2cfd68fd2bfe33fe5ffdd6fc9ffdb6fcecfce0fc6efd0afe55fd53fd91fdb3fdedfde5fd80fd3dfe64fd75fd5dfdc1fcf9fc8cfc2efdecfd26fd57fd2bfd60fd8bfdf2fd47fdb1fd9efd48fd6dfd53fd53fd6efd7cfd94fd64fd1ffd39fd39fd89fdbdfcd8fd16fe01fe7cfdf6fc8cfd85fdf6fd89fec6fdfefd7ffd49fd72fd55fd44fd8bfd62fdc1fd8cfdbefc07fd5afc59fd97fdcdfd58fc59fd14fdccfccdfd93fd6dfe7afd26fd5ffd74fdcffc6cfd8efd14fdcdfd28fde3fc2dfce1fc5afd2bfdcafcc6fd42fe35fd8bfc28fd87fd9efd99fd99fd39fd39fd7ffdb2fdfdfc32fe3ffdbcfcf7fc08feaefd90fd10fde5fc60fd5bfd26fde2fd89fcfbfc90fd50fd76fce9fc45fdebfd98fcaffcfdfc51fdeffc40fe08fdfffd65fdd5fc44fdd3fdecfd9dfdedfc7dfd2afd0ffde5fdb6fdddfd3ffe32fdfdfce8fc2cfdf9fc84fdf6fd7efd67fd4ffd04fdaafc22fdf9fc60fc8ffd33fd6efd81fd85fc2cfd19fef5fd7afd56fd3dfdb7fde3fcd8fc03fd90fd1cfd6efdc8fc2dfd97fc44fd91fd45fd1efe82fd35fdd6fc04fd3ffd0cfd9ffd27fdadfc82fd61fd47fd35fd07fd61fd2dfdcdfc31fd69fdddfc3dfda1fd1ffd2afed3fcc8fd1cfd9bfc04fd37fd6afdc3fcb3fde1fc3ffd1afd9dfddcfd07fd03fe19fd6dfdb2fc45fd46fee5fc60fd77fdc1fdb0fd42fd86fc5bfdfffc0afe01fe7efd8ffdd7fc1afd84fdd5fd0bfe99fca5fc6dfdf3fcf7fc24fdcffd0dfde2fdd0fd41fcb2fcb7fd07feb5fc71fd3dfdf7fd75fc67fd2cfd21fdd4fd52fdc2fce1fc4efd38fd9cfcd2fd40fde9fd37fde6fc02fec0fd79fd69fd95fd88fd3efe00fdccfda5fc70fdd0fc84fd48fd7cfe83fd74fd98fd2bfd2efdfdfc12fedffdcffc70fdc6fc16fddffc7cfd83fd99fd01fdc3fcf1fc0bfda9fdfffc91fd9efd02fd51fd05fdaafcd1fc67fd68fd50fda3fd10fd33fd20fd73fd6ffd56fefffcbafd2cfe7cfd7afd09fdb4fd8afd9cfd7afd63fdb1fd8afdeffd92fd34fddefd60fde1fdb1fc22fc5ffdbffd30fe3efd47fd45fd49fd6dfd80fdb9fd5ffea1fd99fd0ffdfcfce3fc0efd8efd41fd1afe7ffd0bfd52fd09fd50fdb1fdeafcc4fd58fd5ffddefd24fdc1fd90fc79fd95fdb7fd63fd1ffd9dfd9dfde9fd41fd8afd76fdbffde1fdd6fc87fdaefda1fd70fdddfd4ffd4bfd9afd9dfd55fd2afe2cfde6fd90fd22fd4cfd48fd67fc74fd5afe7bfdd5fd06fd6bfd3dfe69fe31ffcafe79fdd2fe42fd46fcdbfc2dfdbafd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 11757,
+      "timestamp": "2026-04-11 02:47:46.341"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:21.466",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 863,
+    "hex": "5f030000201fbf851ac9dc0100070001ca8c0f0100a101000000040000e1fc9efde9fb86fc85fd6dfd66fe7ffe54fd74fda4fd81fce1fc1ffe34fd98fd02fe3efdc2fd41fc26fd2ffd82fdc2fd81fc61fdccfd50fd65fd62fdc1fda3fd65fdebfd88fc89fcb3fcd4fc52fdbbfd68fe02fdf6fd0bfd53fd89fd0ffdedfd29fd08fde0fc87fca9fd45fd39fd0ffe33fd2dfd29fd3afd95fdbefc21fd75fdeffdf9fd28fda7fc0efd3dfdf0fdfdfd94fd2efd6efd3efd5dfd25fd49fd81fd93fdcefd75fd38fdfefccdfcb5fcc0fd31fe39fdf4fd72fdfffceefd54fe8ffd52fdc3fd1dfeb6fcc1fc80fd1afd97fd51fd6efd28fd69fd48fdeffcc9fd9ffdc8fd6efdcbfd7ffd29fd0dfd8afd8efd0afea4fd46fd6afd9dfdf7fda4fd74fd54fd07fe21fdf8fc98fcd3fd2cfd79fd4afd89fd24fd41fd9efddcfd5bfe58fd4cfe23fdfefdbdfc7bfcb6fde3fd11fd8cfdcffdfbfc98fd91fcdffcbefd77fe5ffd26fdc3fce8fc54fd10fe8bfdd6fd35fe59fd9bfd42fdd5fc62fdb7fd13fe36fedafde8fdbafcb6fd72fd3efdccfd17fd47fdccfdbafdf8fc2bfd14fdc1fd78fefdfcadfd5afc13fdbcfd90fccffd6bfdcefd94fd24fd05fcd5fce2fdaffd2afda5fd19fed7fdeffc35fee8fda9fdd6fd38fda1fd58fdaffdcefcfbfdb1fd6dfde1fc48fcf1fd9dfd53fdaffdaefd2bfea1fd13fda8fd0efd3efd70fd03fea8fdadfdb5fd46fdf5fcf4fda0fc61fe78fd04fdfffc8ffd6efdb1fd53fd02feeefca6fd69fd83fdc2fdccfdc9fd77fd78fd68fd75fd52fdf3fc1efdb0fdb2fd9afd29fe7bfd6dfd2cfd2bfeb9fd1afd4dfe8afc22fe0cfd3ffdcdfd45fdf8fd06fd27fdcdfd90fcb0fc50fdb4fdb9fdb5fd00fe52fd9ffc55fe0efe66fd84fd7efd33fdc8fdbdfdb9fd1bfd23fe09fd8dfdd2fd7afd5dfdfdfc08fe2efdd5fd70fd5cfddefd02fd09fd2bfd31fe14fd6ffda8fdb2fd18fd76fc34fef2fc7efd89fe42fd95fde4fcfcfcc6fd2cfd14fe0dfe24fdf9fd27fdccfcc0fd39fdabfd34fd0ffd32fdf3fc21fdc6fcc7fcd6fde4fef0fd86fd72fd85fdc6fdf4fdeffdf5fca5fd1ffd99fd5ffd1ffe89fe42fe1bfe33fe54fda0fda8fd40fdb0fe30fdadfdc9fc99fdedfc52fd3efd94fd4afebefd71fdaffd90fd57fd61fd12fd63fd7efd5bfd78fd8bfd3bfd12fdaafdacfd26fd72fde2fc5efd10fdf9fc1efd3ffe26fd",
+    "header": {
+      "dwLength": 863,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 36042,
+      "timestamp": "2026-04-11 02:47:46.450"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:21.713",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d040000c044e5851ac9dc010007000146660f0100000200000000000029fde4fd0efe3efd20fd3cfd78fe17fe87fd38fd5afe17fd23fd76fd06fe8bfde8fddffd47fd61fdcdfddefccbfd7ffdb8fd36fe20fef8fd85fd6afddffdbafd98fdd4fce7fc0ffd7afdfdfc7dfdccfd77fd3cfda0fd2cfd53fdf1fdb8fd49fd1ffe2efdb5fcdefd79fc0efd2bfdcafdddfd16fdcefdd7fdaafd18fd4cfeeafd2afdf8fd45fd10fdb8fc6cfd47fd70fd7cfe25fd75fd1bfe60fd37fd9ffd87fdc1fc29fe2efd38fd2bfd07fe9bfc51fe40fd76fe38fd34fd16fd80fdadfd64fe52fda8fd65fd97fdbcfdd7fcc6fdc9fd9bfd90fd49fd8ffd13fdcffda3fdf3fdcefd1dfecafc91fd77fdbafd39fd18fd80fed2fc11fe2efd0afd2ffe6dfe6cfeebfcdbfd42fd57fd08fd97fdbcfd62fdc2fe83fdb2fcfffc15fde5fd13fea1fda6fd3efe4ffc60fdb9fd2cfdbffd26fea5fd0afd4afdd8fcdafde9fd55fda9fda1fd83fde0fcb0fdc3fcb8fd30fd37fda6fd13fddcfc7dfcd3fca0fdf7fd63fde3fdb8fcd1fd7cfdadfde8fd73fd2bfdfdfd32fd4afd48fdf5fc65fdd0fc8cfdf0fd37fd02fda5fdd1fc75fd7bfdf3fc9bfd6cfd44fdaffd26fdd0fd8bfd78fee6fdb0fd44fe07fd9cfcedfc80fd35fe06feb9fd93fdb5fd15fe3afdadfd85fd87fdddfda0fd46fd31fd4cfdeafcfefceffd7bfd11fd76fdb1fcdefc8efd6efdb2fdeffdfdfc03fe10fdbbfd56fdbafe16fe13febbfd3efd3afe2efe86fdaafd8ffdaafd95fd19fdedfc87fc8dfdb4fde6fda8fdd5fcd4fc54fd45fcc6fd4efd88fd7ffd5ffc58fdd7fc0dfd2afd95fd1bfe42fdd2fdd1fd8bfd63fd94fd99fdfcfd81fd25fc16fd7afde2fc19fd2bfd69fd93fd4cfd5efdeafccdfdf2fd50fe30fea1fd8ffd4cfd83fdc6fd39fd23fdb8fd52fe88fca1fd2efdb2fc73fdb6fd1dfdd4fdf2fc80fdd1fc49fd53fda4fda7fd85fd43fdebfdeffce5fc16fdcbfdaafdc9fdcafc34fd75fde2fce3fdcefd7cfc88fcf7fca6fd70fd40fd9afde1fd4afdcdfd77fdcafc49fdf0fd32fd0bfdeafd0bfdf6fc41fd84fd44fd3bfdb3fd40fd57fd04fea0fcf7fcbdfd00fdaffcbcfd14fe3afd3ffd42fd72fdcefdb1fdc3fc34fd50fe80fd6dfd9efd05fe6cfd21fe53fdf8fcb9fc22fd97fcf5fdb9fdbdfd3cfe5efd70fd1afd9efd3afd19fe9cfd07fd88fdeefc75fd10fd8efc08fedbfd41fe5efd25feb4fd6afdeffd04fe28fd7cfd9dfda6fdd8fdb2fd0dfde8fde7fd45fd94fc95fdb7fc6bfd25fdfcfd8afd44fd8dfd23fd75fd9cfd66fd49fd62fdf3fdc7fd33fdd6fc30fdd0fd03fe97fdcafd63fd1afdb3fce5fc70fdc1fd12fedefd9bfd11fd16fdb1fcf5fca5fdb0fd69fdb7fdf0fc3efd2afda1fc5dfdb0fdbefdebfc84fd05fdc6fdc5fd5ffd2dfdb6fcf4fc80fdf8fc89fd00fd92fdcffd88fd2cfd57fd27fd27fd69fdecfd24fe77fd33fdedfc1cfda8fd67fd0ffd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 26182,
+      "timestamp": "2026-04-11 02:47:46.700"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:21.822",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d04000090e6f5851ac9dc010007000165c40f0100000200000002000012fec8fde0fdfdfc41fd7efdf2fd22fe20fd1ffde4fc16fee9fc83fdb6fd2dfd24fe72fdaffcb7fc89fdf5fc74fd31fe10fe97fc6cfdf2fd12fdaafdcffd1cfe9dfe0dfddafd93fd89fdcffd4ffd5efdc8fd3ffdcafc5ffd35fdfefc07fec6fd77fd75fdd4fc80fdbcfd37fd75fd48feb8fd65fdccfc58fd99fcbafc25fe31fd0ffdd5fc7dfd0bfdb0fc6cfc56fd21fd37fdd1fd99fc2efd60fdb3fc57fd91fd1ffec6fd0cfd96fdb0fcb8fc40fdf3fc26fdb6fd58fd3ffd45fc3bfd7afdeffd0dfd71fdd8fcb5fc60fdeffc34fd60fd0ffe8cfd7cfda5fd6bfd46fe65fd95fdf3fc47fdadfd32fdd7fdd6fddffd41fe92fe2afda3fd04fd66fd90fd4dfd89fd46fd8cfdbdfd91fd21fd79fd62fd0afefefdfcfd89fdb7fc18fd9afc34fdd1fcaafde9fc9efdb5fcc1fcf2fc06fe88fd97fdd7fc83fdb8fc63fdcdfcacfd89feb4fd82fdbafddefca9fc06fd5dfd8ffd52fd9efd23fd51fd0bfd06fe5bfd2afd52fd33fd71fd1dfd13fd38fd5dfd8bfc99fdfafcdbfc3dfd16fdc5fd1efd6ffd85fd4ffe01fde3fcc3fc99fd36fdd7fd2bfda9fd26fd8bfd1cfde5fd9bfd77fd1afdc6fc2bfd8ffdd9fd39fd83fd58fefffcbdfd32fdf9fc00fdd8fc09fd36fecafdfdfcc8fc66fda1fc14fd38fd50fd4ffd70fdb3fd68fda3fd13fd7dfdfafd39fe5bfd08fc76fdfdfcabfcd2fc7bfd54fdeefdcafc85fdcafc41fd13fd3dfd61fdeafd40fd74fc5bfc3dfd7bfdccfdedfdedfc53fdedfce8fcfefc0cfe91fd4dfe6efd56fe41fd61fd47fd59fe7ffd09fea9fdd6fd5cfd0afde8fd94fdbffdeefd7afd75fdd4fc3dfd04fe44fd17fdcafd76fd23fd66fcd5fc76fda7fd5bfd27febcfd9ffdfcfccffc1dfd24fdf1fd3dfdf9fcbffc4efc07fd9bfd36fcb0fd9efdf8fcb4fce5fdebfcadfde0fd20fe89fd86fd2ffd50fdc3fc20febcfd53fda5fe54fd97fd22fd4cfdc2fd01fe7bfd77fdc1fdedfcc8fd5cfd1afdcbfc1cfeb3fd7efda0fdcefcfffcf8fc62fd9bfd19fd72fc84fdfffc00fdfbfcf4fd71fddbfceffccbfc77fdb6fdaefd76fd59fdebfd6afd7cfd3bfd26fdf4fcb8fd1efe07feeefc26fd29fdc3fceefcccfc8efda3fd28fde8fdfcfca3fdb4fc2bfd22fdaefd71fd97fd06fd58fdb1fccbfde1fdccfdcafdfefd97fca1fccafdf4fc7afe85fdc7fd21fed1fdbffc06fef5fd2cfe1cfe2ffedffcb9fd19fd80fda2fd0dfedbfd98fd3cfd11fda5fd63fd91fd7afd12feddfda5fdf5fca1fd66fd42fec8fd80fd9afd14fe48fcb5fcb1fd3ffe98fdfffdbafda1fdc5fc1ffdaffc14fd01fd31fe83fc9dfda0fdaffd62fdf4fdb5fdf5fdaefd93fc87fd32fd2cfda8fd73fd42fe85fed6fd1dfdcffd5efd06fd9dfd42fe44fd97fdfcfc94fd3ffd54fd50fef9fd28fe16fe22fdc9fdd2fdf5fdfffd03fed7fc39fd54fc54fd08fe61fd69fd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 50277,
+      "timestamp": "2026-04-11 02:47:46.809"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:21.962",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 863,
+    "hex": "5f03000050430b861ac9dc01000700014e680f0100a101000000040000b1fdf1fcb3fdf5fc07fd37fd2efe13fe16fe99fdf7fd2ffd15fd1efd5ffc9ffd22fe93fda7fce3fd02fdfafc47fd4cfdbafdd9fc3bfd62fdd7fc51fd87fc95fdc3fd95fd44fd7bfcd8fc0afdd4fd0efd96fc19fd84fd1dfdc8fd35fd55fd46fdb2fdf1fd0bfd8cfcf3fd37fdcafd20fed6fd88fd1dfd85fdb3fd20fef0fd22fedefd7ffdaafd8ffda9fccffc49fdf2fd18fd4cfda8fc56fc0efdaffc31fdc1fde0fd25fd22fe0ffd7ffbf8fd5afdd3fc80fd88fddafda3fc49fd81fd04fe43fe1cfe7cfd8efd9afd55fd63fd4cfd39fd43fd62fdaafdb1fd06fe34fda3fda5fe30fd89fda9fdf9fcfbfcdafd53fd45fd22fe7afd41fdfbfc8efdbafdb6fd42fef9fdbffd53fd32fcc9fddcfd70fd0efecffd9dfde0fdc8fc57fc35fdfefdecfddefc92fdf6fc9efcaffd07fdc1fd5bfd4efd9afd80fd78fdb5fcbcfda8fdfcfdb7fca3fd55fc13fe1efc1cfe2bfd8afd06fd32fd6dfce3fcdafd68fd47fdd1fda1fd9bfdb8fcf8fc0bfd3ffd79fe3efdbcfdbdfd5ffd03fec9fcc8fd54fde9fd67fca0fdcbfc27fdbafdc9fda0fd55fe8dfdcafde2fc18fd89fda1fdb4fdaefd6dfdc6fdd4fd87fdf9fc70fd53fdf6fda4fd0dfdcefc13fd1ffd8ffdf6fc78fdaffdc7fd74fdd0fc43fdcafdbbfd4ffdd3fde0fd79fd78fd0ffd2efd70fd9dfd04fecbfdfffd56fd33fd97fc0cfdcafdb6fca7fd8afd10fd83fdbafd99fcdffdf4fd84fdbefdfefd46fdf7fc4dfdd2fdfffd41fd12fd47fdb5fc50fd57fd2afeaefd47fe3dfdddfd50fd26fd60fd50fd35fd05fd6dfc38fd68fc1afe3ffd2efee3fdcbfc56fd89fd25fdf9fc34fd1dfd48fdd1fdcafdaefdcdfc42fd44fdfcfd15fe12feaffd38fde1fcebfcfbfde1fdc9fd00fd85fc55fd6cfda3fcaefd7bfe45fde3fdd8fd36fdb6fdaefd81fd1bfd56fdfefdbffdcbfd5dfd4bfd6bfdb3fd5dfe06fea6fc67fdcffcc4fd34fe72fdcefd22fe0ffd3dfd86fd73fdc2fc40fdb8fd1dfc50fd45fdb4fc72fd70fd93fd90fdb0fd08fe36fd61fd8afd99fd7ffdddfc5efde0fea9fefefcb5fdd8fe08fe0afdbffd8ffd9ffd3efe41fda5fdd9fd15fed0fd48fdf8fc7efde4fd9cfdc5fde7fd21fda1fc5cfde0fcb1fdcefdeafd1efe36fdcdfcddfd54fdd3fcfcfc46fdd9fcf9fcd3fc6cfd72fdcffc9cfd8ffd7efd",
+    "header": {
+      "dwLength": 863,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 26702,
+      "timestamp": "2026-04-11 02:47:46.949"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:22.072",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d04000020e51b861ac9dc0100070001afc50f01000002000000000000b9fd9efd52fd08fdb8fce5fd59fdf7fd83fd80fdc4fd92fddcfd43fd57fdd9fdb5fdf0fc96fdc6fcbdfddffd81fd71fd13fdaefc08fd71fdc2fcc0fce6fca4fdbefd88fd65fd6ffd42fd98fd06feaafc58fe14fd92fdc8fc16fd9bfd40fd26febafdbdfdc3fdaefd65fdabfdaefd80fe35fdf3fd3bfd08fd89fd3efde5fc96fd3efd29fdaafd32fd0afee6fd7efde2fddefde9fd33fdacfcc8fdc1fc03fe46fd30fed4fd9dfd75fd8efcf9fc0dfec3fd50fe94fd85fd82fd19fd02fdb5fd03fd7afd37fe30fd36fd06fd56fda9fdecfdfefd27fe66fd47fdd2fc81fd41fdd6fda1fdb4fcbcfd36fdaafc94fdaefd58fda3fc35fd1cfd58fdf4fcaefd9ffdb5fd61fddffc93fddcfc18fdb1fd23fd10fe5bfdf0fd33fdaefc7bfdf9fc3cfd47fd10fe9ffdaafd20fdcafda8fd7cfd05fe90fd17fd60fd74fda4fdcffd82fd8ffd61fd6ffd94fdc8fccafd0bfd8bfde4fdf9fcbcfda1fd7bfd98fc65fda5fd79fdfafc1efdadfdc8fc05fdeefd56fdb3fd9ffcc0fd64fd06fd25fd5dfd4dfdccfdb5fd51fd62fd83fd76fdecfdb4fd26feb3fd2ffd17fdfefc04fd7dfd95fde1fde5fdeefdcdfd23fd52fd8bfd7dfdd4fd64fdcafdaafc29fd6efd59fd8ffd0ffd02fe05fd26fd57fc13fdf9fc5afd03feb8fd7afd17fe70fcdcfd87fdbefcd0fdc4fde7fc3afcf4fca1fcaefdf8fd43fe11fe39fed7fd22fee6fdfcfdbffd27fdbdfd19fe05fda8fde8fc2efd3bfdeafd3cfe30fd42fd24fdccfd85fd53fd58fd2afd57fd0cfd0cfd28fde5fd09fe96fdccfd7bfd81fdcafda9fc48fe31fd81fd1efe3ffd9cfc6dfc33fdc7fdbbfd3ffd4afd96fd20fd07fe86fc1cfd0ffe73fd96fd0bfe55fddbfc60fd1efd06fe47fce3fdd7fd20fed3fc66fdabfd23fec0fdcbfdfdfc6efd07fcecfc48fd27fdd0fda2fdf7fcc5fc1cfde0fc8efc6bfd5cfd74fd3efdb7fdb6fca7fd2dfd2ffe9cfd75fe43fdc3fdc2fca1fde3fc8ffd82fd48fd92fd30fd82fdc1fd63fd7afda7fdeffc07fd2efdd5fc30fd20fd39fd94fdc7fd98fd1bfe5cfdbefdfbfd37fcdcfdb2fdeefc16fdf6fc67fd6afd61fdb4fd44fd5efd09fdd5fd98fd30fdbefdeefd90fe54fd7efd92fda8fc7cfd50fe40fdaefd10fd6ffdf8fc9dfdd4fd17fef4fd73fdf9fcb2fdb0fd4dfd84fd90fdbdfdf5fd26fed6fc1bfd3afc20fe6efd3efe81fdc2fd4ffd9efdb5fd64fd8efc7ffd61fd38fda0fc79fd16fd81fd1cfe18fddefd65fd89fd4afd6afd60fdf6fc55fd98fd97fcb8fc57fd73fd73fd99fd31fe80fdc2fdc1fdedfc4ffd44fee3fd2efd34fd66fd75fcd3fc6ffc21fdcdfd0afe46fd51fd1bfe33fd5afd3cfee4fc8cfd9dfd68fd08fe44fd39fd4efd52fd59fe71fe12fd2ffdd8fd8cfc69fd7dfc30fe61fe43fda5fd3ffd93fc13fdd7fd5cfdd3fd05fd23fda3fc0ffd4efd00fe14fd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 50607,
+      "timestamp": "2026-04-11 02:47:47.058"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:22.212",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d040000f06831861ac9dc0100070001ca410f0100000200000002000036fde2fc19fcf9fc54fd01fdbdfda6fc78fdd7fd36fe45fde1fc57fd48feccfdb3fd78fdabfcf2fd56fe60fc82fd82fed0fdc9fd0ffdfafca9fc0ffea7fd8cfd63fdbdfd02fd33fd6dfd0afd3afd98fd7afd27fd82fd39fc3ffdd4fd44fda3fc58fd6bfd74fd07fda1fc39fc4efd60fdaefdcbfd11fdadfc40fdcffdbffc47fe8afd38fd79fdf5fc42fdd0fc14fe3efd07fd7bfdb2fda1fc0bfd5efdf7fc95fd3dfd0dfef0fcf6fce8fc82fd04fdaffc67fd1dfd38fd01fdb9fcacfd19fdc4fd7afd31feaafcc5fcfdfbfafc2cfd18feabfdf3fd04fd10fd11fd03feb9fdcbfd36feb0feb1fd26fd17fe0bfe74fee1fd26fdb0fd5ffd65fd1bfd9efda3fdd2fdb8fddefd17fdbcfd70fc24fd52fe0bfd55fe45fdd8fc21fde3fc2afd54fdc1fda7fd79fdd1fda6fc64fdc5fdf4fc4afd6afd40fda6fc2efd66fd31fde8fdd3fd78fed1fda5fdd0fc49fd65fcccfcfafc77fd19fd72fdd2fc22fc60fd33fefffd60fde5fd6dfdaafc1efe36fd19fd48fd79fde2fd59fc1dfde8fcf4fc3afc41fdc9fd78fdedfb96fd49fd98fd98fe56fea0fd59fd34fd10fd1ffd26fd1cfd61fdd4fcbdfd2efd8afcfefc71fd59fd28fed8fd44fd7ffdacfce6fc47fd22fd13fe4cfefbfd4ffd71fca8fc89fd38fe6efd2cfd80fdf5fc08fd04fde0fc73fdddfd05fd50fd55fd02fd64fd3ffdadfd81fd8cfc17fddbfc0afd4afdfcfda4fdb6fc2bfdbdfc30fde8fc41fd46fdedfca4fdeffdedfc5afd49fd1afd8dfde2fcb2fd86fd8bfdd4fdb2fd9dfdc1fc41fde7fdd5fd55fd17fd2bfda2fd24fdc3fc21fdcffdccfd03fdebfc3cfddbfc6afdd4fdd9fd3cfd86fc96fd46fd5dfdd3fd60fd8efdf3fcbafc11fd05fd02fee0fc6dfd41fd1efe77fdeefc0efd61fdedfd01fd75fda2fd79fdf9fcd2fc41fd64fe46fd0cfe4dfd01fe57fd5bfd6bfd8dfc04fe62fd7ffd9dfd92fc43fdf4fd1dfd83fdf0fc2dfeb2fc6dfd53fda5fc9efdb8fc97fd43fd4ffdebfceefcd4fd3efd6efdf7fd86fdd4fc79fde9fca6fd82fdaefd8afd6dfdbefd7ffde9fc66fdbefd64fd7afd2ffddefc4ffd5dfc7afdb0fda3fd7afdfdfc5bfd11fdfcfcd4fd38fd64fd36fd13fd40fd67fdf9fc3dfd02fef0fd05fe3bfdd2fdd9fdf2fce8fca9fe4cfdf4fd44fefbfdaefdbefcd0fdcafc4cfe46fd39feedfd52fdf0fcf4fc2cfe7bfe6dfde9fd30fd8dfd1dfcb6fc5dfd66fd5dfd09fd03feb5fc41fefcfc49fdf8fda0fd60fd98fdb3fd4efd5cfdbcfdd7fd63fd47feadfd89fdcffd6bfed8fd0bfe5afe6cfd56fc90fd23fd35fd0ffd60fed4fd24fd2bfec7fce0fd5cfda6fd96fd71fd9dfd76fd5efd6bfd0cfd15fde5fdc9fd99fd73fd25fd57fdf9fc55fd75fd3ffdc3fd22fdc1fd96fdaffd6bfdd1fda5fd4efd0ffdc6fd39fd73fd6afd9dfe3dfe30feb3fd39fda2fd37fd13fe32fe",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 16842,
+      "timestamp": "2026-04-11 02:47:47.199"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:22.321",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 863,
+    "hex": "5f030000c00a42861ac9dc0100070001a7a00f0100a101000000040000d9fd83fd85fd7afdfcfcfbfc7bfd5ffde8fd98fddafc2ffec5fc51fdbefda8fd50fdd4fdc4fd46fd9dfc40fdadfd22fe01fe40fd9ffc7ffcc2fcd0fda6fcc1fd5afd27feadfcddfcadfdebfd77fc62fdfcfd7ffdb5fd55fd89fda8fd2ffdabfd9afdd3fde1fd5cfd86fc9dfd7afdfbfd7afd31fd77fd86fc62fc46fd52fd6efd54fc73fd95fd98fc5cfdb9fcb0fdaafd27fe53fd70fda1fd2bfd59fd39fd99fd31fd58fd97fd16fda1fdc3fd00fee0fdd9fd1dfd6bfeb1fc2afda4fd3bfe1efdd6fd07fe23fdcffc0bfdb9fd2efd6bfdacfd74febefdb4fc13fe53fe7ffd42fe2cfd8cfdeafc48fd43fddffd4cfd4ffea8fc4bfdaafdfdfd46fdc0fd03fec7fd80fd72fd3efdb7fd75fd6afdcbfddcfd18fe1ffd73fd3dfde5fdf3fc77fde3fdb4fc9ffd57fd44fdcbfc7afd06fe3ffd22fe0cfdd5fc7cfc5efd87fcccfd8cfd6afdfafc36fd18fdb4fdb1fc4bfdf9fc03fea0fdb1fdbafcf7fc6afd9efd7ffe8dfd5cfd32fdf6fcb0fd1afd5cfd9ffde2fd61fd43fd69fde5fd09fecbfd17fd09fd75fdcbfd36fd68fe45fd69fd4afd0efd2efdc2fd84fcecfdbafd24fda7fd43fddffc2efed0fc87fc88fde6fd85fd94fd29fea4fdd6fc2cfdd6fdeefd89fd92fe29fd99fc0ffd74fc98fd94fd50fdc1fdd1fddffc96fd19fdb3fcf5fd98fd39fd22fde5fccffc71fce5fc75fda2fdb8fe3afd54fd7ffceffc11fe82fda1fd6dfef0fdc2fc0cfe69fd8efc42fda0fee1fc85fd9afd53fc59fd1efdc9fde8fcb0fd35fd25fdb9fd09fd3dfdf1fd6efe75fedbfd02fd62fd47fd33fd89fd42fd11fe10fd3efd5efc97fdb7fdeffd2cfe87fd72fd17fd42fd40fd25fef1fc56fdf6fdc7fd65fde2fd8bfd67fd1efd5efdb9fdccfc68fdebfcb2fccffc28fe16fea9fd1bfd55fdb1fd67fd8cfdf0fd72fdb7fd7efdbefd10fd4ffd30fd06feb6fd87fd74fd91fd5cfdc3fd80fd1ffec3fd3efd79fd43fd0afe02fd4ffe4dfd6dfe8cfd01fd6cfd13fd65fd91fd7dfdf1fce0fd78fdfffc96fd7dfd9ffddffd59fdacfd7efde7fdabfd33fdf5fdc0fdaafd6bfde2fdfffc8bfc83fd92fde7fd83fd8afd53fd37fd98fc70fc43fd61fdf8fd40fdc6fd14fd14fe21fd90fd8ffda5fd0afea2fd4dfd75fdc2fd9ffc12fefcfd2ffd26fd7dfd11fdbafc39fc40fd30fd1dfe",
+    "header": {
+      "dwLength": 863,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 41127,
+      "timestamp": "2026-04-11 02:47:47.308"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:22.462",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d040000806757861ac9dc010007000114430f01000002000000000000e5fda8fc7cfd89fcfafc75fea0fd9afdc4fd80fddbfd99fccffcb1fcd4fcdefd0cfe60fef9fd86fd50fd05fd86fef5fdd4fd66fdaefdc8fc27fd15fe4ffdf7fd7bfd38fd29fdd1fcc9fd77fd17fd11fe5efec7fdeffd1efc41fd70fdfbfd44fdb8fc7afdd6fda2fd1cfdb5fd8ffd89fdb5fd8ffe39fd96fd38fdaafd89fda0fe63fd32fde5fd36fd5dfd46fd38fd57fd5dfdd4fdd1fdb3fd0cfd82fd11fdfefdc8fdb8fc2bfd79fd4afd9bfd01fd57fdf9fdc6fd4afd36fde4fc42fd16fdbefd6cfd45fd4ffdc7fc4afd5ffdabfd61fe69fe38fd42fd34fd4dfd5dfd3efd30fd5efed3fd1efe15fd3bfd14fe0dfe9cfd22fdb9fd7afd64fde7fc8dfd70fc60fd92fd05fef4fc15fd63fdf4fd3bfe5ffd74fd60fd81fdc8fdb0fd43fd6efd7bfd4afd89fde9fd8cfd16fdd9fc3cfe8efe8dfdb6fd40fd41fdeafcfefc44fd2cfee0fd39fd7ffc11fd23fd9dfdbafd85fd29fee3fc71fdd5fcd5fdb3fd0dfd27fd88fdc9fdb3fcaefcbbfd1afdc8fd4cfc55fd71fdb1fc89fd11fdf9fde3fd0efdc8fdfbfc97fdbffcdcfdd7fdaefda7fd13fed3fdf2fc90fdc6fda0fde8fc6ffdebfc49fd66fd85fd1afd20fd7cfd6bfd6bfd2ffdb6fc50fd41fd12fd3bfd45fea4fdccfd86fcacfcacfbd0fccefd90fdd0fd60fd9cfdc9fcdcfc2cfda0fd34fd1ffdc7fd84fd2ffde4fc86fd5efd3cfd84fdf3fd94fd21fd31fde4fd19fe27fd6bfd55fd0cfe2dfd85fdd6fddffddffc29fe5cfdd9fd22fd41fdcdfd75fd3bfd71fe3dfeadfdfafc46fd48fe9bfd0efe46fdd3fca8fdd5fd69fd63fd66fdeffcaffdd3fd4afc4efd15fde6fcaafdbafdd0fd7bfd0afd2cfdbffd3afd1cfdb0fcebfd66fd14fd6afd30fdc7fde1fd90fc34fed1fceffcb7fd29fd33fd77fdcdfde2fce4fd86fd92fcb0fc02fd37fd1efe0efefcfc59fdfefc17fd88fd99fc14fe1ffe81fd0bfe19fd3afc39fdedfc1afdf9fda4fdbffd24fde9fcd7fc80fdaafd27fe68fdf2fd17fd7cfdc1fc2dfe9afd6ffd60fd7ffd13fdb0fc30fd77fdcafc1bfd91fd72fd36fdc4fceffcf5fda2fd6bfd37febbfd44fc34fd73fd32fec8fd04fd55fd67fdd1fc1ffdccfceefcdefdb6fdaafdcafd5ffd7efcdffc72fddbfdbefd7efcecfc0dfdc9fca0fc5afe9efdbafd6ffda3fdf0fc28fddefcc1fde6fdf7fd5cfd25fd88fda1fca9fda3fd62fe0dfe84fd05feacfc1afddafd34fdc1fddcfd05fe98fedefc8ffde2fcc2fc0cfe37fee3fd7cfd21fddffc93fd32fe6afd96fd66fdf6fc7ffd79fd25fda8fd3cfe71fec7fd48fd74fdbdfd95fd7afdd8fd70fdf6fd9ffcb1fd2afd26fdadfd7ffdc6fd94fd92fc9ffd15fdf1fde7fd68fda7fd21fd10fe42fdd0fc73fd44fd60fd2dfdf2fda9fd69fd56fd9efd5efe77fdc2fd45fddcfc5dfd3bfefafdebfde5fd5bfd20fda1fddefd25fcf8fc19fe76fd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 17172,
+      "timestamp": "2026-04-11 02:47:47.448"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:22.712",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d040000208d7d861ac9dc01000700014e1d0f0100000200000002000077fd78fd18fd86fd22fdf8fcacfd75fcccfd6bfd69fd23fdfbfdb2fd9bfdd2fdb0fde7fc69fd7dfd60fd69fd11fedbfd00fed5fd45fde8fcd0fdfafdbafc19fd7afda8fdd2fd7efc32fd57fd8efddafd27fed6fd19fef3fd43fd93fd4dfcc8fc92fdf7fc6afdfbfb6afd41fda8fdd1fd40fd17fe93fc38fd04fdccfcb1fc64fecdfdd5fc80fd00fd42fe8cfca1fdf8fd16fe12fdacfdc2fc47fc29fd4bfd0efdc8fdcbfc17fd17fdbcfce4fc85fd15fe04fdd9fd81fcbcfc01fd33fd84fd8bfd24fd96fc71fde7fcccfc91fc3ffde0fd83fd05fdb3fd21fdddfc1afd37fc41fe31fe3efd6cfd6dfdddfd09fe9bfd0cfe16fe65fd68fdbefc74fd3dfd3cfdf2fdfcfcd4fdb4fdfafdf1fcadfc3afd05fe6cfd08fed8fde0fd7efcbefc05fdc2fda9fd65fd3afd47fdcffc45fd78fde2fd3bfdfbfcb8fd81fd10fdc4fdb3fdf8fd26fd4efdd2fc27fd42fe5dfd0dfe48fd5dfe48fd30fde5fd30fd54fd5afd6dfd1efd5bfdb0fdf8fd42fcb7fcd1fdcafdc7fc26fd4dfde2fc7ffdc1fd9bfdbcfd55fd92fdcffddefddbfcdafd5afd94fd85fd44fd22fd21fd09fdcffc86fde7fd47fdedfda4fdd2fcf7fcfcfcd0fda6fd3ffd05fd44fdb9fc5afdadfc7bfd22fdc8fd57fdabfdbcfce3fc5efd86fde9fd9afd92fd95fdb7fc98fcf2fc4efd6efd88fd2cfd5efde7fc07fdfbfcaafdebfdbffdf8fd5dfd59fd15fd70fde3fd77fdb1fd0bfe82fd7ffc05fdaefc8dfda0fddefd78fde7fcecfcf6fc05fd0dfd28fd72fd38fdf2fcd6fc19fd50fdd9fd37fdeefd57fd68fda5fd00fdd4fd2bfdc7fd64fd5bfdc1fcb6fdd9fc57fcb9fdf3fc60fd33fedafcd9fc19fdb9fdf2fd74feddfdb4fc2efdc8fddbfc04fdfdfd38fdaafd8bfc52fdd1fc9dfcadfc6dfd24feaafd02fe59fd00fd3cfd4ffd67fd64fde2fd68fd50fc1efd8afda0fd80fd84fd29fdb6fd08fe89fcaffc0cfd80fc54fd73fc9bfd04fd0dfd25fdb2fc42fdd5fd1bfe77fd1cfd38fd16fd2ffd69fdfcfc17fd6efd22fdaafc9efdbafcf8fc16fee8fd55fd64fd04fdc9fcc9fc4dfd6bfdc5fd9afd03fd1dfd60fd8ffd0efe69fd64fdc8fc8ffd66fd3dfdf2fcc3fdedfd0ffd7ffdb0fc2bfd83fd83fdc7fcaffd2dfee5fd2efd0ffd5cfd2efd13fd2bfd8efd82fd85fc7afdf8fde1fd35fe9ffd77fee3fc06fe49fdb9fdadfdabfddafd62fed3fdcffd7ffc45fe75fd69fd31fe94fdc6fd2ffd63fd91fd41fd8efc85fde3fd5afd5bfdf3fc37fca6fd27fdf9fd6bfd6efd2cfe48fe9bfd68fdcffdd2fd18fed8fc67fd6dfd31fd21fd44fd67feb4fd6ffd37fd51fd57fd75fd9afd85fde7fd8cfc2efd6dfd22fcfdfd75fdc9fd70fda8fd82fc8dfc49fd7cfd5afea4fdfafdc3fc01fdd8fc1cfe99fd8afdf8fd7afe1efe2ffdb0fd9bfd59fee8fdf0fddefd41fd50fed8fc8dfd13fe73fd6dfd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 7502,
+      "timestamp": "2026-04-11 02:47:47.698"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:22.821",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 863,
+    "hex": "5f030000f02e8e861ac9dc01000700012b7c0f0100a101000000040000a3fd5ffdc4fd0efd77fdeefdacfdb0fdcbfc7bfdf9fc7cfd4afd67fd7ffdd9fdecfd9efd9afdc5fcf8fc60fd83fdf5fda9fd97fd4ffd04fefdfc1efd4dfdf8fd3efdcefde9fcfcfc49fdc2fd9cfc58fdf3fcdcfdbffc1bfdb6fc2afdc0fd25fd5cfdb9fd41fd9efda7fd06fe8ffddefc63fea2fd00fdc1fd15fd5cfd4bfd00feeffd32fd3ffd8efcf2fd05fd07fd21fe84fda6fddcfd14fdf7fc7afd67fe81fd45fd2afd05fda4fd70fc62fd89fdfbfdc8fde2fc7dfddefc0dfdaefcf4fdc5fd58fdd9fd1afc5dfd97fd93fd17fd2dfd10fe29fd61fdfbfc91fc9efc02fd05fea8fd8ffc33fd54fea0fd22fd2bfd9ffd5efd3efd8ffc0bfd50fd36fd97fdd5fdc0fd44fd93fd53fdb8fdb4fd12fdedfcd4fd40fdb9fce6fc84fdb1fd5dfd02fecefd2cfea0fde0fccbfccefcecfd26fec1fd21fdd4fda8fd91fc76fd33fddefc6dfe05fe5ffd7afc03fde1fd62fee0fd0efd6dfd27fd2afda5fc00fdc8fd3afdabfde5fd07fe6afd63fd4ffd5cfd14fe0afe90fd85fd1ffddafc5dfd41fddbfd11fe58fd00fde1fc40fd6cfd4cfdfefd9cfdd2fcd2fca8fd99fd7dfd70fd22fd97fd21fedefcf2fc82fdbafcfcfcfbfd3afdedfdaffd4cfd64fdaffd3bfd68fd6dfe6ffdd3fd68fd64fda7fd8bfd1cfe5efd43feb7fcc0fc2cfd04feebfd8efd6bfd58fd99fcfbfcbbfceffc55fdc5fd0bfe0ffeccfcf6fc8cfd7efc9efde1fd1afd4bfd0efdbbfc84fd42fd65fd3dfdb0fdc1fd6cfd10fd15fd3bfd2efd6efd0bfe48fd80fd20fd68fd26fd26fd07fe9bfd11fdbffcabfd26fd5afdb6fd2afd69fdeffc1ffccefce1fd79fd48febafceefc85fd1dfdfdfc45fdd0fdfbfc3afdd0fd3bfdebfdb8fc85fc2afd2ffdc6fd5ffd3ffd36fdcefceffc11fee2fc4dfe11feb9fd6ffd1dfeb1fc68fd98fd0dfe8cfd81fd7afd86fd6cfdf7fd49fdf9fdcffd21fd33fd5afdfdfccefc17fda7fd6afda5fd0dfe3efd48fd72fde7fdf4fd33fd4afd8cfd72fdedfda4fda8fd72fd9efc59fd2afd73fd8dfd8bfd4afd42fedcfd34fda8fd31fdebfd34fdd2fd92fe36fdc0fda3fd10fd2ffdfffd7dfd95fdacfd5afd5efdf2fcd5fd62fda9fde8fdbffd39fddffce9fc17fd82fd4efd33fee7fdbcfdc2fd75fd3efcd6fda5fd18fe4dfd48fdecfd55fda4fd91fe8cfde7fd7efd",
+    "header": {
+      "dwLength": 863,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 31787,
+      "timestamp": "2026-04-11 02:47:47.807"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:22.961",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d040000c0b2a3861ac9dc010007000187f70f01000002000000000000e8fc8cfd77fd64fda0fd5efdcdfddefd2bfedafd2ffde4fcf2fc73fdeffdb9fce2fdcefd8cfd2cfd7efc5bfd66fd4bfe9ffd5afd1afdf5fd64fd55fd84fd7afdb0fccffd7afd10fd1bfd4ffdd1fd02fda6fdbffc90fd72fd49fde9fdcffde7fdbefdcafccbfd5efd8cfda6fd9bfdcefd7afd39fe54fe2dfd69fd41fd27fe3efe39fcd5fd74fdbdfd9efda9fd88fdfcfddcfdb0fd41fdb5fcc6fcc8fd62fd89fd7efdf3fc1dfd51fd1dfddafd27feeafd34fe94fd57fdbafcc3fdd3fdf3fc04fec9fd18fd18fdc9fd6dfd50fdebfdc4fd53fdd1fc1dfe75fcfdfb6dfd6cfd97fdaefda1fd12fd09fda7fdd4fcaffde7fd94fdb1fdd2fd6bfc69fd63fdd4fd77fd5efed1fc14fda0fc42fdeffc84fd96fdf1fd12fe0bfe6ffc2dfd3ffd27fe1efd00feb0fd22fd54fd3bfd26fd58fd74fdeefd52fd45fddcfdd6fdf5fd41fdd8fd11fd8afecffd33fcbafdf2fc34fe34fd5afe63fdbcfc9dfc3cfd04fd5efd71fd6efda8fd61fd4dfdd7fc95fd02fdd5fc8ffd32fd60fd61fdeefd94fd85fd27fd2dfd10fd8efd52fd46fdbefc3ffd64fe4afef3fd14fd13fdc2fd43fd52fd0dfe5ffed9fd47fd2ffd7dfd12fd1afd90fd4afd5efdd1fb95fd53fc3ffd52fd01fe0afe8dfd1cfd54fd7afd03fe82fd63fdf4fdcffd65fd01fd7efd1bfddffd09fec2fdddfc4dfdddfc31fd8afdc5fc2bfedcfd28fe5efefdfccffd49fea7fd6efd0dfeb4fdabfd1efd60fd5bfd15fdbefd77fed7fdb1fdacfd6cfd18fd5ffd36fdb2fd2afd97fcf5fc34fdf2fc70fd24fd37fd70fd82fd3bfd3afde2fc27fd0efe49fd01fd18fd2efd34fd80fde5fdc7fd3dfd56fcf5fcc5fc79fd8efd8dfd72fdcdfdb5fdeffccbfdd8fd3cfdfafd3dfd2efdf4fcb4fdedfcb6fc07fda0fc52fef0fdfffceafc87fd36fdfdfca4fddcfd87fdbffdd5fcc6fd0cfd75fdc1fd8afdedfd4bfdcffd6cfdc4fc4afdd1fdf8fdadfd95fddefd9cfd27fdabfdc8fd41fd37fee0fdadfd2cfda0fceffd6cfd2bfe7cfd30fd4ffd21fd8bfd58fd8afd46fe48fdebfd7afd4ffc7ffdbffd97fd1afed7fd37fd98fda3fd67fd01fde8fd21fd74fde1fd79fd87fd2dfdb4fdf8fde6fd84fdd0fc17fd20fdfafc06fd44fe7dfedffdb7fd70fdd5fc5afe80fd33fdc9fd40fd93fc9cfd9efd40fd83fd7cfd08fe9cfdabfd91fc9afcecfc5bfd5efdf4fdb2fd05fe3dfd80fd06fee0fd01fd6afd07fe09feb2fd4bfd84fd77fdd8fdeefd6dfd93fdddfd4cfc5afde2fd49fd27fd6efda8fd39fda5fc30fd0bfd72fd46fe83fdb4fdadfde6fc29fd64fd96fdadfd40fe19fec8fd04fd39fd88fdc3fdc2fd6efde0fce0fd13fd25fd9dfdb6fc41fdc8fd2bfd11fd68fddcfd68fd45fd31fda1fd80fd69fd21fdc0fcf3fc7cfdf2fd49fd84fe78fc5bfd8efdf8fc18fe54fd78fd36fdcdfc0ffd8efc74fd74fd1cfe",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 63367,
+      "timestamp": "2026-04-11 02:47:47.948"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:23.071",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d0400009054b4861ac9dc0100070001a7550f010000020000000200008cfdbefdaefd40fc25fd02fd64fe39fed4fd3bfd21fd27fd40fdc8fcccfdf3fdb6fd79fd8dfd32fd23fdb4fda7fd42fd80fc67fdbefd0afed5fdb8fcc7fc5dfe8bfdd0fc23fe9efd94fcaafd92fd62fdaafdecfd39fd8efd08fee4fde1fd62fdacfd18fef5fcfcfc0afd79fd48fe34fdc8fdd5fd05fd24fde4fd70fd97fdbffc77fde4fd27fd58fdfafcf2fd43fd01fdc1fd9dfdc6fc0afd2bfd01fd68fda3fd6bfd42fd85fd3afd5afde3fc99fdbafd46fd73fd32fd50fc26fd14fd17fe02fd68fd97fda8fd78fd0dfc66fd9ffd97fdacfd12fd5bfdcafd93fdcefd5efd43fd35fd72fd90fd62fd3dfcecfd74feaafe46fe5bfefafd9dfc3bfdf8fdb4fdf9fdaffd35fdf2fb13fd21fd8ffd23fd9ffe74fdccfc84fd5cfd24fd34fda8fcccfca8fd8afd87fd90fdfbfcc4fc06fd3dfdb5fdc4fd72fd49fd19fd5dfdedfc56fddefdf1fd48fd40fdcbfd24fd49fdd2fd7afde5fc09fe04fd3ffd45fd97fdaffd05fd14fd59fdd1fc2ffd5cfe86fdcefde2fc1ffd09fde8fcdcfc67fd9afdd2fdd0fdf4fc36fd89fd21fd58fd51fd57fdabfd9bfd7ffc50fdc2fd3dfd58fd2afdd2fdcbfd90fde8fc52fd1ffdd4fd60feb5fd02fdabfdf3fc3cfde2fcc5fd19fe24fe34fdaefc47fc0efd85fdfdfc9bfd14fd55fedafd5bfd02fd03fda8fd0afdcdfd5efd98fda8fd35fcf7fdb6fc4cfdcdfec0fdd4fc8ffd5afdb5fd95fd3cfdc8fdeefde3fc54fd44fd6afdaffd3afed6fd5bfd6cfd39fd5efd71fc9ffdb9fd25fe21fc45fd45fdc8fcadfbccfd87fdaafcd6fc57fd24fd3ffd41fd49fd43fd9bfd47fd40fd27fd54fdf5fdfdfdbbfda3fd1dfcccfd95fc01fdb9fdfffd1ffe2cfe2bfe40fde5fcd7fda0fd5bfd0dfe26fe28fd9efdd2fce3fc4bfdd7fc77fd5efd51fd94fdbcfc46fc29fd80fd12fecffca8fd59fd39fd07fdcdfc20fda4fe49fe7ffdfafc57fd42fdf7fc20fdcafdd6fd5bfc9bfd3efc16fde8fd76fd97fd23fd43fdc2fc83fc45fd5ffc22fdc6fd2bfeb4fdacfd7efc75fc1ffcc2fd79fd1cfd74fd35fddffc3cfd7bfd77fde4fc6ffddbfc5bfda3fd83fd42fd88fd39fe37fdcdfce0fd2efdc6fc4efde0fdd0fdf1fd7bfd70fdcbfdd6fc70fde3fd4cfe9afd7ffd1afd76fd26fd98fdcefda6fde2fcd4fdeefd11fd8dfd7dfde2fdd6fd13fd78fdd0fc83fd19fd8dfc38fee2fc71fd36fe91fd65fdbcfdc1fd20fde3fda8fed7fdecfd57fd71fd76fd9efdb4fd90fd7dfd6bfdedfc94fc95fd7ffdfbfc32fe42fd12fea1fd36fd85fd08fd66fd03fe57fdd0fd72fdeefc9dfd00fec5fdecfd56fd0afd22fd15fd18fd0ffea5fd78fdf6fc31fd50fceafc41fe78fd7efd7ffdccfd6afdf9fc2afd09fdcffdf5fc85fd19fd4efd12fdecfcabfd74fd17fdf2fcccfd8bfdc9fd84fd24fefffd6ffe0efedcfdfffdcbfd79fcbafcd2fd9afd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 21927,
+      "timestamp": "2026-04-11 02:47:48.057"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:23.179",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 863,
+    "hex": "5f03000060f6c4861ac9dc010007000184b40f0100a101000000040000bafdf0fd77fd5efd31fdb4fdc6fd37fd92fd98fda3fddefc85fd85fdb1fd16feb8fd36fdb6fd90fdd8fc7cfd86fd66fd46fdc3fd62fde4fcb4fcb0fcfdfc01fe9efd45fd07fe0dfd3ffd16fe6afceffd85fdb4fdfafc19fcabfd71fdeefd31fd71fdc0fd46fd95fcf4fca8fd00fd97fd74fd0bfd33fd88fc11fd03fe2dfe70fde0fdbafd6bfdf6fca0fdb6fcf3fd53feacfdb3fd48fd33fd00fde4fc74fdb1fd75fe01fdf2fcc6fdb2fdcafd6afd7efd3bfd11fe2efd44fd72fd1ffd13fdd1fdb6fdeafd86fd75fc1efdb2fd56fd9afdecfc69fd62fdf3fcb9fd94fdf0fdf6fd87fdbafd78fdecfc73fd02fd53fe5efe10feebfd00fe0ffdc6fda5fd64feb5fdc1fdd8fd4afd6cfd26fde5fd67fd65fd6efdb0fc73fd1dfedffc60fdc7fdd1fdddfdfafc02fd6efccdfccffcc6fd97fdf7fd47fd58fda1fc08fd6efde1fdf1fdccfdd5fd7bfd9ffc74fd5afd98fdbdfd0ffd82fd89fd62fd77fdc6fd44fd99fda0fd69fd08fd34fd67fde0fd32fd6efdb1fdf9fdd8fc93fd40fd4cfdb9fccffd7afda2fdfdfd95fd54fd36fdbdfd10fe26fd6bfd7dfde6fc97fdeffcbffd56fdf2fce0fdd7fde0fca3fdfcfc72fd38feccfd77fdfffc76fd9dfd70fd56fdb2fd62fd32fde9fd26fdf2fcccfd01fdc7fdc3fd98fd3afdc7fc7dfd5ffd99fd85fde9fdb5fd21fc8afd39fd51fd49fc6bfd64fde7fcb7fd65fc13fd28fefcfddefeaafdb6fd7dfd64fdeafcfcfd4bfd69fec0fd6efdd4fdb9fd8cfd75fc34fd6ffd51fd1bfde4fc7afd57fdb8fc98fd9bfd4bfd1dfcc8fd7cfc80fd8ffd24feb9fddffd50fdbdfdf3fcbafc06fd09fe20feb7fd71fd2dfd71fd6dfc6cfd59fda9fd00fe93fd40fd4dfd4efdf2fcb1fd49fe73fc57fd4bfdcafca8fd36fdaafde7fce7fd80fc1cfcb1fd29fd5dfd99fd7ffdabfebefd57fd69fd94fdc2fc45fd21fd6efd9efdfcfca6fc57fc82fc87fd19fed3fd62fde3fda6fd03fd1afd0bfdfefca0fd7afdb9fc68fd84fdb1fde7fdcafd9cfd31fd5efd7afd20fd28fe73fd3dfe17fedcfd82fd10fdccfd27fd67feb0fdb7fdd4fdabfd0bfd5ffd5efda9fd8bfda1fda3fd4afd94fd85fdcdfc6afd49fdc8fd20fe2efda1fd02fd5efd1efe78fd14fe35fea9fdb8fc7efdbafd08fe39fdb4fdcafd21fd8cfd2cfd4afd80fd6efdd4fd",
+    "header": {
+      "dwLength": 863,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 46212,
+      "timestamp": "2026-04-11 02:47:48.166"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:23.304",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d0400003009d8861ac9dc0100070001e3a00f01000002000000000000e7fcc7fd66fdd1fd2dfd32fd27fef4fd8cfd15fda5fd34fd91fd09fedffd75fd44fd9bfd57fdf3fca6fdc2fdcffdc5fd44fe38fd01fe6ffc47fdbffde2fd0dfec7fd1afde3fc61fd59fdcdfd37fd2bfe4ffd26fd80fd20fd1afd21fddffcb9fd27feddfda0fe23fd32fd37fd20fe3cfec8fdacfd93fd49fd38fd5cfe42fdb5fdd3fd50fdd9fc01fd68fdd9fcaefdfefd94fd8ffef0fd15fd57fd2dfd47fdbdfde4fdc6fd96fd89fdfffccefdc2fcc3fde7fd82fcc9fd35fdf2fc48fd56fdc9fde4fd65fd6cfd35fddafc17fde1fc9cfdbefd14fd55fd6ffde1fc04fef6fc83fdf7fc9ffda8fd91fdacfc27fd4afd6afd07fe59fd45fd8cfcadfcebfca1fd91fec8fdabfd5ffd10fdd9fd42fd94fdfdfdd4fdbbfd9cfce7fc14fdb7fcbafc82fc59fe70fdd3fd24fd72fdeafdb1fde9fd0efe14fde6fdf3fc56fc24fde4fd86fdb0fde4fccffd10fd6cfcf0fc49fdeffdedfd30fd55fd27fdd3fc7dfd2efdf8fcfefd4bfd1dfd4dfcc7fd56fd7afd4cfd03fe5afd3dfd85fd49fd5bfd9dfd7afde9fdbffd0dfdb7fcd3fcbffd02fdfffd42fd65fd61fd25fda8fca1fde4fc51fd6bfea5fd87fd49fddcfcdbfc93fd28fe85fd2bfe72fd1ffd95fd02fda0fdc7fd5cfdd7fd5afd06fd17fd25fe9bfddafd7afd5afdfbfdd3fdcafc49fde0fdfdfd03fd90fd45fd68fd5afd5ffdd0fd45fe9ffdcdfd97fdaefd3afee6fd73feeafd38febafd4efdddfc55fd90fd95fd46fda0fdc9fd07fdf2fc1ffdb2fd82fdc4fd95fda0fd70fd56fda9fca8fd78fd4cfdf1fdd5fd3ffd2efdddfcbefc90fd8cfdb5fde8fd51fd8bfd8afde7fd34fd0bfe0efe3cfd64fd15fd5bfdecfca2fd5efd66fca3fd2ffdfcfca2fcf3fcb7fd3cfe75fda7fd43fd1bfdb8fc7afd76fd53fdd1fd72fd43fd06fdedfca1fd0ffe39fd0ffe25fedffc3ffd01fd23fd42fe9bfdaafd16fe0efeaafc86fde7fcf6fd2ffd84fd34fd9efc59fd4bfdf9fdb1fdd5fc90fc39fd86fdb8fdb7fdf6fdcafd78fd90fd25fdbffcd3fcc9fce5fdcefd69febbfd2dfd65fd00fd88fc88fd0dfd8bfde0fd7efdd5fd8dfdd9fc20fd81fd74fd12fe73fd44fdd1fc40fde4fc96fd19fe52fd3afd1afe59fd1dfd64fdd0fc87fd02fdeafdebfc3cfd42fd77fdd7fd96fdf7fde1fca5fd2dfd55fd5ffdaefd5cfd2afe3dfd67fd72fd55fd14fdbdfcfefdb1fdd2fda6fd33fd22fd0bfea8fd10fd9dfde1fd04fd8bfde3fc73fda0fd2efd2ffee1fd16fdc5fc8bfc5afdf5fd92fdd1fddafd8efc6afd02fd5cfdd0fd4dfd8afd08fdedfcf8fce8fc8dfde7fcecfdb2fd25fdc3fcd8fc30fd9dfda4fd53fd0afd45fe17fd88fd66fd73fd2ffef3fdd8fc00fe1bfea4fc59fdfbfdb3fd0cfd9bfdc3fc76fd2cfd44fdf9fdc5fdf7fddafd74fd47fee7fcd9fcb9fd0bfd55fdc8fd42fd8afd8efc88fd84fd2bfe81fd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 41187,
+      "timestamp": "2026-04-11 02:47:48.291"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:23.523",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d040000d04cf9861ac9dc0100070001225d0f0100000200000002000095fd7afe0dfe71fd83fd6dfdc6fdc6fd86fdf1fd6bfdc0fd27fd77fd5cfda2fd0ffd7ffdf5fd7ffca6fc4bfd70fd2efd5cfd65fdcdfcf0fc16fde7fd9bfd69fd58fde7fc9cfd1dfd0bfdcffdd9fd29fe3efd38fdb4fc2bfd1afd78fda9fdd4fd16fe38fd5afeabfc37fd36fd6dfdf9fcdcfda7fd4afdd9fd61fd13fcbdfc89fdb7fd1cfd4bfd6efc33feedfce1fd84fdbefc4bfdb5fdc3fc81fd0efd33fde6fdc9fd52fdf3fc5dfd2efde0fc20fd55fd6dfd9dfd19fd93fc3afc2cfd46fd3cfe09fd75fd60fd5dfd05fd74fd6bfd61fdd2fcc7fc27fd07fd6bfc37fd9cfcd2fdc5fc47fd63fd88fd11fdedfc17fe40fe82fe7dfc4dfdf9fc1ffdb0fd27fdb3fd4cfe2cfd1afd29fd4afdd9fd5afd59fdeffda5fdb0fceffb97fc20fd44fddffd54fcf7fd2afd23fda3fc56fd80fd9dfdcefd05fea9fdf2fc3bfd65fd67fd2ffdf9fc79fdc0fd88fd4efd00fd19fdaffd93fde8fd3bfdeefcf4fcb2fd67fd7cfde1fd26febffdfbfc1cfd0cfe07fd0dfe25fd64fd8ffd50fd20fd02fd17fe5afdf0fd5ffd7cfd97fcdbfdb5fdcbfda5fd6efd43fde6fd27fdb9fcd8fcfbfcc4fd28fd79fd35fdd2fc7efde6fcbcfd67fd89fdb0fce5fd57fdb4fc71fd4bfd7ffca0fdadfd3bfdeffcd1fda0fd73fd59fd1ffe5cfdbdfc02fd59fda7fdf6fc1afd9bfde5fcf9fc03fd35fd1dfda7fd77fda9fd85fdaffdebfc17fdc5fd1cfda1fdaafd95fd51fda2fd51fd39fd01fe0bfec7fda3fd33fd3afda7fd2efdc3fc23fe0afe82fde1fc48fd94fcaffd5ffef8fc40fed8fc5efdddfc5afdd6fc02fd4cfd44fe89fd66fde8fc6afc30fd9afd7bfd17fe48fef7fcd7fce6fcacfcbcfd32fd90fd0bfd09fefffce4fc23fdcbfd4cfdb1fe07fe98fd73fcb4fca5fde8fdedfc28fe33fd05fd6bfc0dfd2ffd14fee1fdeefdc6fc9cfda2fc74fdd6fdcafcd5fd59fd63fdbffd8efd1dfd4efda5fc5ffda6fe66fd70fc90fd07fda9fd01fd7afd0bfd4efdf2fda6fda9fceafc57fd41feb3fd98fd5cfd5efcf0fcbffc38fe6cfde0fdeefd9cfd72fd47fd2bfd22fd98fdaefcecfd09fd53fd8efd4bfd6efd43fd50fdcffcecfc82fdeefc57fc86fda3fc34fdf8fc16fd87fd5ffd29fd42fd89fdd3fd51fd04fd7bfc32fcf7fcd3fd2ffd58fe3cfd96fdd4fc3dfd67fd40fee1fc4efd70fdd7fd0ffd85fd03fd81fdc5fdc0fd67fd6efd46fd12fd59fd5dfdc3fd04feb8fd0efd46fd3bfd4afd08fd17fea8fd75fd53fd2cfde6fd10fd60fdccfd0cfed4fd9efd4bfdaafd1dfde3fdc3fd6afdfafce1fd8efcd4fd24fdbefda5fdb1fdfffdd3fd28fc7ffdf6fc8afe76fde7fd24fd69fdbefcebfcb8fc98fcc1fd11fe35fe3ffdbcfc2bfd76fd07fda4fd38fdaefd7efd8ffd8bfdd5fd20fd5dfef1fd1bfe14fe58fe61fd3efec0fe26fe02fedbfdabfd7efd02fdb3fd9efd47fe",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 23842,
+      "timestamp": "2026-04-11 02:47:48.509"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:23.663",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 863,
+    "hex": "5f030000a0d00e871ac9dc0100070001fad90f0100a101000000040000d6fd91fdd0fc1ffd21fdb9fdf2fc99fd5dfe57fd7efdc7fdb5fdc6fd0ffefcfd0efd88fc51fe7dfc50fdbdfd2dfe5afda8fd55fdf9fd20fd5afd98fd14fe98fd53fd67fd71fd2efd25fd65fdfbfcd7fd6bfde7fcb9fdeefd8cfdd2fdc6fc62fdacfddcfdfafc11fd63fd3bfda6fd1cfe76fd1afebafc25fde7fca5fd68fd04fe09fd27fed7fd76fd80fc5bfd29fd9afdb9fd46fd2afd47fdd7fd45fdd2fcbbfd7efe9bfd74fd13fd32fdb3fd1ffde3fcb2fdb3fd0bfd2efda5fc7bfdbcfd30fefbfd8bfde0fd96fdbbfd2bfd33fdb7fd9afdb2fda4fdc6fc6afdb6fdfbfd26fec4fd5ffd72fc0afda3fccbfc0afe35fe1bfd34fdb2fd74fd35fd31fd2efd46fef4fc45fe7efd5efd3cfdaafdc9fd65fda0fdcafd97fda8fcbffde2fce8fdacfd7cfd8ffd15fd75fd7ffdbefdaafdf1fdc3fd39fd5bfd2ffdf6fd86fd15fe6bfdd8fda2fd9efdc2fd6efdf8fc70fdf6fd53fe97fd6ffc2cfda5fd39fd2afd92fe20fe5cfd61fdeafc22fd77fd79fd71fd20fef5fc63fd5cfd53fd62fd9bfd05fe95fde9fdb1fc5dfd97fc05fd4dfd67fdc0fd9efd09fda3fd45fcc7fc36fee0fce4fd24fd4bfd29fdbcfc2cfe82fd9cfd52fdd9fdd0fc1cfd1ffd72fd1ffdebfc28fe03fe75fda8fcf9fc5efd99fdfafd62fd67fd59fd0afcbbfc1dfd25fe59fd2efe42fe07fd4ffd83fd49fd74fd61fd59fdd0fd59fd19fde6fdb6fd56fd09fe82fdf7fd11fd03fd30fd51fdd8fd5afda4feeafdeffc34fde7fc0bfd28fec6fd6efd33fd14fe42fd77fd10fecffd36feb4fde4fd7afdf1fc88fc7cfc66fef7fdbffd83fd0afde6fccdfdaafc0afd9efd53fe1ffe6ffdf9fc81fd3ffde6fd71fd51fd38fd57fdc0fd8dfdf2fde9fdfefdacfde3fd7dfd6ffdfffcc5fdabfd79fdcafd85fd5ffd0efcecfc91fd62fdd7fd62fec7fd0efe2bfdc5fd0afd1cfe9ffd72fd1cfe7afd72fdd6fcccfc75fd5ffe69fd59fdd7fd3afd02fdf0fd72fddbfdf5fd47fde6fd79fddefca1fdc2fdfbfd23fe80fdebfdfcfcddfc94fd1dfec5fe7afdb7fd83fde4fc75fde7fd55fddefd7efdaafdccfd7bfdcffcc9fd88fd23fd66fd0efd63fd1efd70fddafd6dfdeafd5afd8bfdcffc01fd66fd62fdeffc2cfd79fd3afe0cfdb9fc29fdf2fd31fd34fd38fd0dfd4cfdc3fc49fdfefdb4fc67fd10fe",
+    "header": {
+      "dwLength": 863,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 55802,
+      "timestamp": "2026-04-11 02:47:48.650"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:23.772",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d04000070721f871ac9dc01000700015c370f0100000200000000000005fe4afe76fd87fca2fd33fd53fe91fd57fe8efd21fd2afd76fd9bfc28fd8efd7cfde0fd2bfe59fdbbfc05fe01fe37fed5fda2fccafd43fdb9fc26fd6ffda7fd10fe41fd91fd3afd5bfd7dfd3cfdf7fd71fd74fd95fd3efdc1fd5efd10febffd9efd22fe6dfdc2fd02fd42fd97fdf2fda2fd6cfd7ffd8dfd96fd81fd19fd38fdf6fc7dfd6dfddcfc09fd4dfd4afda5fd81fd8ffd86fc38fd05fd85fc8afdc0fd9efd5afdabfd29fe89fd4ffd09fefdfdb7fdc4fda5fd75fd7efdd1fd73fe0efe9efd5ffd37fecafcb6fc7ffd7ffd17fe9efd4bfdadfc31fd98fdd9fd4afd2efe11feb4fda1fd00fd80fd75fd96fd86fe7afdaefd3afd65fd33feaefdd5fd1ffebcfd8afde9fc41fdd5fc6cfdebfeeefd11fe30fdaafd52fda6fdecfc00fe55fddcfd0cfd99fd03fd42fd48fd03fee9fd32fe0cfe63fd59fdb2fcc4fc81fd39fd0ffdf2fca7fd33fd6efd11fd64fd83fdaefd05fd34fd1dfdadfd80fdf9fde6fd29fd22fe21fd95fd54fd2cfdfefde6fd7ffe9bfd3bfd4dfdfffcd1fc78fd09fe67fdc3fc5dfd67fdb1fcc3fd5dfd87fdcffd9efc85fc06fd47fdb0fd2bfed9fd94fdb4fc10fd7afcd3fcbdfc9dfd13fdd3fdeefd18fd42fc1dfd0afdfbfc5bfdbffdb0fda1fcb3fc28fddcfdc5fd8ffde6fdd4fdaafd36fee3fc04fe21fe80fe0cfedffde0fc7cfdc7fd51fda2fed3fee9fe51fecafdc5fd91fdf0fd0afe3efe36fdb9fd43fd8bfd8dfdc2fc6efd0afdb1fd29fd95fd87fce7fcb8fc1ffd75fe95fdd9fd2cfddafcfafc8dfdbafd03feb2fdfafc9afc38fd95fdf2fd64fdc9fd19fdf6fd89fda3fd51fda9fcc0fde7fd22fe17fe4cfd88fdeffc5afd27fdabfdd8fd71fde9fcf6fc0dfdb0fccbfd29fdf3fdaefd8bfc0afdf5fc36fd38fd30fde0fda2fd78fd03fd92fd9ffd64fd9cfd9dfd19fd98fd0afdf1fc09fdbefc79fd00fefafd92fd8dfc59fd25fd59fdf6fd85fed9fc6cfd86fcf3fc7dfd28fe11fe0afe5afd21fd9ffd55fd8ffdd8fd76fdb8fd5bfd47fcf4fd30febbfd9afd17fe7ffd3ffdbbfdd0fcdffcd1fc3dfd2efe30fef4fd25fd1dfdb4fc06fe05fedcfc74fd36fdb8fdf7fd96fd50fe54fdc6fdb6fc0bfe8afd60fd33fd31fe87fd37fd5efdddfdb6fd94fd70fd81fd0dfdeefc94fd03fd88fd25fd6bfd13fec9fc2dfd7afd38fdeefd9cfdbcfc00fd05fd29fdf8fc45fdf7fc30fd14fde9fc9dfc8efde3fde0fd32fd49fd6afcfafddbfd40fd5efddefd06fd50fd3efd10fd84fd3dfe10fdb7fd3dfd33fd18fd25fd57fde8fd00fe41fddbfd69fda4fd34fd91fd57fde6fd51fd2dfd94fd78fc75fd77fd68fdc2fe23fd8bfd19fd88fd6cfde4fd1dfeaafd74fd9efdc5fc5dfdd0fc95fd47fe7bfddefd7efdcafce5fca7fc3afc0cfdedfd3afe2ffdedfcf5fcfbfd16febffdb1fddafd40fc1afd9bfde3fc92fdaafd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 14172,
+      "timestamp": "2026-04-11 02:47:48.759"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:23.912",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d04000030cf34871ac9dc010007000186da0f0100000200000002000047fddafd93fcedfc8afd56fd39fda8fdb9fdfefdccfd20fdd6fc83fdd7fd1cfe21fdb3fc8efdf6fd0dfdf4fc84fd58fdb3fd9afd19fd66fc51fdbafd89fd90fd28fe04fe15fd31fd31fd97fda1fd34fe7bfd5cfda0fd76fd85fc4ffd2efe55fe05fe70fd20fd18fc8ffdc7fceafd13fe7efdebfd78fc93fcdefc1efdd7fd82fd25fe2dfd0cfd39fd14fdc9fde7fc57fde6fc91fcecfc19fd1ffd3dfd19fd76fd4efd02fdd8fd89fdb4fc85fd2bfda1fd33fe53fd7afdb6fd31fd22fe7afd57fde6fdaffcc7fd2efdc4fc22fd97fd6ffe90fd58fd2bfd0ffd3cfd5dfdadfd57fd8efd31fed2fd94fdd1fdbafd43feb1fddafdf8fdc0fd56fd68fd40fed9fcaffdf0fd67fdf2fd13fd95fc6afd15fd10fec1fd4bfdddfdbdfc35fd0cfd9efde0fdf3fdf1fcc8fdc5fd73fcf6fc19fe73fdbffd63fd7bfd7dfd17fcf7fc0cfe49fd13fd0afd73fd8ffde9fc59fd0bfdaafde5fd39fd8bfcc1fcf9fdf0fb15fd3dfdbcfdeffc10fc2dfdb8fcdafde9fc73fdb1fdd0fd16fce5fc1efde5fd9cfd28fef4fc23fd12fde2fd50fd10fd7afd2bfd44fdfdfc6bfd04fd6efd29fde4fd9efdaffd42fd99fcddfca5fcd2fc17fddcfd80fd7afd5efd56fd7dfcf2fdf5fcd0fd53fd76fddefc93fc95fddbfd4ffd13fd67fc0afdeefd80fde1fc2cfd1afd69fe89fdd4fcd1fc92fd22fd9afd15fd06fe19fc92fc9afd2bfd27fd14fdf7fc71fd58fdc1fdb4fd5bfdf3fdd6fc3cfd81fd1efe61fd2dfd00fd46fd16fd3ffd15fd00fd3ffd52fd63fd93fd23fe7bfd70fdd2fde5fc19fd58fdf4fc23fda8fd6afd4bfd52fd20fd16fc63fdcdfc15fec0fd18fd49fd93fdf3fc2dfd55fddafdf8fd59fdcbfd81fde2fc2ffdc0fdfcfcacfd4ffd8bfd20fdd5fd96fdc6fd81fda1fd8ffd05fdbbfcb7fc90fcc3fc65fde5fd97fda7fc25fd62fd76fd34fde0fdfafd94fd0cfdc4fc3bfd4afdc6fdebfdb0fd10fd99fd66fd74fcdcfd71fdfbfdb0fd58fd52fd2ffe1dfd77fd95fc30fd32fe66fd23fd6efdbcfcb9fc3cfdb2fd44fd55fe8afd5ffdd3fd9ffd07fd0afd9ffda1fccefda0fc91fd58fd63fd26fd0cfe94fd78fd4efda2fcd2fcc3fddbfc9bfdd8fd93fdc1fd5cfd02feb8fd86fc1effbdfc65fdb2fcf0fc08fd4bfd56fe8efd93fdc6fd8bfd27fc52fd26fe51fd8dfd7afd30fe95fd73fd0afdaffd24fdf9fcc0fd0ffe92fd6efd1bfdadfd09fe97fdd3fd98fd02fd93fd6afd69fd15fd83fddafda2fd6ffde8fc8efdc5fd15fd15fe9efd6ffd29fd46fd8bfd26fd08fe1cfd0afeb5fd14fd2cfdb9fc2afd60fee9fda5fdeafd89fd3dfe68fd23fdf3fd91fdeffce1fc36fd5efc1afdb7fd22fd1cfeb0fdbefd14fef4fc5dfd94fd44fe2bfe78fdbffda2fd52fd06fda3fddffc49fd95fd9dfd3dfd0cfeddfdb0fe39fef4fdd4fc22fdd9fd49fd12fd07fc27fd63fd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 55942,
+      "timestamp": "2026-04-11 02:47:48.899"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:24.022",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 863,
+    "hex": "5f030000007145871ac9dc010007000164390f0100a10100000004000079fd13fd95fd1ffd65fd20fd97fdeefd89fdb6fd12fd43fd36fdfefd35fd2afdb6fcf9fc22fdc7fcecfc02fe02fe67fdb3fcbbfcbffc2bfd9bfd19fd82fd59fdbbfd9efd55fd44fd2dfd42fde5fdc4fd1cfe00fe80fc54fd19fd11fdb3fb19fd50fd26fd53fdd2fcddfc51fea1fdb4fd04fe70fd29fdf8fc08fd72fd7dfd53fd7dfd8cfd55fd64fdf9fd17fd51fdf4fdbdfdbbfdf2fcfffc8cfcbffc48fdbcfd29fe29fdcffc38fd55fd48fdfefc4efd34febbfd71fd1bfd7ffde0fd87fd0bfd97fdd2fc0bfd23fd1ffd13fe31fd9bfcd9fd58fe29fdf6fd6ffc92fdf5fd9cfde7fc75fdd5fd16fd2bfd8ffd8bfd8efd1ffe52fd97fd99fd07fcb3fd4ffd27fe8afd9afd54fc4cfdc4fda3fd8dfd22fe94fd8bfd75fd5efdf8fc20fd89fd09fe75fd5efdb9fd87fd3bfd2bfeaafd0afdf9fde3fcacfc35fd44fd93fda3fdfcfd78fda9fdfcfdeefc5cfde2fc63fd9bfddefc05fe48fdcbfca8fdbcfd3efd46fd2dfd16fd15fd22fd93fd7efd73fd81fde7fdb4fcaffd0dfde4fd26fea1fd6afe0afe0bfd4cfd61fd82fc3ffc57fe0afd38fdb9fda8fdcafd39fd1ffeaafd1efe09fefffc67fd14fd03fd7dfd26fdc7fdc4fd34fdb8fd24fd3cfdd8fc40feb9fd34fefdfbeafd7cfc2efd9cfd23fd6afdd4fd95fd8cfd49fc74fd61fd12fd4afd3afe74fd57fd82fd32fef7fc77fcedfc0cfd1efea9fd10fdd0fcd8fd50fd67fe94fda4feb1fdb0fd4bfc19fd16fd07fde2fd7afd32feb0fd8dfd9efd1cfe32fddafd64fddcfdd2fc8afd7bfeb7fd24feb4fd8dfd74fd03fd12fd5efd84fdfbfd02fe55fee1fdbffdebfc50fd99fd51fde6fd66fdfafc1dfd8afd0efde1fddafd23fd27fd99fddefc51fdb9fd46fd5dfe68fdd1fda7fd92fdbffd66fda6fd95fddbfd8ffd94fdedfc62fd40fdb6fd53fdd3fd84fce7fd5afd4afec7fcfbfdd0fd13fe41fd5efd59fda8fc84fdc9fc22fd6cfdfdfd60fd92fdb5fc2afd9cfe3afe99fd55fd36fd4bfd54fda6fc93fdb3fd7afd7cfdbcfc2cfdc1fc3dfdd0fdc9fd57fdaffdf9fd83fdcffc68feccfd60fd35fe27fe7bfdebfc92fd01fd33fe35fdbdfcf0fde8fdedfcfdfb47fc4ffd75fd7afd3efd0dfdf8fc41fd1afc5afd1efe67fedcfdadfd00feb4fd6cfea8fd23feb9fdf9fcdffd8cfc57fd1bfd6ffd43fd83fd",
+    "header": {
+      "dwLength": 863,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 14692,
+      "timestamp": "2026-04-11 02:47:49.008"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:24.162",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d040000d0f45a871ac9dc0100070001c0b40f0100000200000000000087fd5bfd9afdadfd12fda1fdecfd4dfe40fe97fda7fd08fddbfc16fe21fed8fde2fd2efefbfc85fdc5fce1fd52fef3fd41fe89fd74fd62fdaafcbafc7dfd8bfd0ffebcfd19fd59fd3bfd6bfd8cfc11fe78fe79fd52fda1fcc0fc91fd45fddbfdf1fc35fdf3fc3afcaafd13feddfd9ffd60fd2dfd7afd47fd45fd65fdd3fda3fed1fd94fca9fd81fdddfd7afddbfdaafd71fdacfca4fc71fd5cfcb2fdf0fd71fd7afd36fec3fd87fd64fda1fd2afddefd63fdbcfde4fcf9fc75fd3efdc6fdabfd28fe1dfe6ffdadfdecfd1cfd9cfdaefde7fdeefc93fd69fd67fdb6fdb5fda9fd86fe0efdd1fd5bfd1bfd9bfd03fe94fd87fdf9fc02fdf3fc73fdc1fd92fd05fdecfc4cfe5cfd50fc51fd7efdeafcbefd11fe62fd62fd59fc58fd2ffe2ffdc6fd69fd78fd05fdadfc32fd1efd14fd4bfdcffd7cfd9dfd65fc46fd67fd67fd15fd0ffe4afd57fdd6fc3efd70fdc2fd0ffda0fd7bfdd3fc38fd25fddefcdbfd45fe2afd50fdf3fc9bfc7afdd4fdf9fda0fd0afd91fd5bfd65fcb0fdd7fdecfd55fdfbfd5efd94fdaffdbefc2dfdc2fd65fdf3fc11fd5ffd8ffd91fc00fddbfca1fdfdfd09fe5efd83fdbffd35fd27fd7cfdccfd3efd1cfd63fc1afeb0fc5efdb8fddafd95fd37fd07feb4fce8fc95fd34fed4fd7afd73fd54fdfdfc2cfcfcfcb6fdf3fcd6fd3cfd2ffd77fd60fde4fd58fe09fe7ffe90fe8afe38fd98fc57fd8ffd3cfc5ffec4fd7efd8efdfffc98fda2fd4bfdd3fda6fdfafcccfc4bfd07fedffda8fda1fc3dfd80fd8afd1bfdf7fd09feddfd8afddafd9afdfdfd89fdc9fddffd8bfdfbfc00fe97fd83fdd3fdd4fde4fcaefd28fd84fd0bfd01fdb7fd79fdadfde1fd29fd8dfc96fcc6fc7ffde3fd25fd73fd2ffd10fdfbfc06fd20fd8ffd07fe6dfdeafdc9fc1efdb5fcfdfc9ffd6cfd9cfdf3fc6efd1dfdedfc95fd9ffd29fe8dfdb2fd5cfc0cfd33fc27fdd1fc58fd08fd38fd45fd7afd72fdecfdd7fd70fde9fd7afdf7fca6fce7fcacfd6ffdecfc75fdbefd4afd35fde1fd4afd87fd81fd4bfd97fceafc3dfd9dfc63fd1dfdb0fdfafd1afe87fd32fdcafd91fd1cfe41fdf5fcbdfda0fd3ffeb9fc6afdf3fd69fdfafdd9fca6fd07fd20fdd2fd99fd5dfe78fdf7fdaffd4bfd5ffdaefdb1fde5fd2bfd42fd4afd49fc78fc80fd0ffd56fdbdfd7cfd88fd3cfd1bfde0fd21fd3bfe5efe79fdbbfd6afddcfc53fe2dfd79fd6efdbcfdb1fc97fc88fdd3fdb6fde8fdd2fd4ffdfffce2fde7fd92fd1ffdbafd54fd09fed2fc83fd1ffdd5fd5bfdc7fdddfd4ffd59fd20fde5fcd0fdf0fc4cfd09fe24fecafc29fd88fd6dfd09fdf7fdb9fc64fdebfc79fc2ffd95fdc1fd3afe07fe71fdc4fd24fd98fd3ffddbfd2cfd5dfdd0fdd1fc1ffd22fce3fd77fd59fe3bfd2cfd01fdacfc66fd17fd0efedafdc6fc78fd65fd0dfd34fdcbfdaafdfcfd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 46272,
+      "timestamp": "2026-04-11 02:47:49.149"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:24.271",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d040000a0966b871ac9dc0100070001e0120f010000020000000200009cfdf8fd2efddafd69fd27fddcfd3afeddfd15fd61fd10fd53fdf6fc50fc8ffea0fd94fc2ffdbdfc26fde1fc77fd3dfdbafdbdfd78fc60fdbafd21fd9dfd33fe2ffe43fe6ffda4fcaefd74fdbdfd18fdd2fd19fd81fdd5fd20fd75fd1cfd17feb5fc49fddafc9efc07fdeafcaffdaefcc4fdd2fd3cfd43fdb7fcaefdecfd48fe29fd95fd4efdbefc7dfd63fd69fdd8fd3afd64fd75fd94fde4fc15fd63fde3fc84fd9dfd67fdacfc22fde3fc41fd21fd6bfe95fd94fdf7fc48fdabfdfbfc31feadfd0efd7ffd29fd23fd02fdd0fc25fefbfde6fccefc0afe7bfd51fce9fd30fe03fe93fdadfce2fd80fd96fdadfd7afe3dfe69fd8cfc36fdd2fc6ffd4afd17fe4dfdfffcf9fc7ffc7bfde3fd50fd25fd71fd06fdf0fc85fd9cfc77fdfffdbafd22fd6dfd1afd3bfd1dfd74fda6fcb5fd79fd0bfe76fd45fcc9fddcfcacfd3cfd63fd78fdc5fce4fd67fc42fefdfd11fd0dfe99fd97fd45fdecfcfefce6fddcfda4fdf4fceefc47fdc3fcc2fd61fd0afdeefdf7fca0fd03fd89fc21fd6dfdddfca3fd04fdedfc7ffdc9fd9dfdbafdfdfce9fcc2fc22fe28fdf8fc99fce1fd12fd37fd6bfdecfc4bfdb4fc43fd73fd86fdf3fc25fd6bfd0afd17fc96fd5bfd8dfd5ffd32fdbdfc86fd07fd58fd1efe02feadfd13fd87fdedfc9efca5fc84fdfefdd6fdc8fc90fd89fce8fc66fdaafcf7fda1fca9fc08fd5dfc4cfd0bfd6afdb2fd50fe99fc89fde8fc1cfdd5fd27fddafd27fd52fd54fd57fc74fc11fd70fd6cfdb7fdd2fd7afd4bfd6dfc5bfe48fdfbfc28fe75fdb8fd31fd18fd44fddcfd80fd61fd5efd7ffca5fd03fdbafd0dfd01fdd3fd36fd7cfda3fcaefdeafc28fe09fe92fd91fd5cfd53fc8afcf9fcfafd54fd97fd4dfd89fdd9fc68fd0afe71fd4afdbbfd84fda4fdf3fc3cfddffdf7fbbffd0afe8efd8afd63fd6ffcd9fc60fd0cfee5fdfbfc73fd2dfd4ffdd1fd48fdb7fd28fe09fc97fdcafc7afd14fd96fd40fd7bfd42fd4ffd1dfd6ffddcfcb9fdd0fd5dfd55fdadfce2fc33fc68fdb0fc0ffe8cfdf2fd41fd4afd86fcc4fd92fda1fd22feb9fd1cfeb0fdbefc97fd50fde4fd83fd59fd11fdf6fc37fdabfd42fd36fe6bfdf0fcdbfc67fd27fdcffc0dfd5bfdadfd21fdbefd13fd97fc57fdaafd71fdabfed2fc24fd01fed4fc49fd2ffd7bfde3fd8efd61fd3ffdc8fd11fdaefd1dfedafdd4fd17fe0afde0fc79fdbffdf7fcc6fd09fd24fd1efe60fdfdfdb4fd85fd84fd56fdf0fd11fd07fdf1fdfefdb9fdc8fd29feb2fd91fc76fcc5fddafc01fe82fda1fd2ffd8afd6ffd58fd75fee8fc9afd9afdc8fc2efd30fdebfc78fd09fe2cfd09fdd7fd88fdfdfc19fd04febafdf7fd80fd29fe4bfd9afc65fd6ffddffdd4fd91fd06fd76fd8dfc36fda2fd0cfe41fdf1fd73fd88fdabfd56fd92fee3fe08fe3efec4fd1afdbbfdd6fde9fc03fd",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 4832,
+      "timestamp": "2026-04-11 02:47:49.258"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:24.412",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 863,
+    "hex": "5f03000060f380871ac9dc0100070001c8b60f0100a101000000040000b4fdb3fdc6fc87fdf8fdfdfc6afe2ffd85fd67fd03fde8fde0fd5efc98fd5bfd3ffd4dfdaffda3fdd2fc67fd94fdb8fd5efe8bfdbffd58fd84fc8ffdf7fd86fd08fe5cfd8cfda1fc2ffd6dfddefdf0fd91fe43fd46fd23fda4fc28fdecfd95fd65fe49fd68fdfbfc9dfdc7fdb8fd77fd23fe7dfd18fe82fd5ffd2afdd2fd73fd2cfe56fd0afd54fd9cfd70fd9efd6cfdb0fc03fe5cfd77fdddfd5efd22fda5fc8afdb0fd7afd7efc14fd50fd61fd5efd9efd18fe33fdcbfd47fdfafce1fd1bfeeffde0fd44fd75fc50fc92fdf8fc3efda8fd60fe43fd78fdacfdfffd76fd22fe92fd25fda8fd24fc1dfd81fda7fd32fe89fddffdaafd8dfc1dfc26fd80fdc1fde3fd6dfd0afdf5fc90fd96fd96fd22fe93fda2fd41fdd6fd70fdd0fc90fc23fddcfde9fda2fcc7fcc5fc74fcc6fda6fda7fd84fd74fdb0fdf1fc4cfd31fefafd4bfd0ffdfefd1bfd2ffd6dfd68fe5afd93fd4efe2bfe85fdd7fc23fe84fd43fed5fdcdfd12fd8afd33fdf6fdbafd65fdc7fdaafdb8fcf1fc63fd6cfd08fd6bfd12fef3fd6bfd05fd39fdf0fcadfd4ffd7bfc0ffd6bfd78fcd1fddffd6cfda1fd4dfdd2fc4efd4efd41fd33fd0ffe13fe50fe4bfdf0fc04fdfdfcc1fc73fd48fd6dfdd6fd2efd97fd3ffc28fd8efde3fd19fdc6fd7efd84fc68fcfefcc3fd8dfdcafda3fd2afd99fdd8fc8bfd2dfe71fdcffd9ffd6ffd4cfd80fd18fde1fd0ffe91fd79fdbafd0ffd4afd3bfde5fcc1fdf0fd3bfdf9fc75fdcffc6cfd8dfdcbfd86fdb8fc98fd95fd1afdcbfdc2fd9efdb9fd12fd30fdfafc12fd5ffd66fd6efd68fd68fdbafc72fd29fd91fdf3fc22feb3fd86fd77fd2efd46fd8efd7afd52feb3fd42fd8afdf9fc2bfce0fc59fd53fe36fd11fd26fde0fc78fd8afdc0fd63fdddfd7efd2cfdcdfccbfc74fd31fe84fe06fdeffd84fd31fee9fdf6fcfdfd57fd0efdfafc06fddcfc69fdaafdb6fdcefd97fd84fd1cfecefcabfc02fd3efdd0fd07feaafd6ffc3bfd29fd8dfdd1fdf2fdd1fdd3fd49fd57fd27fd4cfd5efd93fd9efe8ffd71fd96fdd5fdf1fd11fe9dfdc8fda8fd27fddcfd02fda5fdd6fc1ffed5fc1bfe7bfd89fd6dfde1fc11fdfafdb3fd6efdc9fd93fdd6fd3cfd8afdb4fdf8fd12feaefdb0fd40fdb2fd8afdd2fd7afda9fdadfc62fd09fe1cfe37fe10fe41fe",
+    "header": {
+      "dwLength": 863,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 46792,
+      "timestamp": "2026-04-11 02:47:49.398"
+    }
+  },
+  {
+    "timestamp": "2026-04-10 18:44:24.661",
+    "direction": "S->C",
+    "src": "172.18.114.231",
+    "src_port": 9999,
+    "size": 1053,
+    "hex": "1d0400000019a7871ac9dc010007000144900f0100000200000000000037fefefc4cfd7afc20fd85fd95fdeffd60fd27fef0fd9afdb4fddbfc1dfda6fd40fe89fd20fe2afdc8fcd3fd76fdf9fdb8fde9fd14fdb3fc9bfcd1fc57fd26fe81fd92fd5bfdf6fc3afd9ffc2dfe32fe1dfd0afde8fc39fd0afe8dfd07fdbffe17fd67fdc6fdd0fc4dfdd0fc11fec0fd1bfd2dfd38fdaafd4bfd1bfd28fdaefd47fd6afdcdfd12fdb4fd21fedffdd7fd10fe25fe3cfd74fd2bfd1bfef7fda4fdfdfdd8fd98fd56fd8bfdf4fc3bfd1dfe13fe17fe1efd15fdf8fda5fda8fd18fe0ffe84fd53fdf1fd5ffd38fe67fe62fddbfdd0fd26fdc1fc18fdd0fd1dfe81fdcefde6fdf5fc36fd1efd97fde5fc00fe7afd08fdf3fd3dfd8afdd3fc18fdfefdb2fd90fe74fd99fd67fd27fdf9fc3bfe80fdf8fd76fcbcfd26fd71fdf4fdd2fd76fd8ffda4fd64fc94fdb3fd76fddafd86fd3efd0dfdcbfd92fd3cfd2cfdcdfd2dfde3fdd2fd3cfd71fc9efda5fd2cfe73fdfdfcddfc7ffd45fd58fd0cfdf0fde4fd63fdf0fc32fd4dfd69fdc8fd94fde7fd60fdd5fd0ffdeefc88fdb7fc3cfd5ffd42fdf0fc5efdb2fc24fdb6fd31fd59fd02feb3fde4fc8afccffd08fef2fd70fdf8fd98fd6ffdcafc08fdb1fc6efd88fd9cfdb2fd0efdd3fc8cfd91fd01fe3efd08fd97fd84fda1fcc9fc82fd92fd71fd2cfd50fd98fde9fc5cfd24fd08fea6fd78fd70fdb9fde6fdc4fcbefde9fdaffd77fe9bfd23fe7dfddefdfdfdc3fd17fe32fe95fd6afda9fd49fd63fd33febefd59fd61fd76fd62fd40fc03fe03fe10fe95fd66fdf7fd57fd26fe8dfdabfd80fdecfc29fd19fd5bfd0efec4fdfbfc1afecdfc98fdc1fd99fccefc76fd6cfe68fd49fdc4fd12fd4ffd46fcc9fd25fd43fec2fd47fdc2fc64fc69fc97fdbefd4ffe18fe59fd9cfdaafd75fd5cfda2fd40fd90fc8afc42fd0efd09fe51fdb6fdd0fd8bfe99fcccfcfffc88fd72fd51fd9afebdfdabfd25fe06fd4ffd9ffd06fd1efd92fdccfdc3fd2ffd97fd3ffde6fda2fda2fde2fc89fdc1fce2fca0fd3dfe54fefbfc78fd34fdd2fdfdfc4efde5fd2dfe83fd90fd9afcadfdf4fcaafd38fe24fdc3fde6fdedfc0ffd6efd69fd2cfd05fe24fec6fd7ffdaafc72fc38fdddfd81fe76fd59fdf2fc62fd80fcb2fd13fd39fe66fdd7fc0bfdd4fc5dfd31fe22fd78fcc1fc28fd79fd21fd90fd3afe5ffda5fe88fdb3fb9cfd0dfdf3fc23fdfdfc1cfe5dfddefdc9fcc3fcb1fd8dfda9fdb9fd4ffd22fd1dfd96fd13fd2ffdc0fdf3fdf1fc89fd5efc76fd82fd89fdfcfd85fd88fd0cfd51fd52fd0bfd94fd0ffecafd2ffd08fd7dfccdfc5dfd65fd80fd44fdacfd93fdb2fd4ffdfafc51fd0ffe9cfd28fdf3fd0bfd3ffde6fc2cfdd7fd1ffe5dfd5efd5cfd75fc14fdcbfddafdaafd4cfd23fd1efd83fd47fe93fdf1fddafd8ffd71fd49fd4cfd6efd80fd6efd33fdbdfd30fe03fdb0fbe8fdd1fcfefc",
+    "header": {
+      "dwLength": 1053,
+      "nVersion": 7,
+      "nMsgType": 0,
+      "nMsgTypeName": "UNKNOWN(0)",
+      "nFlags": 1,
+      "nCheckSum": 36932,
+      "timestamp": "2026-04-11 02:47:49.648"
+    }
+  }
+]
