@@ -15,7 +15,9 @@ ATOM_BASE_URL = f"http://{ATOM_HOST}:{ATOM_PORT}"
 
 # 日志配置（使用绝对路径，确保无论从哪个目录运行都能正确保存）
 import os
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LOG_DIR = os.path.join(BASE_DIR, "logs", "soap_proxy")
+# soap_proxy 目录的父目录
+SOAP_PROXY_DIR = os.path.dirname(os.path.abspath(__file__))
+# 日志保存在 soap_proxy/logs/ 目录下
+LOG_DIR = os.path.join(SOAP_PROXY_DIR, "logs")
 LOG_FILE = "soap_proxy.log"
 LOG_FORMAT = "[{timestamp}] {level} - {message}"
