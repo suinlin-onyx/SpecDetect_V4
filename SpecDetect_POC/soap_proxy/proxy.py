@@ -5,6 +5,8 @@ import queue
 from flask import Flask, request, Response
 import requests
 
+from soap_proxy.logger import SOAPProxyLogger
+
 
 class SOAPProxy:
     """SOAP 透明代理"""
@@ -13,6 +15,9 @@ class SOAPProxy:
         self.atom_host = atom_host
         self.atom_port = atom_port
         self.log_dir = log_dir
+
+        # 初始化 SOAPProxyLogger
+        self.logger = SOAPProxyLogger(log_dir)
 
         # 线程安全的日志队列
         self.log_queue = queue.Queue()
@@ -52,10 +57,14 @@ class SOAPProxy:
         # 生成请求ID
         request_id = str(uuid.uuid4())[:8]
 
-        # 打印请求信息
+        # 提取 SOAP 操作名称
         soap_action = request.headers.get("SOAPAction", "").strip('"')
+        xml_data = request.data.decode('utf-8', errors='replace')
+        operation = self.logger.extract_operation(xml_data)
+
+        # 打印请求信息
         xml_len = len(request.data)
-        print(f"[SOAP Proxy] >>> {request_id} | SOAPAction: {soap_action} | {xml_len} bytes")
+        print(f"[SOAP Proxy] >>> {request_id} | {operation} | SOAPAction: {soap_action} | {xml_len} bytes")
 
         # 记录请求到日志队列 (非阻塞)
         self.log_queue.put({
@@ -63,6 +72,9 @@ class SOAPProxy:
             "direction": "req",
             "xml_data": request.data
         })
+
+        # 使用 SOAPProxyLogger 记录请求
+        self.logger.log_request(request_id, operation, xml_data, dict(request.headers))
 
         try:
             # 透明转发到 Real Atom
@@ -82,6 +94,10 @@ class SOAPProxy:
                 "status_code": resp.status_code
             })
 
+            # 使用 SOAPProxyLogger 记录响应
+            resp_xml = resp.content.decode('utf-8', errors='replace')
+            self.logger.log_response(request_id, operation, resp_xml, resp.status_code)
+
             print(f"[SOAP Proxy] <<< {request_id} | HTTP {resp.status_code} | {len(resp.content)} bytes")
 
             return Response(
@@ -93,11 +109,13 @@ class SOAPProxy:
         except requests.exceptions.Timeout:
             error_xml = b'<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><soap:Fault><faultcode>soap:Server</faultcode><faultstring>Gateway Timeout</faultstring></soap:Fault></soap:Body></soap:Envelope>'
             print(f"[SOAP Proxy] !!! {request_id} | Timeout")
+            self.logger.log_error(request_id, operation, "Gateway Timeout")
             return Response(error_xml, status=504, content_type="text/xml")
 
         except Exception as e:
             error_xml = f'<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><soap:Fault><faultcode>soap:Server</faultcode><faultstring>{str(e)}</faultstring></soap:Fault></soap:Body></soap:Envelope>'.encode()
             print(f"[SOAP Proxy] !!! {request_id} | Error: {e}")
+            self.logger.log_error(request_id, operation, str(e))
             return Response(error_xml, status=500, content_type="text/xml")
 
 
