@@ -1,7 +1,5 @@
 """SOAP Proxy 核心转发逻辑 - 最小透明版本"""
 import uuid
-import threading
-import queue
 from flask import Flask, request, Response
 import requests
 
@@ -16,41 +14,8 @@ class SOAPProxy:
         self.atom_port = atom_port
         self.log_dir = log_dir
 
-        # 初始化 SOAPProxyLogger
+        # 初始化 SOAPProxyLogger (统一管理所有日志)
         self.logger = SOAPProxyLogger(log_dir)
-
-        # 线程安全的日志队列
-        self.log_queue = queue.Queue()
-
-        # 启动日志写入线程
-        self.log_thread = threading.Thread(target=self._log_worker, daemon=True)
-        self.log_thread.start()
-
-    def _log_worker(self):
-        """日志写入线程 (守护线程)"""
-        while True:
-            try:
-                item = self.log_queue.get(timeout=1)
-                if item is None:
-                    break
-                self._write_log(**item)
-            except queue.Empty:
-                continue
-
-    def _write_log(self, request_id: str, direction: str, xml_data: bytes, status_code: int = None):
-        """原子化写入日志"""
-        import os
-        from datetime import datetime
-
-        date_str = datetime.now().strftime("%Y%m%d_%H%M")
-        req_dir = os.path.join(self.log_dir, f"requests_{date_str}")
-        os.makedirs(req_dir, exist_ok=True)
-
-        filename = f"{request_id}_{direction}.xml"
-        filepath = os.path.join(req_dir, filename)
-
-        with open(filepath, "wb") as f:
-            f.write(xml_data)
 
     def handle_soap(self):
         """处理 SOAP 请求"""
@@ -66,14 +31,7 @@ class SOAPProxy:
         xml_len = len(request.data)
         print(f"[SOAP Proxy] >>> {request_id} | {operation} | SOAPAction: {soap_action} | {xml_len} bytes")
 
-        # 记录请求到日志队列 (非阻塞)
-        self.log_queue.put({
-            "request_id": request_id,
-            "direction": "req",
-            "xml_data": request.data
-        })
-
-        # 使用 SOAPProxyLogger 记录请求
+        # 使用 SOAPProxyLogger 记录请求 (包含汇总日志 + req xml)
         self.logger.log_request(request_id, operation, xml_data, dict(request.headers))
 
         try:
@@ -86,15 +44,7 @@ class SOAPProxy:
                 timeout=30
             )
 
-            # 记录响应到日志队列 (非阻塞)
-            self.log_queue.put({
-                "request_id": request_id,
-                "direction": "res",
-                "xml_data": resp.content,
-                "status_code": resp.status_code
-            })
-
-            # 使用 SOAPProxyLogger 记录响应
+            # 使用 SOAPProxyLogger 记录响应 (包含汇总日志 + res xml)
             resp_xml = resp.content.decode('utf-8', errors='replace')
             self.logger.log_response(request_id, operation, resp_xml, resp.status_code)
 

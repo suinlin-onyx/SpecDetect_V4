@@ -13,11 +13,23 @@ class SOAPProxyLogger:
         self.log_dir = Path(log_dir)
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
-        # 当天日志文件（加小时分钟）
-        self.date_str = datetime.now().strftime("%Y%m%d_%H%M")
-        self.log_file = self.log_dir / f"soap_proxy_{self.date_str}.log"
-        self.req_dir = self.log_dir / f"requests_{self.date_str}"
-        self.req_dir.mkdir(exist_ok=True)
+        # 当前日期时间字符串（动态，在每次写入时检查是否需要更新）
+        self._current_date_str = None
+        self._log_file = None
+        self._req_dir = None
+
+    def _get_current_date_str(self) -> str:
+        """获取当前日期时间字符串，按分钟"""
+        return datetime.now().strftime("%Y%m%d_%H%M")
+
+    def _ensure_log_paths(self):
+        """确保日志路径是最新的（按分钟检查）"""
+        current = self._get_current_date_str()
+        if self._current_date_str != current:
+            self._current_date_str = current
+            self._log_file = self.log_dir / f"soap_proxy_{self._current_date_str}.log"
+            self._req_dir = self.log_dir / f"requests_{self._current_date_str}"
+            self._req_dir.mkdir(parents=True, exist_ok=True)
 
     def _get_timestamp(self) -> str:
         """获取微秒级时间戳"""
@@ -25,7 +37,8 @@ class SOAPProxyLogger:
 
     def _append_log(self, content: str):
         """追加到日志文件"""
-        with open(self.log_file, "a", encoding="utf-8") as f:
+        self._ensure_log_paths()
+        with open(self._log_file, "a", encoding="utf-8") as f:
             f.write(content + "\n")
 
     def log_request(self, request_id: str, operation: str, xml_data: str, headers: dict):
@@ -37,6 +50,7 @@ class SOAPProxyLogger:
             xml_data: 请求 XML
             headers: 请求头
         """
+        self._ensure_log_paths()
         timestamp = self._get_timestamp()
 
         # 写入汇总日志
@@ -51,7 +65,7 @@ Headers: {json.dumps(dict(headers), ensure_ascii=False)}
         self._append_log(log_entry)
 
         # 保存完整 XML
-        req_file = self.req_dir / f"{request_id}_req.xml"
+        req_file = self._req_dir / f"{request_id}_req.xml"
         with open(req_file, "w", encoding="utf-8") as f:
             f.write(xml_data)
 
@@ -64,6 +78,7 @@ Headers: {json.dumps(dict(headers), ensure_ascii=False)}
             xml_data: 响应 XML
             status_code: HTTP 状态码
         """
+        self._ensure_log_paths()
         timestamp = self._get_timestamp()
 
         # 写入汇总日志
@@ -79,7 +94,7 @@ Status: {status_code}
         self._append_log(log_entry)
 
         # 保存完整 XML
-        res_file = self.req_dir / f"{request_id}_res.xml"
+        res_file = self._req_dir / f"{request_id}_res.xml"
         with open(res_file, "w", encoding="utf-8") as f:
             f.write(xml_data)
 
@@ -91,6 +106,7 @@ Status: {status_code}
             operation: 操作名称
             error: 错误信息
         """
+        self._ensure_log_paths()
         timestamp = self._get_timestamp()
         log_entry = f"""[SOAP Error] {timestamp}
 Request-ID: {request_id}
