@@ -274,12 +274,12 @@ def adjust_params_by_funcid(action_items: list, funcid: int):
 | 10 | B_QueryDeviceInfo | (无) |
 | 11 | B_SglFreqDF | dfmode, antpol, antetype, rfworkmode, ifatt |
 | 12 | B_SglFreqMeas | (无) |
-| 13 | B_PScan | dfmode, dftype, rfworkmode, antpol, antetype, ifatt |
+| 13 | B_PScan | dfmode, dftype, rfworkmode, antpol, antetype, ifatt, ifbw, gainctrl, levelthreshold, antezoom, antArryChoose, calibSwitch |
 | 14 | B_MScan | antpol, antetype, rfworkmode |
 | 15 | B_FScan | gainctrl, rfworkmode, scanmode, antpol, antetype, ifatt |
 | 16 | B_MScanDF | gainctrl, rfworkmode, antpol, keepmode, antetype, ifatt |
 | 17 | B_WBDF | antpol, rfworkmode |
-| 21 | B_FScanDF | antpol, rfworkmode, antetype, ifatt |
+| 21 | B_FScanDF | gainctrl, rfworkmode, antpol, antezoom, levelthreshold, antetype, ifatt |
 | 32 | B_StopMeas | (无) |
 
 ### 4.6 参数值格式化
