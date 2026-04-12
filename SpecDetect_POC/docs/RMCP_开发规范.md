@@ -286,7 +286,7 @@ def adjust_params_by_funcid(action_items: list, funcid: int):
 | 13 | B_PScan | dfmode, dftype, rfworkmode, antpol, antetype, ifatt |
 | 14 | B_MScan | antpol, antetype, rfworkmode |
 | 15 | B_FScan | gainctrl, rfworkmode, scanmode, antpol, antetype, ifatt |
-| 16 | B_MScanDF | antpol, keepmode, rfworkmode |
+| 16 | B_MScanDF | gainctrl, rfworkmode, antpol, keepmode, antetype, ifatt |
 | 17 | B_WBDF | antpol, rfworkmode |
 | 21 | B_FScanDF | antpol, rfworkmode, antetype, ifatt |
 | 32 | B_StopMeas | (无) |
