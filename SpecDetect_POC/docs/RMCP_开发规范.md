@@ -207,8 +207,9 @@ print(f"匹配: {calc == actual}")  # 应为 True
 | 14 | B_MScan | frequency, ifbw, antpol | 多信道扫描 |
 | 15 | B_FScan | startfreq, stopfreq, step | 频率扫描 |
 | 16 | B_MScanDF | startfreq, stopfreq, step, keepmode | 多信道扫描测向 |
-| 17 | B_WBDF | startfreq, stopfreq | 宽带测向 |
+| 17 | B_WBDF | startfreq, stopfreq | 宽带测向 (已过时，设备返回ErrCode=-1) |
 | 21 | B_FScanDF | startfreq, stopfreq, step, antpol | 频率扫描测向 |
+| 25 | B_WBDF | frequency, ifbw, gainctrl, rfworkmode, antpol, antetype, resolution, ifatt, antezoom, antArryChoose | 宽带测向 (当前实际使用) |
 | 32 | B_StopMeas | frequency, dfmode, ifbw, taskid | 停止测量 |
 
 ### 4.2 SOAP 参数名映射
@@ -235,6 +236,8 @@ def infer_funcid(action_items: list, is_nil: bool, has_taskid: bool) -> int:
     # 单频率参数
     if 'frequency' in names and 'dfmode' in names:
         return 11  # B_SglFreqDF
+    elif 'frequency' in names and 'ifbw' in names:
+        return 25  # B_WBDF (当前设备实际使用)
     elif 'frequency' in names:
         return 12  # B_SglFreqMeas
 
@@ -278,8 +281,9 @@ def adjust_params_by_funcid(action_items: list, funcid: int):
 | 14 | B_MScan | antpol, antetype, rfworkmode |
 | 15 | B_FScan | gainctrl, rfworkmode, scanmode, antpol, antetype, ifatt |
 | 16 | B_MScanDF | gainctrl, rfworkmode, antpol, keepmode, antetype, ifatt |
-| 17 | B_WBDF | antpol, rfworkmode |
+| 17 | B_WBDF | antpol, rfworkmode (已过时) |
 | 21 | B_FScanDF | gainctrl, rfworkmode, antpol, antezoom, levelthreshold, antetype, ifatt |
+| 25 | B_WBDF | gainctrl, rfworkmode, antpol, antetype, resolution, ifatt, antezoom, antArryChoose |
 | 32 | B_StopMeas | (无) |
 
 ### 4.6 参数值格式化
@@ -591,7 +595,7 @@ SOAP_FUNCID_MAP = {
     'B_PScan': 13,
     'B_SglFreqDF': 11,
     'B_SglFreqMeas': 12,
-    'B_WBDF': 17,
+    'B_WBDF': 25,  # 注意：设备实际使用 funcid=25，不是 17
     'B_QueryDeviceInfo': 10,
     'B_QueryFaciDevStat': 10,  # 与 B_QueryDeviceInfo 同 funcid
     'B_StopMeas': 32,

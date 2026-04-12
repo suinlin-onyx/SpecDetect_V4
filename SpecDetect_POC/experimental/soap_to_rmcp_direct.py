@@ -53,7 +53,7 @@ SOAP_FUNCID_MAP = {
     'B_SglFreqDF': 11,
     'B_SglFreqMeas': 12,
     'B_StopMeas': 32,
-    'B_WBDF': 17,
+    'B_WBDF': 25,  # 注意：设备实际使用 funcid=25，不是 17
     'B_QueryDeviceInfo': 10,
     'B_QueryFaciDevStat': 10,  # 与 B_QueryDeviceInfo 同 funcid
 }
@@ -155,9 +155,11 @@ def infer_funcid(action_items: list, is_nil: bool, has_taskid: bool) -> int:
         return 32 if has_taskid else 10
 
     if 'frequency' in names and 'dfmode' in names:
-        return 11
+        return 11  # B_SglFreqDF
+    elif 'frequency' in names and 'ifbw' in names:
+        return 25  # B_WBDF (设备实际使用)
     elif 'frequency' in names:
-        return 12
+        return 12  # B_SglFreqMeas
 
     if 'startfreq' in names and 'stopfreq' in names and 'step' in names and 'dfmode' in names:
         return 21
@@ -277,12 +279,24 @@ def add_device_params(action_items: list, funcid: int):
         if 'ifatt' not in names:
             action_items.append(('ifatt', '0'))
 
-    # B_WBDF (17): 宽带测向
-    elif funcid == 17:
-        if 'antpol' not in names:
-            action_items.append(('antpol', '垂直'))
+    # B_WBDF (25): 宽带测向 - 设备实际使用 funcid=25
+    elif funcid == 25:
+        if 'gainctrl' not in names:
+            action_items.append(('gainctrl', 'AGC'))
         if 'rfworkmode' not in names:
             action_items.append(('rfworkmode', '0'))
+        if 'antpol' not in names:
+            action_items.append(('antpol', '垂直'))
+        if 'antetype' not in names:
+            action_items.append(('antetype', 'OFF'))
+        if 'resolution' not in names:
+            action_items.append(('resolution', '25kHz'))
+        if 'ifatt' not in names:
+            action_items.append(('ifatt', '0'))
+        if 'antezoom' not in names:
+            action_items.append(('antezoom', 'OFF'))
+        if 'antArryChoose' not in names:
+            action_items.append(('antArryChoose', '1'))
 
     # B_SglFreqDF (11): 单频测向 - 需要 dfmode
     elif funcid == 11:
