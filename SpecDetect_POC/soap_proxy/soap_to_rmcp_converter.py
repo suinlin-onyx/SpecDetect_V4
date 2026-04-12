@@ -385,12 +385,13 @@ class SOAPToRMCPConverter:
 
         return bytes(frame)
 
-    def convert_and_save(self, xml_data: str) -> Dict[str, Any]:
+    def convert_and_save(self, xml_data: str, soap_action: str = None) -> Dict[str, Any]:
         """
         转换 SOAP XML 为 RMCP 帧并保存
 
         Args:
             xml_data: SOAP XML 字符串
+            soap_action: SOAPAction header (如 "B_FScan")
 
         Returns:
             {
@@ -405,14 +406,13 @@ class SOAPToRMCPConverter:
         timestamp = self._get_timestamp_str()
         operation = self.parse_operation_from_xml(xml_data)
 
-        # 解析 SOAP 参数
-        try:
-            params = parse_soap_request(xml_data)
-            funcid = params.get('funcid', 15)
-            operation = params.get('operation', operation)
-        except Exception as e:
-            params = {'error': str(e)}
-            funcid = 15
+        # 从 SOAPAction 确定 funcid
+        funcid = 15
+        if soap_action:
+            # 去掉引号
+            action_name = soap_action.strip('"')
+            funcid = SOAP_FUNCID_MAP.get(action_name, 15)
+            operation = action_name
 
         # 确保目录存在
         output_dir = self._ensure_output_dir()
@@ -439,7 +439,6 @@ class SOAPToRMCPConverter:
             'soap_file': str(soap_filepath),
             'rmcp_file': str(rmcp_filepath),
             'rmcp_hex': rmcp_frame.hex(),
-            'parsed_params': params,
         }
 
         print(f"[SOAP→RMCP] Converted: {operation} (funcid={funcid})")

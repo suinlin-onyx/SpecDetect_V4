@@ -35,6 +35,7 @@ SOAP_FUNCID_MAP = {
     'B_StopMeas': 32,
     'B_WBDF': 17,
     'B_QueryDeviceInfo': 10,
+    'B_QueryFaciDevStat': 10,  # 与 B_QueryDeviceInfo 同 funcid
 }
 
 FUNCID_SOAP_MAP = {v: k for k, v in SOAP_FUNCID_MAP.items()}

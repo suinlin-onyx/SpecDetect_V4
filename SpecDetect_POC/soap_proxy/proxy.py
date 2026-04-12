@@ -4,18 +4,25 @@ from flask import Flask, request, Response
 import requests
 
 from soap_proxy.logger import SOAPProxyLogger
+from soap_proxy.soap_to_rmcp_converter import SOAPToRMCPConverter
 
 
 class SOAPProxy:
     """SOAP 透明代理"""
 
-    def __init__(self, atom_host: str, atom_port: int, log_dir: str):
+    def __init__(self, atom_host: str, atom_port: int, log_dir: str, conversion_output_dir: str = None):
         self.atom_host = atom_host
         self.atom_port = atom_port
         self.log_dir = log_dir
 
         # 初始化 SOAPProxyLogger (统一管理所有日志)
         self.logger = SOAPProxyLogger(log_dir)
+
+        # 初始化 SOAP→RMCP 转换器
+        if conversion_output_dir:
+            self.converter = SOAPToRMCPConverter(conversion_output_dir)
+        else:
+            self.converter = None
 
     def handle_soap(self):
         """处理 SOAP 请求"""
@@ -33,6 +40,13 @@ class SOAPProxy:
 
         # 使用 SOAPProxyLogger 记录请求 (包含汇总日志 + req xml)
         self.logger.log_request(request_id, operation, xml_data, dict(request.headers))
+
+        # SOAP → RMCP 转换并保存 (用于验证)
+        if self.converter:
+            try:
+                self.converter.convert_and_save(xml_data, soap_action)
+            except Exception as e:
+                print(f"[SOAP→RMCP] Convert error: {e}")
 
         try:
             # 透明转发到 Real Atom
@@ -69,10 +83,10 @@ class SOAPProxy:
             return Response(error_xml, status=500, content_type="text/xml")
 
 
-def create_proxy_app(atom_host: str, atom_port: int, log_dir: str) -> Flask:
+def create_proxy_app(atom_host: str, atom_port: int, log_dir: str, conversion_output_dir: str = None) -> Flask:
     """创建 Flask 应用"""
     app = Flask(__name__)
-    proxy = SOAPProxy(atom_host, atom_port, log_dir)
+    proxy = SOAPProxy(atom_host, atom_port, log_dir, conversion_output_dir)
 
     @app.route('/', methods=['POST'])
     def handle_soap():
