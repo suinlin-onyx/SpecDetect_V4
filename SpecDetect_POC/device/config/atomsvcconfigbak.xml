@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="gb2312" ?>
+<config>
+    <log>
+        <logger trace="false" debug="true" info="true" notice="true" warning="true" error="true" />
+    </log>
+     <system>
+	<!--svc port="8182" atomprotocol = "huari" extend="" isquerytask="" msvcurl=""/-->
+	<svc port="8282" atomprotocol = "boer" extend="" mputequstaturl="http://172.17.110.200:31226/srrc_zj/common/ps/passthrough/passthrough11" puttimeinterval="30" judgebusybymaxtasknum="false" showlog="false"/>
+	<!--svc port="8282" atomprotocol = "boer" extend="" mputequstaturl="http://172.17.110.200:31226/srrc_zj/common/ps/passthrough/passthrough11" puttimeinterval="3" judgebusybymaxtasknum="false" showlog="false"/-->
+	<!--svc port="8282" atomprotocol = "boer" extend="" mputequstaturl="http://10.11.1.48/Monitor/M_PutEquStatus" puttimeinterval="3" judgebusybymaxtasknum="false" showlog="false"/-->
+	<!--svc port="8382" atomprotocol = "huaxin" extend="" msvcurl="http://10.11.1.31/rmas/services/M_PutEquaStatus?wsdl"/-->
+	<!--svc port="8188" atomprotocol = "rongxing" extend="" outputchanneltype="FTP"/-->
+	<streamsrc ip = "172.17.99.231" port = "18012" />
+    </system>
+   
+</config>

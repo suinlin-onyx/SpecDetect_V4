@@ -1,0 +1,7 @@
+{
+  "operation": "B_QueryFaciDevStat",
+  "success": false,
+  "elapsed_time": 0,
+  "response": "HTTPConnectionPool(host='127.0.0.1', port=7899): Read timed out. (read timeout=30)",
+  "timestamp": "2026-04-07T22:31:05.211795"
+}

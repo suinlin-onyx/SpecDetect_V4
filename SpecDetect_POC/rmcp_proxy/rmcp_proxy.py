@@ -191,6 +191,66 @@ class RMCPFrame:
 
         return result
 
+    @staticmethod
+    def parse_fscan_data_simple(data, startfreq=0, step=0):
+        """
+        解析简化的 FSCAN 数据帧 (实测格式)
+
+        帧结构 (从RMCP帧的payload开始):
+        - Business header: 3 bytes (包含nBdType等信息)
+        - Counters: 8 bytes (4 int16 values, 第一值为512)
+        - Spectrum data: int16 little-endian
+
+        转换公式: dBm = raw_value / 10
+        """
+        result = {
+            'data_type': 'SIMPLE_FSCAN',
+            'raw_size': len(data)
+        }
+
+        try:
+            if len(data) < 11:
+                result['error'] = f'Data too short: {len(data)} < 11'
+                return result
+
+            # Business header: bytes 0-2
+            # nBdType is typically at byte 0 (0x0F = 15 for FSCAN)
+            result['nBdType'] = data[0]
+
+            # Counters at bytes 3-10 (4 int16)
+            counters = struct.unpack('<4h', data[3:11])
+            result['counters'] = list(counters)
+            result['nArrays'] = counters[0]  # 通常是 512
+
+            # Spectrum data starts at byte 11
+            spectrum_offset = 11
+            if len(data) > spectrum_offset:
+                spectrum_bytes = data[spectrum_offset:]
+                # 解析所有 int16 值
+                num_levels = len(spectrum_bytes) // 2
+                levels = struct.unpack(f'<{num_levels}h', spectrum_bytes[:num_levels*2])
+                result['levels'] = list(levels)
+                result['level_count'] = len(levels)
+
+                if levels:
+                    result['level_min'] = min(levels)
+                    result['level_max'] = max(levels)
+                    # 转换 dBm
+                    dbm_values = [v / 10.0 for v in levels]
+                    result['dbm_min'] = min(dbm_values)
+                    result['dbm_max'] = max(dbm_values)
+                    result['dbm_avg'] = sum(dbm_values) / len(dbm_values)
+
+                # 计算频率
+                if step > 0:
+                    frequencies = [startfreq + i * step for i in range(len(levels))]
+                    result['frequencies'] = frequencies[:10]  # 只保存前10个作为样本
+
+        except struct.error as e:
+            result['error'] = str(e)
+
+        return result
+
 
 class CaptureLogger:
     """流量记录器"""
@@ -287,11 +347,19 @@ class CaptureLogger:
                 if fscan.get('data_type') == 'FSCAN':
                     frame_info['data_type'] = 'FSCAN'
                     frame_info['fscan'] = fscan
+                else:
+                    # 尝试简化的 FSCAN 解析
+                    # payload = RMCP payload (after 18-byte header)
+                    # simple parser expects: business header (3) + counters (8) + spectrum
+                    simple = RMCPFrame.parse_fscan_data_simple(payload)
+                    if simple.get('level_count', 0) > 0:
+                        frame_info['data_type'] = 'SIMPLE_FSCAN'
+                        frame_info['fscan'] = simple
 
         with self.lock:
             self.frames.append(frame_info)
 
-        self._print_to_console(timestamp, direction, header, len(data), addr)
+        self._print_to_console(timestamp, direction, header, len(data), addr, frame_info)
 
         # 写入原始文件
         with open(self.raw_file, 'ab') as f:
@@ -301,13 +369,19 @@ class CaptureLogger:
         self._save_json_line()
         self._save_log_line(frame_info)
 
-    def _print_to_console(self, timestamp, direction, header, size, addr):
+    def _print_to_console(self, timestamp, direction, header, size, addr, frame_info=None):
         """打印到控制台"""
         if header:
             msg_type = RMCPFrame.get_msg_type_name(header['nMsgType'])
             extra = ""
             if header['nMsgType'] == MSG_TYPE_REQUEST:
                 extra = " -> REQUEST"
+            elif header['nMsgType'] == 0 and frame_info and 'fscan' in frame_info:
+                fs = frame_info['fscan']
+                if 'level_count' in fs:
+                    extra = f" | {fs['level_count']} points"
+                    if 'dbm_min' in fs:
+                        extra += f" | dBm: {fs['dbm_min']:.1f}~{fs['dbm_max']:.1f}"
             print(f"[{timestamp}] {direction:4s} {msg_type:12s} "
                   f"len={size:5d} from={addr[0]}:{addr[1]}{extra}")
         else:
@@ -371,12 +445,22 @@ class CaptureLogger:
                     if 'level_count' in fs:
                         f.write(f"  电平数量: {fs['level_count']}\n")
                     if 'level_min' in fs and 'level_max' in fs:
-                        f.write(f"  电平范围: {fs['level_min']} ~ {fs['level_max']} dBm\n")
+                        if 'dbm_min' in fs:
+                            f.write(f"  dBm范围: {fs['dbm_min']:.1f} ~ {fs['dbm_max']:.1f} (avg: {fs['dbm_avg']:.1f})\n")
+                        else:
+                            f.write(f"  电平范围: {fs['level_min']} ~ {fs['level_max']}\n")
+                    if 'counters' in fs:
+                        f.write(f"  Counters: {fs['counters']}\n")
                     if 'levels' in fs and len(fs['levels']) > 0:
-                        levels_str = ', '.join(str(l) for l in fs['levels'][:16])
-                        if len(fs['levels']) > 16:
-                            levels_str += ', ...'
-                        f.write(f"  电平样本: [{levels_str}]\n")
+                        if 'dbm_min' in fs:
+                            # 显示 dBm 值 (raw / 10)
+                            dbm_sample = [f"{v / 10.0:.1f}" for v in fs['levels'][:10]]
+                            f.write(f"  dBm样本: [{', '.join(dbm_sample)}, ...]\n")
+                        else:
+                            levels_str = ', '.join(str(l) for l in fs['levels'][:16])
+                            if len(fs['levels']) > 16:
+                                levels_str += ', ...'
+                            f.write(f"  电平样本(raw): [{levels_str}]\n")
 
                 f.write("\n" + "-" * 80 + "\n\n")
         except:

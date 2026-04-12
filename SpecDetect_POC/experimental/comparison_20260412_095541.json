@@ -1,0 +1,14 @@
+{
+  "direct": {
+    "method": "direct",
+    "frame_size": 394,
+    "response_size": 80,
+    "response_type": "RMTP_ERROR",
+    "response_hex": "524d54503a457272436f64653d2d312c494e464f3dc9e8d6c3c9e8b1b8b2cecafdcaa7b0dca3acbfc9c4dcc6e4cbfbd3c3bba7d5bcd3c3c9e8b1b8bbf2b7fecef1b6cbb2bbd6a7b3d6b8c3c3fcc1ee0a",
+    "analysis": {
+      "type": "RMTP_ERROR",
+      "hex": "524d54503a457272436f64653d2d312c494e464f3dc9e8d6c3c9e8b1b8b2cecafdcaa7b0dca3acbfc9c4dcc6e4cbfbd3c3bba7d5bcd3c3c9e8b1b8bbf2b7fecef1b6cbb2bbd6a7b3d6b8c3c3fcc1ee0a",
+      "ascii": "RMTP:ErrCode=-1,INFO=����������������������������������������������������������\n"
+    }
+  }
+}

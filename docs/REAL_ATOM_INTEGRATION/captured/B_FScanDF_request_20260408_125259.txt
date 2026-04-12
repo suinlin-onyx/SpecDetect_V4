@@ -1,0 +1,17 @@
+=== HTTP Request ===
+时间: 2026-04-08 12:52:59
+SOAPAction: B_FScanDF
+完整URL: http://113.90.244.216:8282/
+路径: /
+
+=== 请求头 ===
+Host: 127.0.0.1:8888
+User-Agent: gSOAP/2.8
+Content-Type: text/xml; charset=utf-8
+Content-Length: 1311
+Connection: close
+SOAPAction: "B_FScanDF"
+
+=== 请求体 ===
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns1="base" xmlns:srrc="http://www.srrc.org.cn"><soapenv:Body><srrc:requestbody><srrc:appid>123456</srrc:appid><srrc:userid>RX_admin</srrc:userid><srrc:priority>9</srrc:priority><srrc:executetime>0</srrc:executetime><srrc:mfid>53090001140012</srrc:mfid><srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid><srrc:equpara><srrc:items><srrc:item><srrc:paraname>startfreq</srrc:paraname><srrc:paravalue>137000000</srrc:paravalue></srrc:item><srrc:item><srrc:paraname>stopfreq</srrc:paraname><srrc:paravalue>173000000</srrc:paravalue></srrc:item><srrc:item><srrc:paraname>step</srrc:paraname><srrc:paravalue>25000</srrc:paravalue></srrc:item><srrc:item><srrc:paraname>rfworkmode</srrc:paraname><srrc:paravalue>0</srrc:paravalue></srrc:item><srrc:item><srrc:paraname>gain</srrc:paraname><srrc:paravalue>AGC</srrc:paravalue></srrc:item></srrc:items></srrc:equpara><srrc:outputchannel><srrc:mode>source</srrc:mode><srrc:datachannel>stream</srrc:datachannel></srrc:outputchannel></srrc:requestbody></soapenv:Body></soapenv:Envelope>

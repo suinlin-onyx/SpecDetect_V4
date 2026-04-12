@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="gb2312" ?>
+<!-- 配置设备参数转换、中文转数字 -->
+<config>
+     <device equid="25B807CC-44A1-11E9-8000-123987654321"  des="MD950">
+        <field id="rfworkmode" >     		 
+              <item name="常态" value="0" />
+              <item name="低噪声" value="1" />
+              <item name="低失真" value="2" />           
+        </field>
+	<field id="dfmode" >     		 
+              <item name="中心点" value="0" />
+              <item name="带内最大值" value="1" />         
+        </field>
+	<field id="keepmode" >     		 
+              <item name="最大保持" value="0" />
+              <item name="最小保持" value="1" />
+              <item name="平均保持" value="2" />           
+        </field>
+	<field id="dftype" >     		 
+              <item name="常规测向" value="0" />
+              <item name="截获测向" value="1" />         
+        </field>
+     </device>
+</config>

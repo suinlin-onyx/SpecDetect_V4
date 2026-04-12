@@ -1,0 +1,13 @@
+HTTP://113.90.244.216:8282
+53090001140012
+51cd8dfe-e543-40c9-bdc3-a292766fee7f
+
+请求报文如下:
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+<soapenv:Body>
+	<srrc:requestbody>
+		<srrc:mfid>53090001140012</srrc:mfid>
+		<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+	</srrc:requestbody>
+</soapenv:Body>
+</soapenv:Envelope>

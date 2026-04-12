@@ -322,7 +322,8 @@ def format_action_items(action_items: list):
             elif name == 'step':
                 action_items[i] = (name, f"{val // 1000}kHz")
             elif name == 'ifbw':
-                action_items[i] = (name, f"{val // 1000}kHz")
+                # ifbw 值已经是 kHz 单位，直接附加 kHz
+                action_items[i] = (name, f"{val}kHz")
         except (ValueError, TypeError):
             pass
 

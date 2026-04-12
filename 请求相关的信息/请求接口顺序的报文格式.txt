@@ -1,0 +1,517 @@
+B FScan
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+	<soapenv:Body>
+		<srrc:requestbody>
+			<srrc:userid>RX_admin</srrc:userid>
+			<srrc:appid>123456</srrc:appid>
+			<srrc:executetime>0</srrc:executetime>
+			<srrc:priority>9</srrc:priority>
+			<srrc:mfid>53090001140012</srrc:mfid>
+			<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+			<srrc:equpara>
+				<srrc:groupitems>
+					<srrc:groupitem>
+					<srrc:groupid>1</srrc:groupid>
+						<srrc:items>
+							<srrc:item>
+								<srrc:paraname>startfreq</srrc:paraname>
+								<srrc:paravalue>137000000</srrc:paravalue>
+							</srrc:item>
+							<srrc:item>
+								<srrc:paraname>stopfreq</srrc:paraname>
+								<srrc:paravalue>173000000</srrc:paravalue>
+							</srrc:item>
+							<srrc:item>
+								<srrc:paraname>step</srrc:paraname>
+								<srrc:paravalue>25000</srrc:paravalue>
+							</srrc:item>
+							<srrc:item>
+								<srrc:paraname>gain</srrc:paraname>
+								<srrc:paravalue>AGC</srrc:paravalue>
+							</srrc:item>
+							<srrc:item>
+								<srrc:paraname>rfworkmode</srrc:paraname>
+								<srrc:paravalue>0</srrc:paravalue>
+							</srrc:item>
+							<srrc:item>
+								<srrc:paraname>scanmode</srrc:paraname>
+								<srrc:paravalue>0</srrc:paravalue>
+							</srrc:item>
+						</srrc:items>
+					</srrc:groupitem>
+				</srrc:groupitems>
+			</srrc:equpara>
+			<srrc:resulttype>
+				<FSCAN/>
+			</srrc:resulttype>
+			<srrc:outputchannel>
+				<srrc:mode>source</srrc:mode>
+				<srrc:datachannel>stream</srrc:datachannel>
+				<srrc:host></srrc:host>
+				<srrc:port></srrc:port>
+				<srrc:stc></srrc:stc>
+			</srrc:outputchannel>
+		</srrc:requestbody>
+	 </soapenv:Body>
+</soapenv:Envelope>
+
+
+B_FScanDF
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+	<soapenv:Body>
+		<srrc:requestbody>
+			<srrc:userid>RX_admin</srrc:userid>
+			<srrc:appid>123456</srrc:appid>
+			<srrc:executetime>0</srrc:executetime>
+			<srrc:priority>9</srrc:priority>
+			<srrc:mfid>53090001140012</srrc:mfid>
+			<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+			<srrc:equpara>
+					<srrc:items>
+						<srrc:item>
+							<srrc:paraname>startfreq</srrc:paraname>
+							<srrc:paravalue>137000000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>stopfreq</srrc:paraname>
+							<srrc:paravalue>173000000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>step</srrc:paraname>
+							<srrc:paravalue>25000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>rfworkmode</srrc:paraname>
+							<srrc:paravalue>0</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>gain</srrc:paraname>
+							<srrc:paravalue>AGC</srrc:paravalue>
+						</srrc:item>
+					</srrc:items>
+			</srrc:equpara>
+			<srrc:resulttype>
+				<WBDF/>
+			</srrc:resulttype>
+			<srrc:outputchannel>
+				<srrc:mode>source</srrc:mode>
+				<srrc:datachannel>stream</srrc:datachannel>
+				<srrc:host></srrc:host>
+				<srrc:port></srrc:port>
+				<srrc:stc></srrc:stc>
+			</srrc:outputchannel>
+		</srrc:requestbody>
+	 </soapenv:Body>
+</soapenv:Envelope>
+
+B_MScan
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+	<soapenv:Body>
+		<srrc:requestbody>
+			<srrc:userid>RX_admin</srrc:userid>
+			<srrc:appid>123456</srrc:appid>
+			<srrc:executetime>0</srrc:executetime>
+			<srrc:priority>9</srrc:priority>
+			<srrc:mfid>53090001140012</srrc:mfid>
+			<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+			<srrc:equpara>
+				<srrc:groupitems>
+					<srrc:groupitem>
+					<srrc:groupid>1</srrc:groupid>
+						<srrc:items>
+							<srrc:item>
+								<srrc:paraname>frequency</srrc:paraname>
+								<srrc:paravalue>100000000</srrc:paravalue>
+							</srrc:item>
+							<srrc:item>
+								<srrc:paraname>ifbw</srrc:paraname>
+								<srrc:paravalue>40000000</srrc:paravalue>
+							</srrc:item>
+							<srrc:item>
+								<srrc:paraname>gain</srrc:paraname>
+								<srrc:paravalue>AGC</srrc:paravalue>
+							</srrc:item>
+							<srrc:item>
+								<srrc:paraname>rfworkmode</srrc:paraname>
+								<srrc:paravalue>0</srrc:paravalue>
+							</srrc:item>
+						</srrc:items>
+					</srrc:groupitem>
+				</srrc:groupitems>
+			</srrc:equpara>
+			<srrc:resulttype>
+				<MSCAN/>
+			</srrc:resulttype>
+			<srrc:outputchannel>
+				<srrc:mode>source</srrc:mode>
+				<srrc:datachannel>stream</srrc:datachannel>
+				<srrc:host></srrc:host>
+				<srrc:port></srrc:port>
+				<srrc:stc></srrc:stc>
+			</srrc:outputchannel>
+		</srrc:requestbody>
+	 </soapenv:Body>
+</soapenv:Envelope>
+
+B_MScanDF
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+	<soapenv:Body>
+		<srrc:requestbody>
+			<srrc:userid>RX_admin</srrc:userid>
+			<srrc:appid>123456</srrc:appid>
+			<srrc:executetime>0</srrc:executetime>
+			<srrc:priority>9</srrc:priority>
+			<srrc:mfid>53090001140012</srrc:mfid>
+			<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+			<srrc:equpara>
+					<srrc:items>
+						<srrc:item>
+							<srrc:paraname>frequency</srrc:paraname>
+							<srrc:paravalue>100000000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>dfmode</srrc:paraname>
+							<srrc:paravalue>1</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>ifbw</srrc:paraname>
+							<srrc:paravalue>40000000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>gain</srrc:paraname>
+							<srrc:paravalue>AGC</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>rfworkmode</srrc:paraname>
+							<srrc:paravalue>0</srrc:paravalue>
+						</srrc:item>
+					</srrc:items>
+			</srrc:equpara>
+			<srrc:resulttype>
+			</srrc:resulttype>
+			<srrc:outputchannel>
+				<srrc:mode>source</srrc:mode>
+				<srrc:datachannel>stream</srrc:datachannel>
+				<srrc:host></srrc:host>
+				<srrc:port></srrc:port>
+				<srrc:stc></srrc:stc>
+			</srrc:outputchannel>
+		</srrc:requestbody>
+	 </soapenv:Body>
+</soapenv:Envelope>
+
+
+B_PScan
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+	<soapenv:Body>
+		<srrc:requestbody>
+			<srrc:userid>RX_admin</srrc:userid>
+			<srrc:appid>123456</srrc:appid>
+			<srrc:executetime>0</srrc:executetime>
+			<srrc:priority>9</srrc:priority>
+			<srrc:mfid>53090001140012</srrc:mfid>
+			<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+			<srrc:equpara>
+					<srrc:items>
+						<srrc:item>
+							<srrc:paraname>startfreq</srrc:paraname>
+							<srrc:paravalue>137000000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>stopfreq</srrc:paraname>
+							<srrc:paravalue>173000000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>step</srrc:paraname>
+							<srrc:paravalue>25000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>gain</srrc:paraname>
+							<srrc:paravalue>AGC</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>rfworkmode</srrc:paraname>
+							<srrc:paravalue>0</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>keepmode</srrc:paraname>
+							<srrc:paravalue>0</srrc:paravalue>
+						</srrc:item>
+					</srrc:items>
+			</srrc:equpara>
+			<srrc:resulttype>
+				<PSCAN/>
+			</srrc:resulttype>
+			<srrc:outputchannel>
+				<srrc:mode>source</srrc:mode>
+				<srrc:datachannel>stream</srrc:datachannel>
+				<srrc:host></srrc:host>
+				<srrc:port></srrc:port>
+				<srrc:stc></srrc:stc>
+			</srrc:outputchannel>
+		</srrc:requestbody>
+	 </soapenv:Body>
+</soapenv:Envelope>
+
+
+B_QueryDeviceInfo
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+	<soapenv:Body>
+		<srrc:requestbody>
+			<srrc:userid>RX_admin</srrc:userid>
+			<srrc:appid>123456</srrc:appid>
+			<srrc:executetime>0</srrc:executetime>
+			<srrc:priority>9</srrc:priority>
+			<srrc:mfid>53090001140012</srrc:mfid>
+			<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+			<srrc:equpara>
+			</srrc:equpara>
+			<srrc:resulttype>
+			</srrc:resulttype>
+			<srrc:outputchannel>
+				<srrc:mode>source</srrc:mode>
+				<srrc:datachannel>stream</srrc:datachannel>
+				<srrc:host></srrc:host>
+				<srrc:port></srrc:port>
+				<srrc:stc></srrc:stc>
+			</srrc:outputchannel>
+		</srrc:requestbody>
+	 </soapenv:Body>
+</soapenv:Envelope>
+
+B_QueryFaciDevStat
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+<soapenv:Body>
+	<srrc:requestbody>
+		<srrc:mfid>53090001140012</srrc:mfid>
+		<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+		</srrc:requestbody>
+	 </soapenv:Body>
+</soapenv:Envelope>
+
+
+B_SglFreqDF
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+	<soapenv:Body>
+		<srrc:requestbody>
+			<srrc:userid>RX_admin</srrc:userid>
+			<srrc:appid>123456</srrc:appid>
+			<srrc:executetime>0</srrc:executetime>
+			<srrc:priority>9</srrc:priority>
+			<srrc:mfid>53090001140012</srrc:mfid>
+			<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+			<srrc:equpara>
+					<srrc:items>
+						<srrc:item>
+							<srrc:paraname>frequency</srrc:paraname>
+							<srrc:paravalue>100000000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>dfmode</srrc:paraname>
+							<srrc:paravalue>1</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>ifbw</srrc:paraname>
+							<srrc:paravalue>40000000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>gain</srrc:paraname>
+							<srrc:paravalue>AGC</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>rfworkmode</srrc:paraname>
+							<srrc:paravalue>0</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>dftype</srrc:paraname>
+							<srrc:paravalue>0</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>spectrumswitch</srrc:paraname>
+							<srrc:paravalue>on</srrc:paravalue>
+						</srrc:item>
+					</srrc:items>
+			</srrc:equpara>
+			<srrc:resulttype>
+				<SFDF/>
+				<audio/>
+			</srrc:resulttype>
+			<srrc:outputchannel>
+				<srrc:mode>source</srrc:mode>
+				<srrc:datachannel>stream</srrc:datachannel>
+				<srrc:host></srrc:host>
+				<srrc:port></srrc:port>
+				<srrc:stc></srrc:stc>
+			</srrc:outputchannel>
+		</srrc:requestbody>
+	 </soapenv:Body>
+</soapenv:Envelope>
+
+B_SglFreqMeas
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+	<soapenv:Body>
+		<srrc:requestbody>
+			<srrc:userid>RX_admin</srrc:userid>
+			<srrc:appid>123456</srrc:appid>
+			<srrc:executetime>0</srrc:executetime>
+			<srrc:priority>9</srrc:priority>
+			<srrc:mfid>53090001140012</srrc:mfid>
+			<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+			<srrc:equpara>
+					<srrc:items>
+						<srrc:item>
+							<srrc:paraname>frequency</srrc:paraname>
+							<srrc:paravalue>100000000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>ifbw</srrc:paraname>
+							<srrc:paravalue>40000000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>gain</srrc:paraname>
+							<srrc:paravalue>AGC</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>rfworkmode</srrc:paraname>
+							<srrc:paravalue>0</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>audiotype</srrc:paraname>
+							<srrc:paravalue>off</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>demodmode</srrc:paraname>
+							<srrc:paravalue>FM</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>demodbw</srrc:paraname>
+							<srrc:paravalue>200000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>spectrumswitch</srrc:paraname>
+							<srrc:paravalue>on</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>ITUSwitch</srrc:paraname>
+							<srrc:paravalue>on</srrc:paravalue>
+						</srrc:item>
+					</srrc:items>
+			</srrc:equpara>
+			<srrc:resulttype>
+				<ITU/>
+				<audio/>
+			</srrc:resulttype>
+			<srrc:outputchannel>
+				<srrc:mode>source</srrc:mode>
+				<srrc:datachannel>stream</srrc:datachannel>
+				<srrc:host></srrc:host>
+				<srrc:port></srrc:port>
+				<srrc:stc></srrc:stc>
+			</srrc:outputchannel>
+		</srrc:requestbody>
+	 </soapenv:Body>
+</soapenv:Envelope>
+
+
+B_StopMeas
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+	<soapenv:Body>
+		<srrc:requestbody>
+			<srrc:userid>RX_admin</srrc:userid>
+			<srrc:appid>123456</srrc:appid>
+			<srrc:executetime>0</srrc:executetime>
+			<srrc:priority>9</srrc:priority>
+			<srrc:mfid>53090001140012</srrc:mfid>
+			<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+			<srrc:equpara>
+			</srrc:equpara>
+			<srrc:resulttype>
+			</srrc:resulttype>
+			<srrc:outputchannel>
+				<srrc:mode>source</srrc:mode>
+				<srrc:datachannel>stream</srrc:datachannel>
+				<srrc:host></srrc:host>
+				<srrc:port></srrc:port>
+				<srrc:stc></srrc:stc>
+			</srrc:outputchannel>
+		</srrc:requestbody>
+	 </soapenv:Body>
+</soapenv:Envelope>
+
+
+B_TaskModification
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+	<soapenv:Body>
+		<srrc:requestbody>
+			<srrc:userid>RX_admin</srrc:userid>
+			<srrc:appid>123456</srrc:appid>
+			<srrc:executetime>0</srrc:executetime>
+			<srrc:priority>9</srrc:priority>
+			<srrc:mfid>53090001140012</srrc:mfid>
+			<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+			<srrc:equpara>
+			</srrc:equpara>
+			<srrc:resulttype>
+			</srrc:resulttype>
+			<srrc:outputchannel>
+				<srrc:mode>source</srrc:mode>
+				<srrc:datachannel>stream</srrc:datachannel>
+				<srrc:host></srrc:host>
+				<srrc:port></srrc:port>
+				<srrc:stc></srrc:stc>
+			</srrc:outputchannel>
+		</srrc:requestbody>
+	 </soapenv:Body>
+</soapenv:Envelope>
+
+B_WBDF
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+	<soapenv:Body>
+		<srrc:requestbody>
+			<srrc:userid>RX_admin</srrc:userid>
+			<srrc:appid>123456</srrc:appid>
+			<srrc:executetime>0</srrc:executetime>
+			<srrc:priority>9</srrc:priority>
+			<srrc:mfid>53090001140012</srrc:mfid>
+			<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+			<srrc:equpara>
+					<srrc:items>
+						<srrc:item>
+							<srrc:paraname>frequency</srrc:paraname>
+							<srrc:paravalue>100000000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>ifbw</srrc:paraname>
+							<srrc:paravalue>40000000</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>gain</srrc:paraname>
+							<srrc:paravalue>AGC</srrc:paravalue>
+						</srrc:item>
+						<srrc:item>
+							<srrc:paraname>rfworkmode</srrc:paraname>
+							<srrc:paravalue>0</srrc:paravalue>
+						</srrc:item>
+					</srrc:items>
+			</srrc:equpara>
+			<srrc:resulttype>
+				<WBDF/>
+			</srrc:resulttype>
+			<srrc:outputchannel>
+				<srrc:mode>source</srrc:mode>
+				<srrc:datachannel>stream</srrc:datachannel>
+				<srrc:host></srrc:host>
+				<srrc:port></srrc:port>
+				<srrc:stc></srrc:stc>
+			</srrc:outputchannel>
+		</srrc:requestbody>
+	 </soapenv:Body>
+</soapenv:Envelope>
+
+
+
+
+
+
+
+

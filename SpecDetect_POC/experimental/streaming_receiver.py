@@ -448,10 +448,15 @@ def test_streaming(soap_xml: str, soap_action: str, duration: float = 30.0,
     sock.settimeout(2.0)  # 重置socket超时
 
     # 构建 request_params 用于 AtomDataFormatter
-    request_params = {}
+    # 根据接口类型提取不同参数
+    request_params = {'action': soap_action}
+
+    # B_FScan: startfreq, stopfreq, step
+    # B_PScan: frequency (单频点), dfmode, dftype
+    # B_MScan: startfreq, stopfreq, step
+    # B_SglFreqMeas: frequency (单频点), ifbw, measuretime
     for name, value in action_items:
-        if name in ('startfreq', 'stopfreq', 'step'):
-            # 格式化后的值如 "137MHz", "25kHz"
+        if name in ('startfreq', 'stopfreq', 'step', 'frequency', 'dfmode', 'dftype', 'ifbw', 'measuretime'):
             request_params[name] = value
 
     frames = receive_streaming_data(sock, timeout=duration, request_params=request_params)

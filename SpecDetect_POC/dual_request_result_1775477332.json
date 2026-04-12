@@ -1,0 +1,33 @@
+{
+  "operation": "StartMeasure",
+  "params": {
+    "Freq": 100000000,
+    "Bandwidth": 120000
+  },
+  "proxy_a": {
+    "url": "http://127.0.0.1:8080/soap",
+    "raw_response": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <soap:Body>\n    <soap:Fault>\n      <faultcode>soap:Server</faultcode>\n      <faultstring>Error</faultstring>\n      <detail>\n        <ns0:ErrorDetail xmlns:ns0=\"http://monitor.rrmp.gov.cn/services/\">\n          <ns0:ErrorCode>1</ns0:ErrorCode>\n          <ns0:ErrorMessage>Error</ns0:ErrorMessage>\n        </ns0:ErrorDetail>\n      </detail>\n    </soap:Fault>\n  </soap:Body>\n</soap:Envelope>\n",
+    "parsed": {
+      "success": false,
+      "error": "Error",
+      "error_code": "1",
+      "error_message": "Error"
+    }
+  },
+  "proxy_b": {
+    "url": "http://127.0.0.1:8081/soap",
+    "raw_response": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <soap:Body>\n    <soap:Fault>\n      <faultcode>soap:Server</faultcode>\n      <faultstring>Error</faultstring>\n      <detail>\n        <ns0:ErrorDetail xmlns:ns0=\"http://monitor.rrmp.gov.cn/services/\">\n          <ns0:ErrorCode>1</ns0:ErrorCode>\n          <ns0:ErrorMessage>Error</ns0:ErrorMessage>\n        </ns0:ErrorDetail>\n      </detail>\n    </soap:Fault>\n  </soap:Body>\n</soap:Envelope>\n",
+    "parsed": {
+      "success": false,
+      "error": "Error",
+      "error_code": "1",
+      "error_message": "Error"
+    }
+  },
+  "timestamp": "2026-04-06 20:08:52",
+  "diff": {
+    "success_match": true,
+    "fields_diff": [],
+    "summary": "双方都失败: Error vs Error"
+  }
+}

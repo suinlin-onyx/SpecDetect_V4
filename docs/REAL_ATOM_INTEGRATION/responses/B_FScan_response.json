@@ -1,0 +1,7 @@
+{
+  "operation": "B_FScan",
+  "success": false,
+  "elapsed_time": 0,
+  "response": "HTTPConnectionPool(host='113.90.244.216', port=8282): Read timed out. (read timeout=30)",
+  "timestamp": "2026-04-07T21:59:40.108407"
+}

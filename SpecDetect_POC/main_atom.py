@@ -4,6 +4,9 @@
 """
 import sys
 import os
+import socket
+import struct
+import selectors
 import asyncio
 import threading
 import time
@@ -22,7 +25,7 @@ from app.atom_service.protocol_builder import RMCPTPBuilder
 from app.atom_service.services.monitor import MonitorService
 from app.atom_service.services.direction import DirectionService
 from app.atom_service.services.device import DeviceService
-from config.settings import SERVICES
+from config.settings import SERVICES, BUSINESS_DATA_TYPE
 from utils.logger import setup_logger
 from utils.protocol_hook import HookManager, bytes_to_hex
 
@@ -35,6 +38,207 @@ CORS(app)
 
 # 线程池用于执行异步代码
 executor = ThreadPoolExecutor(max_workers=4)
+
+
+# ==================== streamsrc 服务器 ====================
+
+class StreamSrcServer:
+    """streamsrc TCP 服务器 - 被动监听设备连接
+
+    streamsrc 是设备回调通道:
+    - Mock Atom 监听 streamsrc 端口 (默认 127.0.0.1:18012)
+    - 设备主动连接 streamsrc，使用随机源端口
+    - 接收设备发送的数据和心跳
+    """
+
+    def __init__(self, host='127.0.0.1', port=18012):
+        self.host = host
+        self.port = port
+        self.server_socket = None
+        self.running = False
+        self._thread = None
+        self._clients = []  # 连接的客户端
+        self._selector = selectors.DefaultSelector()
+
+    def start(self):
+        """启动 streamsrc 监听"""
+        if self.running:
+            logger.warning("streamsrc 服务器已在运行")
+            return
+
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            self.server_socket.bind((self.host, self.port))
+            self.server_socket.listen(5)
+            self.server_socket.settimeout(1.0)  # 非阻塞接受
+            self.running = True
+            logger.info(f"streamsrc 监听启动成功: {self.host}:{self.port}")
+
+            # 启动接受连接的线程
+            self._thread = threading.Thread(target=self._accept_loop, daemon=True)
+            self._thread.start()
+        except Exception as e:
+            logger.error(f"streamsrc 监听启动失败: {e}")
+            raise
+
+    def _accept_loop(self):
+        """接受连接的循环"""
+        while self.running:
+            try:
+                client_socket, client_addr = self.server_socket.accept()
+                # client_addr[1] 是随机源端口
+                logger.info(f"streamsrc 接受连接: {client_addr[0]}:{client_addr[1]} (源端口: {client_addr[1]})")
+                self._clients.append(client_socket)
+                # 为每个客户端启动处理线程
+                client_thread = threading.Thread(
+                    target=self._handle_client,
+                    args=(client_socket, client_addr),
+                    daemon=True
+                )
+                client_thread.start()
+            except socket.timeout:
+                continue
+            except Exception as e:
+                if self.running:
+                    logger.error(f"streamsrc 接受连接错误: {e}")
+
+    def _handle_client(self, client_socket, client_addr):
+        """处理设备消息"""
+        client_socket.settimeout(30.0)  # 30秒超时
+        last_data_time = time.time()
+
+        try:
+            while self.running:
+                try:
+                    data = client_socket.recv(8192)
+                    if not data:
+                        logger.info(f"streamsrc 设备断开: {client_addr[0]}:{client_addr[1]}")
+                        break
+
+                    last_data_time = time.time()
+                    data_len = len(data)
+                    logger.info(f"streamsrc 收到数据 from {client_addr[0]}:{client_addr[1]}: {data_len} bytes")
+
+                    # 记录原始数据
+                    hook = HookManager.get_instance()
+                    hook.log_frame("recv", "STREAMSRC", bytes_to_hex(data[:min(data_len, 256)]))
+
+                    # 解析并分析 RMCPTP 帧
+                    self._parse_and_log_frames(data)
+
+                except socket.timeout:
+                    # 发送心跳探测
+                    elapsed = time.time() - last_data_time
+                    if elapsed > 30:
+                        try:
+                            # 发送 0x00 心跳探测
+                            client_socket.sendall(b'\x00')
+                            logger.debug(f"streamsrc 发送心跳探测 to {client_addr[0]}:{client_addr[1]}")
+                            last_data_time = time.time()
+                        except:
+                            break
+        except Exception as e:
+            logger.error(f"streamsrc 处理客户端错误 {client_addr}: {e}")
+        finally:
+            try:
+                client_socket.close()
+            except:
+                pass
+            if client_socket in self._clients:
+                self._clients.remove(client_socket)
+
+    def _parse_and_log_frames(self, data: bytes):
+        """解析并记录 RMCPTP 帧"""
+        offset = 0
+        while offset < len(data):
+            # 至少需要 18 字节的帧头
+            if len(data) - offset < 18:
+                logger.debug(f"streamsrc 数据不完整 (剩余 {len(data) - offset} bytes, 需要至少 18)")
+                break
+
+            # 解析 RMCPTP 帧头 (18 bytes)
+            # struct format: <LHBBHI (little-endian)
+            # L: dwLength (4 bytes) - 帧总长度
+            # L: tmStamp (4 bytes) - 时间戳
+            # H: nVersion (2 bytes) - 版本
+            # B: nMsgType (1 byte) - 消息类型
+            # B: nFlags (1 byte) - 标志
+            # H: nCheckSum (2 bytes) - 校验和
+            try:
+                header = struct.unpack('<LLHBBH', data[offset:offset+18])
+                frame_len = header[0]
+                timestamp = header[1]
+                version = header[2]
+                msg_type = header[3]
+                flags = header[4]
+                checksum = header[5]
+
+                logger.info(f"streamsrc 帧头: length={frame_len}, ts={timestamp}, ver=0x{version:04x}, "
+                           f"type=0x{msg_type:02x}, flags=0x{flags:02x}, checksum=0x{checksum:04x}")
+
+                # 获取业务数据类型
+                business_type = None
+                payload_start = offset + 18
+                if len(data) - payload_start > 0:
+                    business_type = data[payload_start]
+                    business_name = BUSINESS_DATA_TYPE.get(business_type, f'0x{business_type:02x}')
+                    logger.info(f"streamsrc 业务类型: {business_name} (0x{business_type:02x})")
+
+                # 根据消息类型记录
+                msg_type_name = {0: 'DATA', 6: 'RESPONSE', 90: 'REQUEST'}.get(msg_type, f'0x{msg_type:02x}')
+                logger.info(f"streamsrc 消息类型: {msg_type_name}")
+
+                # 计算实际帧长度
+                if frame_len > 0:
+                    offset += frame_len
+                else:
+                    # frame_len == 0 表示长度待定，跳过此帧
+                    break
+
+            except struct.error as e:
+                logger.error(f"streamsrc 帧解析错误: {e}")
+                break
+
+    def stop(self):
+        """停止 streamsrc 监听"""
+        logger.info("停止 streamsrc 监听...")
+        self.running = False
+
+        # 关闭所有客户端
+        for client in self._clients:
+            try:
+                client.close()
+            except:
+                pass
+        self._clients.clear()
+
+        # 关闭服务器 socket
+        if self.server_socket:
+            try:
+                self.server_socket.close()
+            except:
+                pass
+
+        if self._thread:
+            self._thread.join(timeout=2)
+        logger.info("streamsrc 监听已停止")
+
+
+# 全局 streamsrc 服务器实例
+_streamsrc_server: StreamSrcServer = None
+
+
+def get_streamsrc_server() -> StreamSrcServer:
+    """获取 streamsrc 服务器实例"""
+    global _streamsrc_server
+    if _streamsrc_server is None:
+        config = SERVICES['atom']
+        _streamsrc_server = StreamSrcServer(
+            host=config.get('streamsrc_host', '127.0.0.1'),
+            port=config.get('streamsrc_port', 18012)
+        )
+    return _streamsrc_server
 
 # 全局设备客户端
 _device_client: DeviceClient = None
@@ -182,6 +386,51 @@ def get_device_status():
         'port': config['device_port'],
         'connected': _device_connected
     }), 200
+
+
+# ==================== streamsrc 控制接口 ====================
+
+@app.route('/streamsrc/status', methods=['GET'])
+def get_streamsrc_status():
+    """获取 streamsrc 监听状态"""
+    streamsrc = get_streamsrc_server()
+    config = SERVICES['atom']
+    return jsonify({
+        'host': config.get('streamsrc_host', '127.0.0.1'),
+        'port': config.get('streamsrc_port', 18012),
+        'running': streamsrc.running,
+        'client_count': len(streamsrc._clients)
+    }), 200
+
+
+@app.route('/streamsrc/start', methods=['POST'])
+def start_streamsrc():
+    """启动 streamsrc 监听"""
+    streamsrc = get_streamsrc_server()
+    if streamsrc.running:
+        return jsonify({'success': True, 'message': 'streamsrc 已运行'}), 200
+
+    try:
+        streamsrc.start()
+        return jsonify({'success': True, 'message': 'streamsrc 启动成功'}), 200
+    except Exception as e:
+        logger.error(f"streamsrc 启动失败: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/streamsrc/stop', methods=['POST'])
+def stop_streamsrc():
+    """停止 streamsrc 监听"""
+    streamsrc = get_streamsrc_server()
+    if not streamsrc.running:
+        return jsonify({'success': True, 'message': 'streamsrc 未运行'}), 200
+
+    try:
+        streamsrc.stop()
+        return jsonify({'success': True, 'message': 'streamsrc 停止成功'}), 200
+    except Exception as e:
+        logger.error(f"streamsrc 停止失败: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 # ==================== 监测服务接口 ====================
@@ -1678,6 +1927,11 @@ def main():
     config = SERVICES['atom']
     logger.info(f"启动原子服务: {config['host']}:{config['port']}")
     logger.info(f"设备地址: {config['device_host']}:{config['device_port']}")
+
+    # 启动 streamsrc 监听服务器
+    streamsrc = get_streamsrc_server()
+    streamsrc.start()
+    logger.info(f"streamsrc 监听配置: {config.get('streamsrc_host', '127.0.0.1')}:{config.get('streamsrc_port', 18012)}")
 
     app.run(
         host=config['host'],

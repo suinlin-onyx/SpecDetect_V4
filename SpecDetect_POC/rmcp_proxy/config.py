@@ -14,7 +14,7 @@ DEVICE_HOST = "100.72.95.36"
 DEVICE_PORT = 1449
 
 # 日志配置
-LOG_DIR = "D:/arvin/claude_workspace/rmcp_proxy/capture"
+LOG_DIR = "D:/arvin/claude_workspace/SpecDetect_V4/SpecDetect_POC/rmcp_proxy/capture"
 LOG_LEVEL = "DEBUG"  # DEBUG, INFO, WARNING, ERROR
 
 # 帧头大小

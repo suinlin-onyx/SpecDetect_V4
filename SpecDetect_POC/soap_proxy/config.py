@@ -19,5 +19,7 @@ import os
 SOAP_PROXY_DIR = os.path.dirname(os.path.abspath(__file__))
 # 日志保存在 soap_proxy/logs/ 目录下
 LOG_DIR = os.path.join(SOAP_PROXY_DIR, "logs")
+# SOAP → RMCP 转换输出目录
+CONVERSION_OUTPUT_DIR = os.path.join(SOAP_PROXY_DIR, "conversion_output")
 LOG_FILE = "soap_proxy.log"
 LOG_FORMAT = "[{timestamp}] {level} - {message}"

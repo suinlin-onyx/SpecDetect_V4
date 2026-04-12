@@ -1,0 +1,12 @@
+B FScan
+B_FScanDF
+B_MScan
+B_MScanDF
+B_PScan
+B_QueryDeviceInfo
+B_QueryFaciDevStat
+B_SglFreqDF
+B_SglFreqMeas
+B_StopMeas
+B_TaskModification
+B_WBDF
