@@ -159,7 +159,7 @@ class AtomDataFormatter:
             'LEADER': FSCAN_LEADER_STANDARD,
             'version': 1,
             'stc': tmstamp,  # 使用 RMCP 帧时间戳
-            'ts': self._filetime_to_datetime(tmstamp),
+            'ts': _filetime_to_datetime(tmstamp),
             'pl': len(raw_payload),
             'el': 0,
 
@@ -219,7 +219,7 @@ class AtomDataFormatter:
             'LEADER': FSCAN_LEADER_STANDARD,
             'version': 1,
             'stc': tmstamp,
-            'ts': self._filetime_to_datetime(tmstamp),
+            'ts': _filetime_to_datetime(tmstamp),
             'pl': len(raw_payload),
             'el': 0,
 
@@ -277,7 +277,7 @@ class AtomDataFormatter:
             'LEADER': FSCAN_LEADER_STANDARD,
             'version': 1,
             'stc': tmstamp,
-            'ts': self._filetime_to_datetime(tmstamp),
+            'ts': _filetime_to_datetime(tmstamp),
             'pl': len(raw_payload),
             'el': 0,
 
@@ -338,7 +338,7 @@ class AtomDataFormatter:
             'LEADER': FSCAN_LEADER_STANDARD,
             'version': 1,
             'stc': tmstamp,
-            'ts': self._filetime_to_datetime(tmstamp),
+            'ts': _filetime_to_datetime(tmstamp),
             'pl': len(raw_payload),
             'el': 0,
 
@@ -461,28 +461,51 @@ class AtomDataFormatter:
         except Exception as e:
             return None
 
-    def _filetime_to_datetime(self, filetime: int) -> str:
-        """
-        将 Windows FILETIME 转换为 ISO 格式时间字符串
 
-        Args:
-            filetime: Windows FILETIME (100 纳秒间隔，从 1601-01-01 开始)
+# 模块级函数用于简化格式解析
+def _parse_simple_level(payload: bytes) -> Optional[Dict[str, Any]]:
+    """模块级函数：解析简化格式的单电平数据 (B_MScan)"""
+    if len(payload) < 12:
+        return None
 
-        Returns:
-            ISO 格式时间字符串
-        """
-        if filetime == 0:
-            return datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')[:-3]
+    try:
+        if len(payload) >= 13:
+            level = struct.unpack('<h', payload[11:13])[0]
+            return {
+                'levels': [level],
+                'level_count': 1,
+                'frame_channels': 1,
+                'total_channels': 1,
+                'freq_count': 1,
+                'dl': 2,
+            }
+        return None
+    except Exception as e:
+        return None
 
-        try:
-            # FILETIME epoch: 1601-01-01
-            epoch = datetime(1601, 1, 1)
-            # 转换为微秒
-            microseconds = filetime // 10
-            dt = epoch + timedelta(microseconds=microseconds)
-            return dt.strftime('%Y-%m-%d %H:%M:%S:%f')[:-3]
-        except:
-            return datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')[:-3]
+
+def _filetime_to_datetime(filetime: int) -> str:
+    """
+    将 Windows FILETIME 转换为 ISO 格式时间字符串
+
+    Args:
+        filetime: Windows FILETIME (100 纳秒间隔，从 1601-01-01 开始)
+
+    Returns:
+        ISO 格式时间字符串
+    """
+    if filetime == 0:
+        return datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')[:-3]
+
+    try:
+        # FILETIME epoch: 1601-01-01
+        epoch = datetime(1601, 1, 1)
+        # 转换为微秒
+        microseconds = filetime // 10
+        dt = epoch + timedelta(microseconds=microseconds)
+        return dt.strftime('%Y-%m-%d %H:%M:%S:%f')[:-3]
+    except:
+        return datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')[:-3]
 
 
 def format_streaming_frame(frame_data: bytes, tmstamp: int, request_params: Dict[str, Any]) -> Dict[str, Any]:
@@ -505,11 +528,28 @@ def format_streaming_frame(frame_data: bytes, tmstamp: int, request_params: Dict
     formatter = AtomDataFormatter(request_params)
     payload = frame_data[18:]  # 去掉 RMCP 帧头
 
-    # 根据 funcid 或 action 决定格式化器类型
+    # 检查是否为标准格式 (LEADER=0xEEEE1DE6)
+    is_standard_format = False
+    if len(payload) >= 4:
+        leader = struct.unpack('<I', payload[0:4])[0]
+        if leader == 0xEEEE1DE6 or leader == 4007718438:  # 0xEEEE1DE6 小端/大端
+            is_standard_format = True
+
+    # 如果已经是标准格式，直接解析并补充元数据
+    if is_standard_format:
+        result = _format_standard_frame(payload, tmstamp, request_params)
+        # 如果解析失败或数据太短，尝试用简化格式解析
+        if 'error' in result or result.get('level_count', 0) == 0:
+            # 尝试简化格式解析
+            simple_result = _parse_simple_level(payload)
+            if simple_result:
+                result.update(simple_result)
+        return result
+
+    # 否则使用简化格式格式化器
     funcid = request_params.get('funcid', 0)
     action = request_params.get('action', '')
 
-    # 如果 action 包含接口名称，使用对应的格式化器
     if 'B_MScan' in action and 'DF' not in action:
         return formatter.format_mscan_data(payload, tmstamp)
     elif 'B_PScan' in action:
@@ -519,8 +559,87 @@ def format_streaming_frame(frame_data: bytes, tmstamp: int, request_params: Dict
     elif 'B_FScan' in action or funcid == 15:
         return formatter.format_fscan_data(payload, tmstamp)
 
-    # 默认使用 FSCAN 格式化器
     return formatter.format_fscan_data(payload, tmstamp)
+
+
+def _format_standard_frame(payload: bytes, tmstamp: int, request_params: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    解析标准格式的帧数据，并补充元数据
+
+    Args:
+        payload: 标准格式的 payload 数据
+        tmstamp: RMCP 帧时间戳
+        request_params: 请求参数
+
+    Returns:
+        格式化后的数据
+    """
+    if len(payload) < 23:
+        return {'error': 'Payload too short for standard format'}
+
+    # 解析标准格式头部
+    leader = struct.unpack('<i', payload[0:4])[0]
+    version = payload[4]
+    stc = struct.unpack('<I', payload[5:9])[0]
+    ts = struct.unpack('<Q', payload[9:17])[0]
+    pl = struct.unpack('<I', payload[17:21])[0]
+    el = struct.unpack('<H', payload[21:23])[0]
+
+    # 解析 DT 和 DL
+    dt = payload[23] if len(payload) > 23 else 0
+    dl = struct.unpack('<I', payload[24:28])[0] if len(payload) > 27 else 0
+
+    # 解析频段信息 (offset=28)
+    offset = 28
+    band_no = total_channels = start_freq = end_freq = start_index = step = 0
+    frame_channels = 0
+
+    if len(payload) >= offset + 28:
+        band_no = struct.unpack('<I', payload[offset:offset+4])[0]
+        offset += 4
+        total_channels = struct.unpack('<I', payload[offset:offset+4])[0]
+        offset += 4
+        start_freq = struct.unpack('<d', payload[offset:offset+8])[0]
+        offset += 8
+        end_freq = struct.unpack('<d', payload[offset:offset+8])[0]
+        offset += 8
+        start_index = struct.unpack('<I', payload[offset:offset+4])[0]
+        offset += 4
+        step = struct.unpack('<d', payload[offset:offset+8])[0]
+        offset += 8
+
+    # 解析帧信道数量 (offset + 4)
+    if len(payload) >= offset + 4:
+        frame_channels = struct.unpack('<I', payload[offset:offset+4])[0]
+        offset += 4
+
+    # 解析电平数据
+    levels = []
+    while offset + 1 < len(payload):
+        level = struct.unpack('<h', payload[offset:offset+2])[0]
+        levels.append(level)
+        offset += 2
+
+    return {
+        'LEADER': leader,
+        'version': version,
+        'stc': stc,
+        'ts': _filetime_to_datetime(ts),
+        'pl': pl,
+        'el': el,
+        'dt': dt,
+        'dl': dl,
+        'band_no': band_no,
+        'total_channels': total_channels,
+        'start_freq': start_freq,
+        'end_freq': end_freq,
+        'start_index': start_index,
+        'step': step,
+        'frame_channels': frame_channels,
+        'levels': levels,
+        'level_count': len(levels),
+        'data_format': 'standard',
+    }
 
 
 def get_funcid_from_action(action: str) -> int:

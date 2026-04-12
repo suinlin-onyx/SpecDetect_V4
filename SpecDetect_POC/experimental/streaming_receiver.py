@@ -21,6 +21,9 @@ from typing import List, Tuple, Optional
 # Atom 数据整理器
 from atom_data_formatter import AtomDataFormatter, format_streaming_frame
 
+# SOAP to RMCP converter
+from soap_to_rmcp_direct import build_rmcp_frame
+
 # RMCP常量
 RMCP_HOST = '100.72.95.36'
 RMCP_PORT = 1449
@@ -141,6 +144,73 @@ def parse_fscan_data(frame_data: bytes) -> Optional[dict]:
 
     except Exception as e:
         return {'error': str(e)}
+
+
+def stop_streaming(sock: socket.socket) -> bool:
+    """发送停止测量请求 (B_StopMeas)
+
+    Args:
+        sock: 已连接的socket
+
+    Returns:
+        是否成功
+    """
+    import sys
+    sys.path.insert(0, 'experimental')
+    from soap_to_rmcp_direct import build_action_xml
+
+    print("  发送停止测量请求...")
+
+    # B_StopMeas SOAP
+    stop_soap = '''<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+<soapenv:Body>
+<srrc:requestbody xmlns:srrc="http://www.srrc.org.cn">
+<srrc:mfid>53090001150015</srrc:mfid>
+<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+<srrc:equpara>
+<srrc:items>
+</srrc:items>
+</srrc:equpara>
+</srrc:requestbody>
+</soapenv:Body>
+</soapenv:Envelope>'''
+
+    try:
+        # 构建 RMCP 帧
+        action_xml = build_action_xml(stop_soap, 'B_StopMeas')
+        frame = build_rmcp_frame(action_xml)
+
+        # 发送停止请求
+        sock.send(frame)
+        print("  停止请求已发送")
+
+        # 等待响应
+        sock.settimeout(5.0)
+        response = b''
+        try:
+            while True:
+                chunk = sock.recv(4096)
+                if not chunk:
+                    break
+                response += chunk
+                if len(response) >= 18:
+                    dwLen = struct.unpack('<I', response[0:4])[0]
+                    if len(response) >= dwLen:
+                        break
+        except socket.timeout:
+            pass
+
+        if response:
+            print(f"  收到停止响应: {len(response)} bytes")
+            return True
+        else:
+            print("  未收到停止响应")
+            return False
+
+    except Exception as e:
+        print(f"  停止请求失败: {e}")
+        return False
 
 
 def receive_streaming_data(sock: socket.socket, timeout: float = 60.0,
