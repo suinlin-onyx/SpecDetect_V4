@@ -186,6 +186,94 @@ def adjust_params_by_funcid(action_items: list, funcid: int):
         action_items[:] = [(n, v) for n, v in action_items if n != 'dfmode']
 
 
+def add_device_params(action_items: list, funcid: int):
+    """
+    根据接口类型添加设备配置参数
+
+    这些参数由 Atom 从设备配置中获取并添加到 RMCP 请求中
+    """
+    names = {name for name, _ in action_items}
+
+    # B_FScan (15): 频率扫描
+    if funcid == 15:
+        if 'gainctrl' not in names:
+            action_items.append(('gainctrl', 'AGC'))
+        if 'rfworkmode' not in names:
+            action_items.append(('rfworkmode', '0'))
+        if 'scanmode' not in names:
+            action_items.append(('scanmode', '0'))
+        if 'antpol' not in names:
+            action_items.append(('antpol', '垂直'))
+        if 'antetype' not in names:
+            action_items.append(('antetype', 'OFF'))
+        if 'ifatt' not in names:
+            action_items.append(('ifatt', '0'))
+
+    # B_FScanDF (21): 频率扫描测向 - 需要 antpol
+    elif funcid == 21:
+        if 'antpol' not in names:
+            action_items.append(('antpol', '垂直'))
+        if 'rfworkmode' not in names:
+            action_items.append(('rfworkmode', '0'))
+        if 'antetype' not in names:
+            action_items.append(('antetype', 'OFF'))
+        if 'ifatt' not in names:
+            action_items.append(('ifatt', '0'))
+
+    # B_PScan (13): 频谱扫描 - 需要 dfmode, dftype
+    elif funcid == 13:
+        if 'dfmode' not in names:
+            action_items.append(('dfmode', '0'))
+        if 'dftype' not in names:
+            action_items.append(('dftype', '0'))
+        if 'rfworkmode' not in names:
+            action_items.append(('rfworkmode', '0'))
+        if 'antpol' not in names:
+            action_items.append(('antpol', '垂直'))
+        if 'antetype' not in names:
+            action_items.append(('antetype', 'OFF'))
+        if 'ifatt' not in names:
+            action_items.append(('ifatt', '0'))
+
+    # B_MScan (14): 多信道扫描
+    elif funcid == 14:
+        if 'antpol' not in names:
+            action_items.append(('antpol', '垂直'))
+        if 'antetype' not in names:
+            action_items.append(('antetype', 'OFF'))
+        if 'rfworkmode' not in names:
+            action_items.append(('rfworkmode', '0'))
+
+    # B_MScanDF (16): 多信道扫描测向
+    elif funcid == 16:
+        if 'antpol' not in names:
+            action_items.append(('antpol', '垂直'))
+        if 'keepmode' not in names:
+            action_items.append(('keepmode', '0'))
+        if 'rfworkmode' not in names:
+            action_items.append(('rfworkmode', '0'))
+
+    # B_WBDF (17): 宽带测向
+    elif funcid == 17:
+        if 'antpol' not in names:
+            action_items.append(('antpol', '垂直'))
+        if 'rfworkmode' not in names:
+            action_items.append(('rfworkmode', '0'))
+
+    # B_SglFreqDF (11): 单频测向 - 需要 dfmode
+    elif funcid == 11:
+        if 'dfmode' not in names:
+            action_items.append(('dfmode', '0'))
+        if 'antpol' not in names:
+            action_items.append(('antpol', '垂直'))
+        if 'antetype' not in names:
+            action_items.append(('antetype', 'OFF'))
+        if 'rfworkmode' not in names:
+            action_items.append(('rfworkmode', '0'))
+        if 'ifatt' not in names:
+            action_items.append(('ifatt', '0'))
+
+
 def format_action_items(action_items: list):
     """格式化参数值"""
     for i, (name, value) in enumerate(action_items):
@@ -201,14 +289,22 @@ def format_action_items(action_items: list):
             pass
 
 
-def build_action_xml(soap_xml: str) -> str:
+def build_action_xml(soap_xml: str, soap_action: str = None) -> str:
     """将 SOAP XML 转换为 RMCP Action XML 格式"""
     action_items, mfid, _, is_nil, has_taskid = parse_soap_items(soap_xml)
 
-    funcid = infer_funcid(action_items, is_nil, has_taskid)
+    # 从 SOAPAction 确定 funcid
+    if soap_action:
+        funcid = SOAP_FUNCID_MAP.get(soap_action.strip('"'), 15)
+    else:
+        funcid = infer_funcid(action_items, is_nil, has_taskid)
+
     map_param_names(action_items)
     adjust_params_by_funcid(action_items, funcid)
     format_action_items(action_items)
+
+    # 添加设备配置参数 (Atom 自动添加的)
+    add_device_params(action_items, funcid)
 
     # stationid/deviceid
     if len(mfid) >= 8:
@@ -228,6 +324,7 @@ def build_action_xml(soap_xml: str) -> str:
             {items_str}
         </group>
     </parameter>
+    <other_param />
 </action>'''
 
     return action_xml
@@ -267,7 +364,7 @@ def build_rmcp_frame(action_xml: str) -> bytes:
     """构建 RMCP REQUEST 帧"""
     xml_bytes = action_xml.encode('gb2312')
 
-    # RMCP 帧头结构 (19字节)
+    # RMCP 帧头结构 (18字节)
     # Bytes 0-3: dwLength
     # Bytes 4-11: FILETIME
     # Byte 12: 0x00
@@ -275,10 +372,10 @@ def build_rmcp_frame(action_xml: str) -> bytes:
     # Byte 14: nMsgType (=90)
     # Byte 15: nFlags (=1)
     # Bytes 16-17: nCheckSum
-    # Byte 18: 0x00
-    # Byte 19+: XML
+    # Byte 18+: XML (no null byte between header and XML)
 
-    total_len = 19 + len(xml_bytes) + 1
+    # Total: 18 bytes header + XML + 1 trailing null
+    total_len = 18 + len(xml_bytes) + 1
 
     frame = bytearray()
 
@@ -304,16 +401,13 @@ def build_rmcp_frame(action_xml: str) -> bytes:
     checksum_pos = len(frame)
     frame.extend(bytes([0xCC, 0xCC]))
 
-    # Byte 18: 0x00
-    frame.append(0x00)
-
     # SOAP XML
     frame.extend(xml_bytes)
 
-    # null terminator
+    # Trailing null (Atom frame has this at the end of XML)
     frame.append(0x00)
 
-    # Calculate and update checksum
+    # Calculate and update checksum (over 18-byte header)
     header_for_checksum = bytes(frame[:18])
     calculated_checksum = calculate_checksum(header_for_checksum)
     frame[checksum_pos:checksum_pos+2] = struct.pack('<H', calculated_checksum)
@@ -368,7 +462,7 @@ def send_rmcp_frame(host: str, port: int, frame: bytes, timeout: float = 5.0) ->
 def parse_rmcp_response(response: bytes) -> dict:
     """解析 RMCP 响应"""
     if len(response) < 19:
-        return {'error': 'Response too short'}
+        return {'error': 'Response too short', 'hex': response.hex(), 'raw_text': response.decode('ascii', errors='replace') if response.startswith(b'RMTP') else None}
 
     dwLength = struct.unpack('<I', response[0:4])[0]
     nVersion = response[13]
@@ -387,6 +481,7 @@ def parse_rmcp_response(response: bytes) -> dict:
         'nFlags': nFlags,
         'nCheckSum': nCheckSum,
         'hex': response.hex(),
+        'raw_text': response.decode('ascii', errors='replace') if response.startswith(b'RMTP') else None
     }
 
 
@@ -394,7 +489,7 @@ def parse_rmcp_response(response: bytes) -> dict:
 # 主函数
 # ============================================
 
-def send_soap_to_device(soap_xml: str, host: str = RMCP_HOST, port: int = RMCP_PORT) -> dict:
+def send_soap_to_device(soap_xml: str, host: str = RMCP_HOST, port: int = RMCP_PORT, soap_action: str = None) -> dict:
     """
     直接发送 SOAP 请求到设备 (绕过 Atom)
 
@@ -402,6 +497,7 @@ def send_soap_to_device(soap_xml: str, host: str = RMCP_HOST, port: int = RMCP_P
         soap_xml: SOAP XML 字符串
         host: 设备 IP
         port: 设备端口
+        soap_action: SOAPAction header (如 "B_FScan")
 
     Returns:
         {
@@ -414,8 +510,8 @@ def send_soap_to_device(soap_xml: str, host: str = RMCP_HOST, port: int = RMCP_P
         }
     """
     try:
-        # 1. 转换 SOAP → Action XML
-        action_xml = build_action_xml(soap_xml)
+        # 1. 转换 SOAP → Action XML (传递 soap_action 以添加设备参数)
+        action_xml = build_action_xml(soap_xml, soap_action)
 
         # 2. 构建 RMCP 帧
         rmcp_frame = build_rmcp_frame(action_xml)
