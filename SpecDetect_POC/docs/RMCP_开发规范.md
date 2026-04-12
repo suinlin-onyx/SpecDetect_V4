@@ -269,20 +269,11 @@ def adjust_params_by_funcid(action_items: list, funcid: int):
 
 以下参数由 Atom 根据设备配置自动添加，**直连设备时必须包含**：
 
-#### 通用参数
-
-| 参数 | 值示例 | 说明 |
-|------|--------|------|
-| rfworkmode | 0 | 射频工作模式 |
-| antpol | 垂直 / b4b9d6b1 | 天线极化 |
-
-#### 按接口添加的参数
-
 | funcid | 接口 | 需要添加的参数 |
 |--------|------|----------------|
 | 10 | B_QueryDeviceInfo | (无) |
 | 11 | B_SglFreqDF | dfmode, antpol, antetype, rfworkmode, ifatt |
-| 12 | B_SglFreqMeas | (仅通用参数) |
+| 12 | B_SglFreqMeas | (无) |
 | 13 | B_PScan | dfmode, dftype, rfworkmode, antpol, antetype, ifatt |
 | 14 | B_MScan | antpol, antetype, rfworkmode |
 | 15 | B_FScan | gainctrl, rfworkmode, scanmode, antpol, antetype, ifatt |
