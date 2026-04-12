@@ -211,6 +211,8 @@ def add_device_params(action_items: list, funcid: int):
 
     # B_FScanDF (21): 频率扫描测向 - 需要 antpol
     elif funcid == 21:
+        if 'gainctrl' not in names:
+            action_items.append(('gainctrl', 'AGC'))
         if 'antpol' not in names:
             action_items.append(('antpol', '垂直'))
         if 'rfworkmode' not in names:
@@ -219,6 +221,10 @@ def add_device_params(action_items: list, funcid: int):
             action_items.append(('antetype', 'OFF'))
         if 'ifatt' not in names:
             action_items.append(('ifatt', '0'))
+        if 'antezoom' not in names:
+            action_items.append(('antezoom', 'OFF'))
+        if 'levelthreshold' not in names:
+            action_items.append(('levelthreshold', '0'))
 
     # B_PScan (13): 频谱扫描 - 需要 dfmode, dftype
     elif funcid == 13:
@@ -234,6 +240,18 @@ def add_device_params(action_items: list, funcid: int):
             action_items.append(('antetype', 'OFF'))
         if 'ifatt' not in names:
             action_items.append(('ifatt', '0'))
+        if 'ifbw' not in names:
+            action_items.append(('ifbw', '40000kHz'))
+        if 'gainctrl' not in names:
+            action_items.append(('gainctrl', 'AGC'))
+        if 'levelthreshold' not in names:
+            action_items.append(('levelthreshold', '0'))
+        if 'antezoom' not in names:
+            action_items.append(('antezoom', 'OFF'))
+        if 'antArryChoose' not in names:
+            action_items.append(('antArryChoose', '1'))
+        if 'calibSwitch' not in names:
+            action_items.append(('calibSwitch', 'OFF'))
 
     # B_MScan (14): 多信道扫描
     elif funcid == 14:
