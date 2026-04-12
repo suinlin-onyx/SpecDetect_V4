@@ -211,7 +211,17 @@ print(f"匹配: {calc == actual}")  # 应为 True
 | 21 | B_FScanDF | startfreq, stopfreq, step, antpol | 频率扫描测向 |
 | 32 | B_StopMeas | frequency, dfmode, ifbw, taskid | 停止测量 |
 
-### 4.2 funcid 推断逻辑
+### 4.2 SOAP 参数名映射
+
+SOAP 请求中的参数名与 RMCP Action XML 中的参数名可能不同：
+
+```python
+SOAP_TO_ACTION_PARAM_MAP = {
+    'gain': 'gainctrl',  # SOAP gain 参数映射为 RMCP gainctrl
+}
+```
+
+### 4.3 funcid 推断逻辑
 
 ```python
 def infer_funcid(action_items: list, is_nil: bool, has_taskid: bool) -> int:
@@ -235,28 +245,74 @@ def infer_funcid(action_items: list, is_nil: bool, has_taskid: bool) -> int:
         return 15  # B_FScan
     elif 'startfreq' in names and 'stopfreq' in names:
         return 17  # B_WBDF
-
-    # 功率扫描
-    if 'frequency' in names and 'dftype' in names:
+    elif 'startfreq' in names or 'stopfreq' in names:
         return 13  # B_PScan
 
     return 15  # 默认 B_FScan
 ```
 
-### 4.3 Atom 自动添加的参数
+### 4.4 参数调整逻辑
+
+根据 funcid 对参数进行调整：
+
+```python
+def adjust_params_by_funcid(action_items: list, funcid: int):
+    """根据 funcid 调整参数"""
+    names = {name for name, _ in action_items}
+
+    # B_SglFreqDF (11): 移除 dfmode 参数
+    if funcid == 11 and 'dfmode' in names:
+        action_items[:] = [(n, v) for n, v in action_items if n != 'dfmode']
+```
+
+### 4.5 Atom 自动添加的参数 (按接口)
 
 以下参数由 Atom 根据设备配置自动添加，**直连设备时必须包含**：
 
+#### 通用参数
+
 | 参数 | 值示例 | 说明 |
 |------|--------|------|
-| gainctrl | AGC | 增益控制 |
 | rfworkmode | 0 | 射频工作模式 |
-| scanmode | 0 | 扫描模式 |
 | antpol | 垂直 / b4b9d6b1 | 天线极化 |
-| antetype | OFF | 天线类型 |
-| ifatt | 0 | 中频衰减 |
 
-**重要**：这些参数在 SOAP 请求中通常不存在，需要从设备配置文件读取或使用默认值。
+#### 按接口添加的参数
+
+| funcid | 接口 | 需要添加的参数 |
+|--------|------|----------------|
+| 10 | B_QueryDeviceInfo | (无) |
+| 11 | B_SglFreqDF | dfmode, antpol, antetype, rfworkmode, ifatt |
+| 12 | B_SglFreqMeas | (仅通用参数) |
+| 13 | B_PScan | dfmode, dftype, rfworkmode, antpol, antetype, ifatt |
+| 14 | B_MScan | antpol, antetype, rfworkmode |
+| 15 | B_FScan | gainctrl, rfworkmode, scanmode, antpol, antetype, ifatt |
+| 16 | B_MScanDF | antpol, keepmode, rfworkmode |
+| 17 | B_WBDF | antpol, rfworkmode |
+| 21 | B_FScanDF | antpol, rfworkmode, antetype, ifatt |
+| 32 | B_StopMeas | (无) |
+
+### 4.6 参数值格式化
+
+频率和带宽参数需要格式化：
+
+```python
+def format_action_items(action_items: list):
+    """格式化参数值"""
+    for i, (name, value) in enumerate(action_items):
+        try:
+            val = int(value)
+            if name in ('startfreq', 'stopfreq', 'frequency'):
+                # 转换为 MHz 格式: 137000000 -> "137MHz"
+                action_items[i] = (name, f"{val // 1000000}MHz")
+            elif name == 'step':
+                # 转换为 kHz 格式: 25000 -> "25kHz"
+                action_items[i] = (name, f"{val // 1000}kHz")
+            elif name == 'ifbw':
+                # 转换为 kHz 格式
+                action_items[i] = (name, f"{val // 1000}kHz")
+        except (ValueError, TypeError):
+            pass
+```
 
 ---
 
@@ -473,7 +529,65 @@ def send_rmcp_frame(host: str, port: int, frame: bytes, timeout: float = 5.0) ->
         return response, elapsed
 ```
 
-### 5.2 SOAP 到 Action XML 转换
+### 5.2 接收持续数据流
+
+B_FScan 等扫描接口发起后，设备会持续发送数据帧：
+
+**典型序列**：
+1. **RESPONSE** (51 bytes) - 请求确认
+2. **DATA** (1053 bytes) - 频谱数据帧
+3. **DATA** (863 bytes) - 后续数据帧
+4. ... 持续发送直到收到 B_StopMeas
+
+**数据流接收示例**：
+
+```python
+def receive_data_stream(sock, max_duration=10, max_packets=100):
+    """接收设备持续发送的数据流"""
+    packets = []
+    start_time = time.time()
+
+    while time.time() - start_time < max_duration:
+        try:
+            # 读取数据 (根据实际情况调整 buffer 大小)
+            chunk = sock.recv(2048)
+            if not chunk:
+                break
+            packets.append(chunk)
+        except socket.timeout:
+            break
+
+    return b''.join(packets)
+
+
+def parse_data_frames(data: bytes):
+    """解析多个连续的数据帧"""
+    frames = []
+    offset = 0
+
+    while offset < len(data):
+        if offset + 4 > len(data):
+            break
+        dwLength = struct.unpack('<I', data[offset:offset+4])[0]
+
+        if offset + dwLength > len(data):
+            break
+
+        frame = data[offset:offset+dwLength]
+        nMsgType = frame[14] if len(frame) > 14 else 0
+
+        frames.append({
+            'dwLength': dwLength,
+            'nMsgType': nMsgType,
+            'data': frame[18:]
+        })
+        offset += dwLength
+
+    return frames
+```
+
+**注意**：当前 `send_rmcp_frame` 函数只返回第一个 RESPONSE 帧，如需接收完整数据流需要使用上述代码。
+
 
 ```python
 import xml.etree.ElementTree as ET
@@ -488,7 +602,12 @@ SOAP_FUNCID_MAP = {
     'B_SglFreqMeas': 12,
     'B_WBDF': 17,
     'B_QueryDeviceInfo': 10,
+    'B_QueryFaciDevStat': 10,  # 与 B_QueryDeviceInfo 同 funcid
     'B_StopMeas': 32,
+}
+
+SOAP_TO_ACTION_PARAM_MAP = {
+    'gain': 'gainctrl',  # SOAP gain 参数映射为 RMCP gainctrl
 }
 
 def parse_soap_items(soap_xml: str) -> Tuple[list, str, str, bool, bool]:
