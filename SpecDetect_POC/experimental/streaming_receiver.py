@@ -14,8 +14,12 @@ import struct
 import time
 import csv
 import os
+import json
 from datetime import datetime
 from typing import List, Tuple, Optional
+
+# Atom 数据整理器
+from atom_data_formatter import AtomDataFormatter, format_streaming_frame
 
 # RMCP常量
 RMCP_HOST = '100.72.95.36'
@@ -58,90 +62,80 @@ def parse_fscan_data(frame_data: bytes) -> Optional[dict]:
 
         payload = frame_data[18:]
 
-        # 尝试解析为FSCAN格式 (LEADER=0xEEEE1DE6)
+        # 检查是否为FSCAN格式 (LEADER=0xEEEE1DE6)
+        # 注意：有符号整数-286331154的十六进制是0xEEEE1DE6
+        is_fscan = False
         if len(payload) >= 23:
-            leader = struct.unpack('<I', payload[0:4])[0]
-            if leader == 0xEEEE1DE6:
-                # FSCAN格式解析
-                # ... (原有逻辑)
-                pass
+            leader_le = struct.unpack('<I', payload[0:4])[0]
+            leader_be = struct.unpack('>I', payload[0:4])[0]
+            if leader_le == 0xEEEE1DE6 or leader_le == 4007718438 or leader_be == 0xEEEE1DE6:
+                is_fscan = True
 
-        # 备用解析: 直接提取电平数据
-        # 跳过前4字节，剩余数据按每2字节一个电平值
-        level_data = payload[4:]
-        levels = []
-        for i in range(0, len(level_data)-1, 2):
-            val = struct.unpack('<h', level_data[i:i+2])[0]
-            # 过滤异常值
-            if -1000 < val < 200:
-                levels.append(val)
+        if is_fscan:
+            # FSCAN格式解析
+            # FSCAN头: LEADER(4) + VER(1) + STC(4) + TS(8) + PL(4) + EL(2) = 23 bytes
+            leader = struct.unpack('<i', payload[0:4])[0]  # 有符号整数
+            result['leader'] = leader
+            result['version'] = payload[4]
+            result['stc'] = struct.unpack('<I', payload[5:9])[0]
+            result['ts'] = struct.unpack('<Q', payload[9:17])[0]
+            result['pl'] = struct.unpack('<I', payload[17:21])[0]
+            result['el'] = struct.unpack('<H', payload[21:23])[0]
 
-        result['levels'] = levels
-        result['level_count'] = len(levels)
-        result['data_format'] = 'raw'
+            offset = 23
 
-        return result
-        offset = 0
+            # DT(1) + DL(4)
+            if len(payload) - offset >= 5:
+                result['dt'] = payload[offset]
+                offset += 1
+                result['dl'] = struct.unpack('<I', payload[offset:offset+4])[0]
+                offset += 4
 
-        # FSCAN头: LEADER(4) + VER(1) + STC(4) + TS(8) + PL(4) + EL(2) = 23 bytes
-        if len(payload) < 23:
-            return None
+            # 频段信息 (28 bytes)
+            if len(payload) - offset >= 28:
+                result['band_no'] = struct.unpack('<I', payload[offset:offset+4])[0]
+                offset += 4
+                result['total_channels'] = struct.unpack('<I', payload[offset:offset+4])[0]
+                offset += 4
+                result['start_freq'] = struct.unpack('<d', payload[offset:offset+8])[0]
+                offset += 8
+                result['end_freq'] = struct.unpack('<d', payload[offset:offset+8])[0]
+                offset += 8
+                result['start_index'] = struct.unpack('<I', payload[offset:offset+4])[0]
+                offset += 4
+                result['step'] = struct.unpack('<d', payload[offset:offset+8])[0]
+                offset += 8
 
-        leader = struct.unpack('<I', payload[0:4])[0]
-        ver = payload[4]
-        stc = struct.unpack('<I', payload[5:9])[0]
-        ts = struct.unpack('<Q', payload[9:17])[0]
-        pl = struct.unpack('<I', payload[17:21])[0]
-        el = struct.unpack('<H', payload[21:23])[0]
+            # 帧信道数量 (4 bytes)
+            if len(payload) - offset >= 4:
+                result['frame_channels'] = struct.unpack('<I', payload[offset:offset+4])[0]
+                offset += 4
 
-        offset = 23
+            # 电平数据: FSCAN格式中电平是直接dBm值，不需要除以256
+            levels = []
+            while offset + 2 <= len(payload):
+                level = struct.unpack('<h', payload[offset:offset+2])[0]
+                levels.append(level)
+                offset += 2
 
-        # DT(1) + DL(4)
-        if len(payload) - offset < 5:
-            return None
-
-        dt = payload[offset]
-        offset += 1
-        dl = struct.unpack('<I', payload[offset:offset+4])[0]
-        offset += 4
-
-        # 频段信息
-        if len(payload) - offset >= 28:
-            band_no = struct.unpack('<I', payload[offset:offset+4])[0]
-            offset += 4
-            total_channels = struct.unpack('<I', payload[offset:offset+4])[0]
-            offset += 4
-            start_freq = struct.unpack('<d', payload[offset:offset+8])[0]
-            offset += 8
-            end_freq = struct.unpack('<d', payload[offset:offset+8])[0]
-            offset += 8
-            start_index = struct.unpack('<I', payload[offset:offset+4])[0]
-            offset += 4
-            step = struct.unpack('<d', payload[offset:offset+8])[0]
-            offset += 8
-
-            result['band_no'] = band_no
-            result['total_channels'] = total_channels
-            result['start_freq'] = start_freq
-            result['end_freq'] = end_freq
-            result['start_index'] = start_index
-            result['step'] = step
-
-        # 帧信道数量
-        if len(payload) - offset >= 4:
-            frame_channels = struct.unpack('<I', payload[offset:offset+4])[0]
-            offset += 4
-            result['frame_channels'] = frame_channels
-
-        # 电平数据 (2 bytes per level, little-endian short)
-        levels = []
-        while offset + 2 <= len(payload):
-            level = struct.unpack('<h', payload[offset:offset+2])[0]
-            levels.append(level)
-            offset += 2
-
-        result['levels'] = levels
-        result['level_count'] = len(levels)
+            result['levels'] = levels
+            result['level_count'] = len(levels)
+            result['data_format'] = 'fscan'
+        else:
+            # 直连数据格式: 从payload偏移11开始，每2字节是有符号整数
+            # 需要除以10得到dBm值 (原始数据是dBm×10)
+            if len(payload) > 11:
+                levels = []
+                offset = 11
+                while offset + 1 < len(payload):
+                    val = struct.unpack('<h', payload[offset:offset+2])[0]
+                    # 转换为dBm (原值除以10)
+                    dbm = round(val / 10.0, 1)
+                    levels.append(dbm)
+                    offset += 2
+                result['levels'] = levels
+                result['level_count'] = len(levels)
+                result['data_format'] = 'direct'
 
         return result
 
@@ -149,12 +143,14 @@ def parse_fscan_data(frame_data: bytes) -> Optional[dict]:
         return {'error': str(e)}
 
 
-def receive_streaming_data(sock: socket.socket, timeout: float = 60.0) -> List[dict]:
+def receive_streaming_data(sock: socket.socket, timeout: float = 60.0,
+                          request_params: dict = None) -> List[dict]:
     """持续接收streaming数据
 
     Args:
         sock: 已连接的socket
         timeout: 接收超时时间(秒)
+        request_params: 请求参数，用于 AtomDataFormatter 填充元数据
 
     Returns:
         数据帧列表
@@ -197,7 +193,15 @@ def receive_streaming_data(sock: socket.socket, timeout: float = 60.0) -> List[d
                     nMsgType = frame_data[14] if len(frame_data) > 14 else 0
 
                     if nMsgType == 0:  # DATA frame
-                        fscan_result = parse_fscan_data(frame_data)
+                        if request_params:
+                            # 使用 AtomDataFormatter 进行解析
+                            tmstamp = struct.unpack('<Q', frame_data[4:12])[0]
+                            fscan_result = format_streaming_frame(frame_data, tmstamp, request_params)
+                            fscan_result['dwLength'] = dwLength
+                            fscan_result['nMsgType'] = nMsgType
+                        else:
+                            fscan_result = parse_fscan_data(frame_data)
+
                         if fscan_result and 'error' not in fscan_result:
                             frames.append(fscan_result)
                             elapsed = time.time() - start_time
@@ -259,6 +263,58 @@ def save_to_csv(frames: List[dict], output_file: str):
             levels = frame.get('levels', [])
             row.extend(levels[:freq_count])
             writer.writerow(row)
+
+    print(f"  已保存 {len(frames)} 帧数据到: {output_file}")
+
+
+def save_to_json(frames: List[dict], output_file: str):
+    """保存数据到JSON文件
+
+    Args:
+        frames: 数据帧列表
+        output_file: 输出文件路径
+    """
+    if not frames:
+        print("  没有数据可保存")
+        return
+
+    os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
+
+    output_data = {
+        'timestamp': datetime.now().isoformat(),
+        'frame_count': len(frames),
+        'frames': []
+    }
+
+    for i, frame in enumerate(frames):
+        frame_data = {
+            '帧索引': i,
+            '帧长度': frame.get('dwLength', 0),
+            '时间戳': frame.get('tmStamp', 0),
+            '消息类型': frame.get('nMsgType', 0),
+            '数据格式': frame.get('data_format', 'unknown'),
+            'LEADER': frame.get('LEADER', 0),
+            'VER': frame.get('version', 0),
+            'STC': frame.get('stc', 0),
+            'TS': frame.get('ts', ''),
+            'PL': frame.get('pl', 0),
+            'EL': frame.get('el', 0),
+            'DT': frame.get('dt', 0),
+            'DL': frame.get('dl', 0),
+            '频段序号': frame.get('band_no', 0),
+            '信道总数': frame.get('total_channels', 0),
+            '起始频率': frame.get('start_freq', 0.0),
+            '结束频率': frame.get('end_freq', 0.0),
+            '起始频率序号': frame.get('start_index', 0),
+            '步长': frame.get('step', 0.0),
+            '帧信道数量': frame.get('frame_channels', 0),
+            '电平数量': len(frame.get('levels', [])),
+            '电平': frame.get('levels', [])
+        }
+        output_data['frames'].append(frame_data)
+
+    with open(output_file, 'w', encoding='utf-8') as f:
+        json.dump(output_data, f, indent=2, ensure_ascii=False)
 
     print(f"  已保存 {len(frames)} 帧数据到: {output_file}")
 
@@ -390,7 +446,15 @@ def test_streaming(soap_xml: str, soap_action: str, duration: float = 30.0,
     # 继续接收数据
     print(f"  继续等待DATA帧 (最多{duration}秒)...")
     sock.settimeout(2.0)  # 重置socket超时
-    frames = receive_streaming_data(sock, timeout=duration)
+
+    # 构建 request_params 用于 AtomDataFormatter
+    request_params = {}
+    for name, value in action_items:
+        if name in ('startfreq', 'stopfreq', 'step'):
+            # 格式化后的值如 "137MHz", "25kHz"
+            request_params[name] = value
+
+    frames = receive_streaming_data(sock, timeout=duration, request_params=request_params)
 
     sock.close()
     print("  连接已关闭")
@@ -400,7 +464,7 @@ def test_streaming(soap_xml: str, soap_action: str, duration: float = 30.0,
 
     # 保存数据
     if frames and output_file:
-        save_to_csv(frames, output_file)
+        save_to_json(frames, output_file)
 
     return {
         'success': len(frames) > 0,
@@ -412,12 +476,13 @@ def test_streaming(soap_xml: str, soap_action: str, duration: float = 30.0,
 if __name__ == '__main__':
     import sys
 
-    # 测试B_FScan (funcid=15) - 返回FSCAN数据
+    # 测试B_FScan (funcid=15) - 频率扫描
+    # 使用与capture相同的频率范围
     test_soap = '''<?xml version="1.0" encoding="UTF-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
 <soapenv:Body>
 <srrc:requestbody xmlns:srrc="http://www.srrc.org.cn">
-<srrc:mfid>53090001140012</srrc:mfid>
+<srrc:mfid>53090001150015</srrc:mfid>
 <srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
 <srrc:equpara>
 <srrc:items>
@@ -430,7 +495,7 @@ if __name__ == '__main__':
 </soapenv:Body>
 </soapenv:Envelope>'''
 
-    output = f"data/streaming_fscan_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    output = f"data/streaming_fscan_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     result = test_streaming(test_soap, "B_FScan", duration=30.0, output_file=output)
 
     print(f"\n测试结果: {'成功' if result['success'] else '失败'}")
