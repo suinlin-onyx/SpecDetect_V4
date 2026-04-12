@@ -246,12 +246,18 @@ def add_device_params(action_items: list, funcid: int):
 
     # B_MScanDF (16): 多信道扫描测向
     elif funcid == 16:
+        if 'gainctrl' not in names:
+            action_items.append(('gainctrl', 'AGC'))
         if 'antpol' not in names:
             action_items.append(('antpol', '垂直'))
         if 'keepmode' not in names:
             action_items.append(('keepmode', '0'))
         if 'rfworkmode' not in names:
             action_items.append(('rfworkmode', '0'))
+        if 'antetype' not in names:
+            action_items.append(('antetype', 'OFF'))
+        if 'ifatt' not in names:
+            action_items.append(('ifatt', '0'))
 
     # B_WBDF (17): 宽带测向
     elif funcid == 17:
