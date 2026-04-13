@@ -1,0 +1,88 @@
+{
+  "interface": "B_PScan",
+  "soap_action": "B_MScanDF",
+  "action_xml": "<?xml version=\"1.0\" encoding=\"gb2312\" ?>\n<action id=\"1\">\n    <parameter groups=\"1\" stationid=\"53090001\" deviceid=\"00106\" devicename=\"MS845\" funcid=\"16\">\n        <group index=\"0\">\n            <item name=\"startfreq\" value=\"137MHz\" />\n            <item name=\"stopfreq\" value=\"173MHz\" />\n            <item name=\"step\" value=\"25kHz\" />\n            <item name=\"gainctrl\" value=\"AGC\" />\n            <item name=\"rfworkmode\" value=\"0\" />\n            <item name=\"antpol\" value=\"垂直\" />\n            <item name=\"keepmode\" value=\"0\" />\n            <item name=\"antetype\" value=\"OFF\" />\n            <item name=\"ifatt\" value=\"0\" />\n        </group>\n    </parameter>\n    <other_param />\n</action>",
+  "total_bytes": 12935,
+  "packet_count": 14,
+  "frames": [
+    {
+      "index": 1,
+      "dwLength": 51,
+      "nMsgType": 6,
+      "tmStamp": 134205640655930000,
+      "payload_hex": "100100000040742a080000000040c54f0a00000000a861000000000000a1050000"
+    },
+    {
+      "index": 2,
+      "dwLength": 2911,
+      "nMsgType": 0,
+      "tmStamp": 134205640692750000,
+      "payload_hex": "100100a1050000000000008601380184019e010e0152013001a60118013e01fe004c013201d4002401bc01dc00e8006c0132016c01ae0110012c01c8012c015c",
+      "fscan": {
+        "leader": 2701132048,
+        "ver": 5,
+        "levelCount": 1441,
+        "levels": [
+          390,
+          312,
+          388,
+          414,
+          270,
+          338,
+          304,
+          422,
+          280,
+          318,
+          254,
+          332,
+          306,
+          212,
+          292,
+          444,
+          220,
+          232,
+          364,
+          306
+        ],
+        "totalBytes": 2893
+      }
+    },
+    {
+      "index": 3,
+      "dwLength": 2911,
+      "nMsgType": 0,
+      "tmStamp": 134205640696340000,
+      "payload_hex": "100100a10500000000000012013a01e001f6000a010e010001560180011e011a014e015801be017c0122011e011601f400e40014015601b2017601f0014e010c",
+      "fscan": {
+        "leader": 2701132048,
+        "ver": 5,
+        "levelCount": 1441,
+        "levels": [
+          274,
+          314,
+          480,
+          246,
+          266,
+          270,
+          256,
+          342,
+          384,
+          286,
+          282,
+          334,
+          344,
+          446,
+          380,
+          290,
+          286,
+          278,
+          244,
+          228
+        ],
+        "totalBytes": 2893
+      }
+    }
+  ],
+  "success": true,
+  "frame_count": 6
+}

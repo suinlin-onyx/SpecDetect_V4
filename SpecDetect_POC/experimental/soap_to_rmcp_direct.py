@@ -180,136 +180,99 @@ def map_param_names(action_items: list):
             action_items[i] = (SOAP_TO_ACTION_PARAM_MAP[name], value)
 
 
-def adjust_params_by_funcid(action_items: list, funcid: int):
-    """根据 funcid 调整参数"""
-    names = {name for name, _ in action_items}
+# ============================================
+# 接口参数配置 (解耦设计)
+# ============================================
 
-    if funcid == 11 and 'dfmode' in names:
-        action_items[:] = [(n, v) for n, v in action_items if n != 'dfmode']
+# 各接口的默认参数 (仅列出需要添加的参数)
+FUNCID_DEFAULT_PARAMS = {
+    15: [  # B_FScan - 频率扫描
+        ('gainctrl', 'AGC'),
+        ('rfworkmode', '0'),
+        ('scanmode', '0'),
+        ('antpol', '垂直'),
+        ('antetype', 'OFF'),
+        ('ifatt', '0'),
+    ],
+    21: [  # B_FScanDF - 频率扫描测向
+        ('gainctrl', 'AGC'),
+        ('antpol', '垂直'),
+        ('rfworkmode', '0'),
+        ('antetype', 'OFF'),
+        ('ifatt', '0'),
+        ('antezoom', 'OFF'),
+        ('levelthreshold', '0'),
+    ],
+    13: [  # B_PScan - 频谱扫描 (简化参数，匹配B_MScan)
+        ('rfworkmode', '0'),
+        ('antpol', '垂直'),
+        ('antetype', 'OFF'),
+        ('ifatt', '0'),
+        ('ifbw', '40000kHz'),
+        ('gainctrl', 'AGC'),
+    ],
+    14: [  # B_MScan - 多信道扫描
+        ('antpol', '垂直'),
+        ('antetype', 'OFF'),
+        ('rfworkmode', '0'),
+    ],
+    16: [  # B_MScanDF - 多信道扫描测向
+        ('gainctrl', 'AGC'),
+        ('antpol', '垂直'),
+        ('keepmode', '0'),
+        ('rfworkmode', '0'),
+        ('antetype', 'OFF'),
+        ('ifatt', '0'),
+    ],
+    25: [  # B_WBDF - 宽带测向
+        ('gainctrl', 'AGC'),
+        ('rfworkmode', '0'),
+        ('antpol', '垂直'),
+        ('antetype', 'OFF'),
+        ('resolution', '25kHz'),
+        ('ifatt', '0'),
+        ('antezoom', 'OFF'),
+        ('antArryChoose', '1'),
+    ],
+    11: [  # B_SglFreqDF - 单频测向 (无 dfmode)
+        ('antpol', '垂直'),
+        ('antetype', 'OFF'),
+        ('rfworkmode', '0'),
+        ('ifatt', '0'),
+    ],
+    # funcid=12 (B_SglFreqMeas) 无需默认参数
+    12: [],  # B_SglFreqMeas - 单频测量
+}
+
+# 各接口不允许包含的参数 (设备不支持的功能)
+FUNCID_DISALLOWED_PARAMS = {
+    11: ['dfmode'],   # B_SglFreqDF - 无 DF 硬件
+    12: ['dfmode'],   # B_SglFreqMeas - 无 DF 硬件
+    13: ['dfmode'],   # B_PScan - 无 DF 硬件
+}
+
+
+def adjust_params_by_funcid(action_items: list, funcid: int):
+    """根据 funcid 调整参数: 移除不允许的参数"""
+    # 移除不允许的参数
+    disallowed = FUNCID_DISALLOWED_PARAMS.get(funcid, [])
+    if disallowed:
+        action_items[:] = [(n, v) for n, v in action_items if n not in disallowed]
 
 
 def add_device_params(action_items: list, funcid: int):
     """
-    根据接口类型添加设备配置参数
+    根据接口类型添加设备配置参数 (解耦版本)
 
-    这些参数由 Atom 从设备配置中获取并添加到 RMCP 请求中
+    使用 FUNCID_DEFAULT_PARAMS 字典配置各接口参数，互不影响
     """
     names = {name for name, _ in action_items}
 
-    # B_FScan (15): 频率扫描
-    if funcid == 15:
-        if 'gainctrl' not in names:
-            action_items.append(('gainctrl', 'AGC'))
-        if 'rfworkmode' not in names:
-            action_items.append(('rfworkmode', '0'))
-        if 'scanmode' not in names:
-            action_items.append(('scanmode', '0'))
-        if 'antpol' not in names:
-            action_items.append(('antpol', '垂直'))
-        if 'antetype' not in names:
-            action_items.append(('antetype', 'OFF'))
-        if 'ifatt' not in names:
-            action_items.append(('ifatt', '0'))
-
-    # B_FScanDF (21): 频率扫描测向 - 需要 antpol
-    elif funcid == 21:
-        if 'gainctrl' not in names:
-            action_items.append(('gainctrl', 'AGC'))
-        if 'antpol' not in names:
-            action_items.append(('antpol', '垂直'))
-        if 'rfworkmode' not in names:
-            action_items.append(('rfworkmode', '0'))
-        if 'antetype' not in names:
-            action_items.append(('antetype', 'OFF'))
-        if 'ifatt' not in names:
-            action_items.append(('ifatt', '0'))
-        if 'antezoom' not in names:
-            action_items.append(('antezoom', 'OFF'))
-        if 'levelthreshold' not in names:
-            action_items.append(('levelthreshold', '0'))
-
-    # B_PScan (13): 频谱扫描 - 需要 dfmode, dftype
-    elif funcid == 13:
-        if 'dfmode' not in names:
-            action_items.append(('dfmode', '0'))
-        if 'dftype' not in names:
-            action_items.append(('dftype', '0'))
-        if 'rfworkmode' not in names:
-            action_items.append(('rfworkmode', '0'))
-        if 'antpol' not in names:
-            action_items.append(('antpol', '垂直'))
-        if 'antetype' not in names:
-            action_items.append(('antetype', 'OFF'))
-        if 'ifatt' not in names:
-            action_items.append(('ifatt', '0'))
-        if 'ifbw' not in names:
-            action_items.append(('ifbw', '40000kHz'))
-        if 'gainctrl' not in names:
-            action_items.append(('gainctrl', 'AGC'))
-        if 'levelthreshold' not in names:
-            action_items.append(('levelthreshold', '0'))
-        if 'antezoom' not in names:
-            action_items.append(('antezoom', 'OFF'))
-        if 'antArryChoose' not in names:
-            action_items.append(('antArryChoose', '1'))
-        if 'calibSwitch' not in names:
-            action_items.append(('calibSwitch', 'OFF'))
-
-    # B_MScan (14): 多信道扫描
-    elif funcid == 14:
-        if 'antpol' not in names:
-            action_items.append(('antpol', '垂直'))
-        if 'antetype' not in names:
-            action_items.append(('antetype', 'OFF'))
-        if 'rfworkmode' not in names:
-            action_items.append(('rfworkmode', '0'))
-
-    # B_MScanDF (16): 多信道扫描测向
-    elif funcid == 16:
-        if 'gainctrl' not in names:
-            action_items.append(('gainctrl', 'AGC'))
-        if 'antpol' not in names:
-            action_items.append(('antpol', '垂直'))
-        if 'keepmode' not in names:
-            action_items.append(('keepmode', '0'))
-        if 'rfworkmode' not in names:
-            action_items.append(('rfworkmode', '0'))
-        if 'antetype' not in names:
-            action_items.append(('antetype', 'OFF'))
-        if 'ifatt' not in names:
-            action_items.append(('ifatt', '0'))
-
-    # B_WBDF (25): 宽带测向 - 设备实际使用 funcid=25
-    elif funcid == 25:
-        if 'gainctrl' not in names:
-            action_items.append(('gainctrl', 'AGC'))
-        if 'rfworkmode' not in names:
-            action_items.append(('rfworkmode', '0'))
-        if 'antpol' not in names:
-            action_items.append(('antpol', '垂直'))
-        if 'antetype' not in names:
-            action_items.append(('antetype', 'OFF'))
-        if 'resolution' not in names:
-            action_items.append(('resolution', '25kHz'))
-        if 'ifatt' not in names:
-            action_items.append(('ifatt', '0'))
-        if 'antezoom' not in names:
-            action_items.append(('antezoom', 'OFF'))
-        if 'antArryChoose' not in names:
-            action_items.append(('antArryChoose', '1'))
-
-    # B_SglFreqDF (11): 单频测向 - 需要 dfmode
-    elif funcid == 11:
-        if 'dfmode' not in names:
-            action_items.append(('dfmode', '0'))
-        if 'antpol' not in names:
-            action_items.append(('antpol', '垂直'))
-        if 'antetype' not in names:
-            action_items.append(('antetype', 'OFF'))
-        if 'rfworkmode' not in names:
-            action_items.append(('rfworkmode', '0'))
-        if 'ifatt' not in names:
-            action_items.append(('ifatt', '0'))
+    # 从配置字典获取默认参数
+    default_params = FUNCID_DEFAULT_PARAMS.get(funcid, [])
+    for param_name, param_value in default_params:
+        if param_name not in names:
+            action_items.append((param_name, param_value))
 
 
 def format_action_items(action_items: list):

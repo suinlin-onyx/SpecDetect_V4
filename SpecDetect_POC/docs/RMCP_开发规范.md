@@ -201,16 +201,21 @@ print(f"匹配: {calc == actual}")  # 应为 True
 | funcid | 接口名 | 主要参数 | 说明 |
 |--------|--------|----------|------|
 | 10 | B_QueryDeviceInfo | - | 设备信息查询 |
-| 11 | B_SglFreqDF | frequency, dfmode | 单频测向 |
-| 12 | B_SglFreqMeas | frequency | 单频测量 |
-| 13 | B_PScan | frequency, dfmode, dftype | 功率扫描 |
-| 14 | B_MScan | frequency, ifbw, antpol | 多信道扫描 |
+| 11 | B_SglFreqDF | frequency, ifbw, dfmode=1 | **双模式**：ifbw=40MHz单频(nArrays=1)，ifbw=40kHz扫描(nArrays=1601) |
+| 12 | B_SglFreqMeas | frequency | ❌ 设备返回"设备校验失败" |
+| 13 | B_PScan | frequency, dfmode=1, dftype | ❌ 设备返回"设备校验失败" |
+| 14 | B_MScan | frequency, ifbw, antpol | ✅ 多信道扫描 (成功) |
 | 15 | B_FScan | startfreq, stopfreq, step | 频率扫描 |
-| 16 | B_MScanDF | startfreq, stopfreq, step, keepmode | 多信道扫描测向 |
-| 17 | B_WBDF | startfreq, stopfreq | 宽带测向 (已过时，设备返回ErrCode=-1) |
-| 21 | B_FScanDF | startfreq, stopfreq, step, antpol | 频率扫描测向 |
-| 25 | B_WBDF | frequency, ifbw, gainctrl, rfworkmode, antpol, antetype, resolution, ifatt, antezoom, antArryChoose | 宽带测向 (当前实际使用) |
-| 32 | B_StopMeas | frequency, dfmode, ifbw, taskid | 停止测量 |
+| 16 | B_MScanDF | startfreq, stopfreq, step, keepmode, antpol, antetype, ifatt | ✅ **频谱扫描 (实际成功使用)** |
+| 17 | B_WBDF | startfreq, stopfreq | ❌ 设备返回ErrCode=-1 |
+| 21 | B_FScanDF | startfreq, stopfreq, step, dfmode=1, antpol | 频率扫描测向 (需要DF硬件) |
+| 25 | B_WBDF | frequency, ifbw | ❌ 设备返回"设备校验失败" |
+| 32 | B_StopMeas | taskid | 停止测量 |
+
+> **重要发现 (2026-04-13)**：根据实际设备测试：
+> - TestTool 的 "B_PScan" 界面实际映射到 **funcid=16** (频谱扫描)
+> - funcid=12, 13, 25 设备返回"设备校验失败"，设备不支持
+> - funcid=14, 16 成功触发 streaming 数据
 
 ### 4.2 SOAP 参数名映射
 
@@ -224,6 +229,8 @@ SOAP_TO_ACTION_PARAM_MAP = {
 
 ### 4.3 funcid 推断逻辑
 
+> **重要更新 (2026-04-13)**：根据实际捕获数据分析，Atom 的 funcid 推断逻辑与之前文档描述有差异。
+
 ```python
 def infer_funcid(action_items: list, is_nil: bool, has_taskid: bool) -> int:
     """根据参数推断 funcid"""
@@ -233,40 +240,90 @@ def infer_funcid(action_items: list, is_nil: bool, has_taskid: bool) -> int:
     if is_nil:
         return 32 if has_taskid else 10
 
-    # 单频率参数
-    if 'frequency' in names and 'dfmode' in names:
-        return 11  # B_SglFreqDF
-    elif 'frequency' in names and 'ifbw' in names:
-        return 25  # B_WBDF (当前设备实际使用)
-    elif 'frequency' in names:
-        return 12  # B_SglFreqMeas
-
-    # 频率范围参数
+    # 频率范围参数 (startfreq/stopfreq/step) -> funcid=16 (B_MScanDF)
     if 'startfreq' in names and 'stopfreq' in names and 'step' in names:
-        if 'dfmode' in names or 'antpol' in names:
-            return 21  # B_FScanDF
-        return 15  # B_FScan
-    elif 'startfreq' in names and 'stopfreq' in names:
-        return 17  # B_WBDF
-    elif 'startfreq' in names or 'stopfreq' in names:
-        return 13  # B_PScan
+        return 16  # B_MScanDF (频谱扫描 - 实际成功使用)
+
+    # 单频率参数 (frequency)
+    if 'frequency' in names:
+        if 'dfmode' in names:
+            return 11  # B_SglFreqDF (需要DF硬件)
+        elif 'ifbw' in names:
+            return 25  # B_WBDF (设备返回ErrCode=-1)
+        else:
+            return 12  # B_SglFreqMeas (设备可能不支持)
+
+    # 其他情况
+    if 'startfreq' in names or 'stopfreq' in names:
+        return 16  # B_MScanDF
 
     return 15  # 默认 B_FScan
 ```
 
-### 4.4 参数调整逻辑
+**实际验证结果**：
+- funcid=16 + startfreq/stopfreq/step → ✅ 成功触发 streaming (nArrays=1441)
+- funcid=11 + frequency + dfmode=1 + ifbw=40MHz → ✅ 单频模式 (nArrays=1)
+- funcid=11 + frequency + ifbw=40kHz → ✅ 扫描模式 (nArrays=1601)
+- funcid=13 + frequency + dfmode=1 → ❌ 设备校验失败
+- funcid=25 + frequency + ifbw → ❌ 设备校验失败
+
+### 4.4 funcid=11 (B_SglFreqDF) 双模式详解
+
+**重要发现 (2026-04-13)**：funcid=11 支持两种工作模式，由 `ifbw` 参数决定：
+
+| 模式 | ifbw 值 | nArrays | 数据量 | 说明 |
+|------|---------|---------|--------|------|
+| 单频模式 | 40MHz (40000000kHz) | 1 | 26 电平 | 测量单个频率点 |
+| 扫描模式 | 40kHz (40000kHz) | 1601 | 1601 电平 | 扫描一段频率范围 |
+
+**参数示例**：
+
+```xml
+<!-- 单频模式 (nArrays=1) -->
+<item name="frequency" value="100MHz" />
+<item name="ifbw" value="40000000kHz" />
+
+<!-- 扫描模式 (nArrays=1601) - 需要额外参数 -->
+<item name="frequency" value="100MHz" />
+<item name="ifbw" value="40000kHz" />
+<item name="audioswitch" value="OFF" />
+<item name="demodmode" value="FM" />
+<item name="demodbw" value="200kHz" />
+<item name="bbfftl" value="2048" />
+<item name="CombineFunc" value="AsIIEQ" />
+```
+
+**扫描模式数据格式**：
+- 频率范围：center_freq ± 20MHz（100MHz → 80~120MHz）
+- 通道数：1601
+- 步进：≈25kHz
+- DT=7（频谱数据类型）
+- 前4个值为前缀校准数据，实际频谱从第5个值开始
+
+**验证来源**：
+- 单频模式：我们的测试 `test_result_B_SglFreqDF_20260413_150111.json`
+- 扫描模式：我们的测试 `test_result_B_SglFreqDF_SCAN_20260413_160622.json`
+
+### 4.5 参数调整逻辑
 
 根据 funcid 对参数进行调整：
 
 ```python
-def adjust_params_by_funcid(action_items: list, funcid: int):
-    """根据 funcid 调整参数"""
-    names = {name for name, _ in action_items}
+# 各接口不允许包含的参数 (设备不支持的功能)
+FUNCID_DISALLOWED_PARAMS = {
+    11: ['dfmode'],   # B_SglFreqDF - 无 DF 硬件时需移除
+    12: ['dfmode'],   # B_SglFreqMeas - 设备不支持
+    13: ['dfmode'],   # B_PScan - 设备不支持
+}
 
-    # B_SglFreqDF (11): 移除 dfmode 参数
-    if funcid == 11 and 'dfmode' in names:
-        action_items[:] = [(n, v) for n, v in action_items if n != 'dfmode']
+def adjust_params_by_funcid(action_items: list, funcid: int):
+    """根据 funcid 调整参数: 移除不允许的参数"""
+    disallowed = FUNCID_DISALLOWED_PARAMS.get(funcid, [])
+    if disallowed:
+        action_items[:] = [(n, v) for n, v in action_items if n not in disallowed]
 ```
+
+> **注意**：根据实际测试，funcid=11 在带 dfmode=1 时成功了，但 funcid=13 带 dfmode=1 失败了。这可能是因为设备有 DF 硬件但配置不同。
 
 ### 4.5 Atom 自动添加的参数 (按接口)
 
@@ -275,16 +332,19 @@ def adjust_params_by_funcid(action_items: list, funcid: int):
 | funcid | 接口 | 需要添加的参数 |
 |--------|------|----------------|
 | 10 | B_QueryDeviceInfo | (无) |
-| 11 | B_SglFreqDF | dfmode, antpol, antetype, rfworkmode, ifatt |
-| 12 | B_SglFreqMeas | (无) |
-| 13 | B_PScan | dfmode, dftype, rfworkmode, antpol, antetype, ifatt, ifbw, gainctrl, levelthreshold, antezoom, antArryChoose, calibSwitch |
+| 11 | B_SglFreqDF | antpol, antetype, rfworkmode, ifatt |
+| 12 | B_SglFreqMeas | (无) - **设备可能不支持** |
+| 13 | B_PScan | dftype, antpol, antetype, rfworkmode, ifatt - **设备返回校验失败** |
 | 14 | B_MScan | antpol, antetype, rfworkmode |
 | 15 | B_FScan | gainctrl, rfworkmode, scanmode, antpol, antetype, ifatt |
 | 16 | B_MScanDF | gainctrl, rfworkmode, antpol, keepmode, antetype, ifatt |
-| 17 | B_WBDF | antpol, rfworkmode (已过时) |
+| 17 | B_WBDF | antpol, rfworkmode - **已过时，设备返回ErrCode=-1** |
 | 21 | B_FScanDF | gainctrl, rfworkmode, antpol, antezoom, levelthreshold, antetype, ifatt |
-| 25 | B_WBDF | gainctrl, rfworkmode, antpol, antetype, resolution, ifatt, antezoom, antArryChoose |
+| 25 | B_WBDF | gainctrl, rfworkmode, antpol, antetype, resolution, ifatt, antezoom, antArryChoose - **设备返回ErrCode=-1** |
 | 32 | B_StopMeas | (无) |
+
+> **实际验证 (2026-04-13)**：根据 rmcp_proxy 捕获分析，funcid=16 的实际参数为：
+> - startfreq, stopfreq, step, gainctrl, rfworkmode, keepmode, antpol, antetype, ifatt
 
 ### 4.6 参数值格式化
 
@@ -938,4 +998,35 @@ def test_b_fscan():
 | 版本 | 日期 | 修改内容 |
 |------|------|----------|
 | 1.0 | 2026-04-12 | 初始版本，包含完整帧结构、校验和、funcid 映射 |
+| 1.1 | 2026-04-13 | 更新 funcid=16 B_PScan 测试验证通过；确认 funcid=12/13/25 设备不支持 |
+| 1.2 | 2026-04-13 | 更新 funcid=11 双模式说明：ifbw=40MHz 单频(nArrays=1)，ifbw=40kHz 扫描(nArrays=1601) |
+
+### 测试验证记录 (2026-04-13)
+
+**B_PScan (TestTool) → funcid=16** ✅
+
+请求参数:
+```xml
+<item name="startfreq" value="137MHz" />
+<item name="stopfreq" value="173MHz" />
+<item name="step" value="25kHz" />
+<item name="gainctrl" value="AGC" />
+<item name="rfworkmode" value="0" />
+<item name="antpol" value="垂直" />
+<item name="keepmode" value="0" />
+<item name="antetype" value="OFF" />
+<item name="ifatt" value="0" />
+```
+
+响应数据:
+- 帧数: 4 帧 (1 RESPONSE + 3 DATA streaming)
+- 数据量: 12935 bytes
+- FSCAN Payload: 2893 bytes (Header 11 + 1441 channels × 2 bytes)
+- 频率范围: 137-173 MHz, 步长: 25 kHz
+
+**B_SglFreqMeas → funcid=12** ❌
+
+响应: `RMTP:ErrCode=-1,INFO=设备校验失败[ID:00106][功能:12]`
+
+结论: funcid=12 设备不支持
 
