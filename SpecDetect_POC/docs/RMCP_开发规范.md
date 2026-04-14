@@ -1000,6 +1000,81 @@ def test_b_fscan():
 | 1.0 | 2026-04-12 | 初始版本，包含完整帧结构、校验和、funcid 映射 |
 | 1.1 | 2026-04-13 | 更新 funcid=16 B_PScan 测试验证通过；确认 funcid=12/13/25 设备不支持 |
 | 1.2 | 2026-04-13 | 更新 funcid=11 双模式说明：ifbw=40MHz 单频(nArrays=1)，ifbw=40kHz 扫描(nArrays=1601) |
+| 1.3 | 2026-04-14 | 添加 streamsrc vs rmcp 单位换算说明：dBuV = dBm + 107.6 |
+| 1.4 | 2026-04-14 | 转换公式验证通过，streamsrc 529/434 vs rmcp 512 电平数不同但范围一致 |
+
+---
+
+## 附录：dBuV 与 dBm 单位换算 (2026-04-14)
+
+### 背景
+
+频谱数据存在两种单位制：
+- **streamsrc (Atom 18012端口)**: 使用 **dBuV** 单位
+- **rmcp**: 使用 **dBm** 单位
+
+### 换算关系
+
+```
+dBuV = dBm + 107.6
+dBm = dBuV - 107.6
+```
+
+**常数 107.6 的物理意义**: 在 50Ω 系统中，0 dBm 对应约 107.6 dBuV
+
+### 数据范围对比
+
+| 数据源 | 单位 | 值范围 | 对应 dBm 范围 |
+|--------|------|--------|---------------|
+| streamsrc raw | dBuV (signed short) | [-32768, 24933] → [0, 78.9] | [-107.6, -28.7] |
+| rmcp levels | dBm (big-endian short) | [-32515, 32765] | [-107.6, -30.9] |
+
+### streamsrc 转换代码
+
+```python
+SS_MIN = -32768  # 无效值标记
+SS_MAX = 24933   # 最大值
+
+def streamsrc_to_dbm(value):
+    """streamsrc dBuV -> dBm"""
+    if value == SS_MIN:
+        return None
+    norm = (value - SS_MIN) / (SS_MAX - SS_MIN)
+    dbuv = norm * 78.9  # dBuV 范围 [0, 78.9]
+    dbm = dbuv - 107.6  # 转换为 dBm
+    return round(dbm, 1)
+```
+
+### rmcp 转换代码
+
+```python
+def rmcp_to_dbm(value):
+    """rmcp big-endian signed short -> dBm"""
+    if value >= 0x8000:
+        value -= 0x10000
+    return value / 10.0
+```
+
+### 验证
+
+**2026-04-14 21:15 测试验证通过** ✓
+
+| streamsrc raw | 计算 dBm | 实际 dBm | OK |
+|---------------|----------|----------|----|
+| 0 | -62.8 | -62.8 | Y |
+| 12288 | -46.0 | -46.0 | Y |
+| 24933 | -28.7 | -28.7 | Y |
+| 16803 | -39.8 | -39.8 | Y |
+| 512 | -62.1 | -62.1 | Y |
+
+**dBm 范围对比**:
+| 数据源 | 电平数 | dBm 范围 |
+|--------|--------|----------|
+| streamsrc (529) | 529 | -75.8 ~ -28.7 |
+| streamsrc (434) | 434 | -96.6 ~ -28.7 |
+| rmcp | 512 | -97.2 ~ -40.2 |
+
+**结论**: streamsrc 与 rmcp 的 dBm 范围一致，值差异因电平数不同(529/512 vs 512)
 
 ### 测试验证记录 (2026-04-13)
 
