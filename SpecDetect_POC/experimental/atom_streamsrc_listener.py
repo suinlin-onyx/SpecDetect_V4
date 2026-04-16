@@ -228,6 +228,39 @@ def parse_atom_frame(data):
             }
 
     # FSCAN 帧: offset 19 == 0x26 (529) 或 0x68 (434)
+    # 注意: 1086字节帧是完整的512点频谱，不是重组数据
+    if fscan_type in (0x26, 0x68) and len(data) == 1086:
+        # 1086字节帧: 从offset 48解析512点频谱
+        vals = struct.unpack('<' + 'h' * 519, data[48:])
+        meta = list(vals[:7])
+        spectrum = list(vals[7:7+512])
+        return {
+            'type': 'SPECTRUM',
+            'length': 1086,
+            'level_count': 512,
+            'levels': spectrum,
+            'level_min': min(spectrum),
+            'level_max': max(spectrum),
+            'metadata': meta,
+        }
+
+    # 896字节帧 (FSCAN-434): 完整434点数据帧
+    # 结构: offset 28开始 = 434个int16 (包含17个元数据 + 417点频谱)
+    if fscan_type == 0x68 and len(data) == 896:
+        vals = struct.unpack('<' + 'h' * 434, data[28:])
+        meta = list(vals[:17])
+        spectrum = list(vals[17:])
+        return {
+            'type': 'SPECTRUM-434',
+            'length': 896,
+            'level_count': len(spectrum),
+            'levels': spectrum,
+            'level_min': min(spectrum),
+            'level_max': max(spectrum),
+            'metadata': meta,
+        }
+
+    # 旧重组逻辑: 65字节帧或其他小帧
     if fscan_type in (0x26, 0x68):
         frame_type = 'FSCAN-434' if fscan_type == 0x68 else 'FSCAN-529'
         payload = data[28:]
@@ -372,15 +405,16 @@ def connect_and_receive(host, port, taskid=None, timeout=30):
                         recv_buffer = recv_buffer[1:]
                         continue
 
-                    if len(recv_buffer) >= 65 and recv_buffer[4] == 0x01:
-                        frame_data = recv_buffer[:65]
-                        recv_buffer = recv_buffer[65:]
-                    elif len(recv_buffer) >= 1086:
+                    # 先检查大帧，再检查小帧（顺序重要！）
+                    if len(recv_buffer) >= 1086:
                         frame_data = recv_buffer[:1086]
                         recv_buffer = recv_buffer[1086:]
                     elif len(recv_buffer) >= 896:
                         frame_data = recv_buffer[:896]
                         recv_buffer = recv_buffer[896:]
+                    elif len(recv_buffer) >= 65 and recv_buffer[4] == 0x01:
+                        frame_data = recv_buffer[:65]
+                        recv_buffer = recv_buffer[65:]
                     else:
                         break
 
@@ -423,7 +457,13 @@ def connect_and_receive(host, port, taskid=None, timeout=30):
                             spectrum = buffer_529[:TARGET_LEVELS['FSCAN-529']]
                             buffer_529 = buffer_529[TARGET_LEVELS['FSCAN-529']:]
                             output_spectrum('FSCAN-529', spectrum, elapsed)
-                    elif result and result['type'] in ('STATUS', 'SPECTRUM'):
+                    elif result and result['type'] == 'SPECTRUM':
+                        # 1086帧直接输出512点完整频谱
+                        output_spectrum('SPECTRUM', result['levels'], elapsed)
+                    elif result and result['type'] == 'SPECTRUM-434':
+                        # 896帧输出434点频谱
+                        output_spectrum('SPECTRUM-434', result['levels'], elapsed)
+                    elif result and result['type'] in ('STATUS',):
                         msg = f"[{elapsed:.1}s] 帧 #{frame_count}: {result['type']} levels={result['level_count']} range=[{result['level_min']}, {result['level_max']}]"
                         print(msg)
                         log_fp.write(msg + "\n")
