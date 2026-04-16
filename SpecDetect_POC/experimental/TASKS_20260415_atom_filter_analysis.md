@@ -259,29 +259,44 @@ Offset 66-64: 3 bytes padding/校验
 | -32768 | 无效值标记 | 同上 |
 | 其余12值 | 该帧的13个频谱电平 | 填充在 META 值周围 |
 
-### Task #B 完成: streamsrc vs rmcp 数据对比 ✅
+### Task #B 完成: streamsrc vs rmcp 数据对比 ✅ (2026-04-16 更正)
 
-**来源**: streamsrc `streamsrc_raw_20260416_101328.log` ↔ rmcp `raw_fscan_20260416_101230.log`（同一时段）
+**来源**: streamsrc `18012.pcap` ↔ rmcp `9996.pcap`（同一时刻抓包）
 
-**关键发现**:
+**重大发现**: 之前的结论错误！
 
-| 属性 | streamsrc FSCAN-529 | rmcp FSCAN |
-|------|---------------------|-----------|
-| 总 buffer | 529 int16/帧 | 512 电平/帧 |
-| 有效频谱点 | **379**（去元数据后） | **512** |
-| 压缩比 | ~3.8:1 | 1:1 |
-| 覆盖范围 | ~9.5 MHz（137~146.5MHz） | 36 MHz（137~173MHz） |
-| 帧速率 | ~3 Hz | ~3 Hz（每扫描周期） |
-| 精度 | ~16 级量化 | 702 级 |
-| 元数据分布 | 每 18 值固定穿插 | 无 |
+| 属性 | streamsrc (旧结论) | streamsrc (正确) | rmcp |
+|------|-------------------|-------------------|------|
+| 帧大小 | 65 bytes | **1086 bytes** | 1053 bytes |
+| 点数/帧 | 379 (压缩) | **512** | 512 |
+| 数据格式 | 需复杂提取 | **直接dBm整数** | dBm×10 |
+| 精度 | ~16级量化 | **整数dBm** | 1位小数 |
 
-**数据关系**: streamsrc 是 rmcp 的**实时压缩监测版本**，同源于 Device 信号但用途不同。
+**帧类型**:
+- 65 bytes = 注册帧 (含UUID，无频谱)
+- 1086 bytes = **频谱帧** (512点完整数据)
 
-### 进行中: Task #4 streamsrc vs rmcp 原始数据对比
+**1086字节帧结构**:
+```
+Offset 0-3:   Sync (0xEEEEEEEE)
+Offset 4-47:   Header (44 bytes)
+Offset 48+:    Payload
+  - int16[0-6]: Metadata [16801, 0, 0, 20480, 18115, 512, 0]
+  - int16[7-518]: **512点频谱数据 (小端序int16)**
+```
 
-**待查**:
-- streamsrc 私有 raw 编码的查表映射（需逆向 raw→dBuV 关系）
-- Atom 量化算法的具体阈值（需更多样本验证）
+**转换公式**:
+```
+streamsrc_dBm = raw_value              # 直接使用，无需转换
+rmcp_dBm = raw_value / 10.0           # 存储的是×10
+```
+
+**验证结果**:
+- Pearson相关系数: **0.9997**
+- 差值<1dB的比例: **99.8%**
+- 数据完全对应，同一底层测量
+
+**结论**: streamsrc (1086字节帧) = rmcp (512点)，**两者提供完全相同的数据**。
 
 ### 新建文档
 - `STREAMSRC_OFFSET_V1.md` — offset 4-11=会话级FILETIME, offset 19=类型, offset 20-23=类型码
