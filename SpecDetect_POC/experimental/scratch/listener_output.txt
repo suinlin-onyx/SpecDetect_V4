@@ -1,0 +1,18 @@
+============================================================
+GWJ004 完整频谱数据获取 - Task #6
+============================================================
+
+>>> 步骤0: B_QueryDeviceInfo
+
+[0] B_QueryDeviceInfo - 查询设备信息
+    HTTP响应: 200, 54445 bytes
+    [OK] B_QueryDeviceInfo 回调成功
+
+>>> 步骤1: B_FScan
+
+[1] B_FScan - 启动频段扫描
+    HTTP响应: 733 bytes
+    [!] 设备使用冲突
+    [!] 未找到 outputchannel
+
+[!] 无法获取 outputchannel，退出

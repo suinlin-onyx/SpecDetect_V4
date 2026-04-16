@@ -1,0 +1,746 @@
+======================================================================
+FILE: GWJ001-2015超短波监测管理一体化服务接口规范 平台架构部分.docx
+======================================================================
+[p130] 本规范起草单位：国家无线电监测中心。
+[p195] 设备操作标准化服务接入到服务总线中，通过 TCP/IP 的连接方式控制设备进行信号监测和数据回传。监测数据一方面传输到监测管理系统门户界面进行数据结果分析展示，另一方面可以通过数据操作服务接口传输到监测管理数据库中存储。
+[p206] 针对每一种监测设备型号的管理包括以下内容：此类设备型号的基本描述信息；一系列被封装成 Web Service 服务的操作接口；可以向指定的远程接收端推送监测结果数据；设备注册：型号在服务总线上注册过的设备即可用于一体化监测，远程协调和调度；
+[p215] 无线电管理数据中心的重要组成部分，接收规范的监测结果数据；接收监测任务和流程数据；存放监测管理数据，包括监测设施库等；为监测数据分析系统提供 (实时或批量)的数据；集成来自于频率资源管理、台站管理等系统的业务数据；为无线电管理数据中心提供监测相关数据；管理数据字典和数据库结构等元数据，当元数据发生变化时，由中心向各地方的推送。
+[p219] 集中监控所有相关的主机、数据库、中间件、监测管理应用、以及各 IT 系统运行是否正常；远程实现各监测站监测管理应用的升级；远程推送监测数据规范以及数据库表结构的升级。
+[p252] 国家与省之间可实现数据和资源的共享，例如国家中心可以通过一体化监测接口平台调用省级机构的相关服务，监测数据写入省级机构的数据平台（监测数据库）中，通过数据交换平台远程复制到国家中心的监测数据库中，国家中心的监测门户通过数据服务调用本地监测数据库中的结果数据进行展示；区域协作和应急情况下，可能需要实现实时操作指令型调用，例如：国家中心通过一体化监测接口平台调用省级机构的相关服务，实时结果数据远程推送到国家中心的监测门户中进行实时展现。
+[t0r1] TCP/IP联网络协议 | Transmission Control Protocol/Internet Protocol 传输控制协议/互
+======================================================================
+FILE: GWJ002-2015超短波监测管理一体化服务接口规范 服务和接口部分.docx
+======================================================================
+[p131] 本规范起草单位：国家无线电监测中心
+[p223] http——超文本传输协议资源
+[p224] https——用安全套接字层传送的超文本传输协议--host
+[p227] 服务寄宿的主机端口。
+[p287] 超短波监测服务接口规范由两个子规范构成：同步请求应答规范和异步数据传输规范。
+[p314] 7.2 异步数据传输规范
+[p315] 实际业务场景中，例如一些自动化监测流程，如果需要将这类功能封装成服务，由于此类服务执行时间较长，则需要采用异步处理的方式实现。以业务应用 A（服务消费者）需要调用业务应用 B（服务提供者）提供的某个自动化监测服务为例。具体的实现方式可以采用以下两种。
+[p317] 服务提供者告诉服务消费者采用异步传输的方式，对于数据流采用 stream 方式传输,对于其他形式结果采用轮询的方式获知结果数据是否已经给出，流程如下：
+[p320] 第 3 步 A 系统监控或定期轮询或一段时间后，查看结果写入情况，如已经执行完成，则读取相应结果进行处理。
+[t0r3] FTP | File Transfer Protocol 文件传输协议
+======================================================================
+FILE: GWJ003-2015超短波监测管理一体化服务接口规范 设备操作服务部分.docx
+======================================================================
+[p73] 本规范起草单位：国家无线电监测中心。
+[p118] 该服务调用具备单频测量功能的设备，按照 ITU建议的测量内容对发射信号进行监测，对频率、场强、带宽、调制参数等进行测量。
+[p128] 指定期望得到的监测数据结果。包括 ITU 测量数据、频谱数据、音频数据、IQ数据等的一种或几种，具体参见本规范 5.14 节“监测结果类型表 ”。
+[p131] l 中频带宽（ifbw）
+[p132] 指定被测量的频率的中频带宽。
+[p135] u 解调带宽（demodbw）
+[p138] 存在解调方式存在时，有效；如果此值不给出，则以中频带宽（ifbw）为解调带宽。
+[p140] 中频带宽 <= 跨距，单位：Hz。
+[p141] u 检波方式（detector）
+[p142] 参见本规范 5.8 节“检波方式表”。
+[p143] u 带宽测量模式（bwmeasuremode）
+[p144] 参见本规范 5.10 节“带宽测量模式 ”。
+[p150] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p153] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p169] <ifbw val='中频带宽'/> <span val='跨距'/>
+[p170] <demodmode val='调制方式'>解调带宽</demodmode>
+[p171] <detector val='检波方式'/>
+[p187] <outputchannel mode='指定方' type='stream'>
+[p188] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p190] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p192] port='连接端口'
+[p203] <ifbw val='中频带宽'/> <resulttype>
+[p210] <outputchannel mode='指定方' type='stream'>
+[p213] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p215] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p217] port='连接端口'
+[p229] --Step 3：异步接收测量数据结果
+[p230] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p244] 对 103.9MHz 的单频信号以 200kHz 中频带宽，持续测量 ITU 结果。
+[p257] <outputchannel mode='source' type='stream'>
+[p258] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p262] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的 5000端口使用 stream 的方式可以获得 ITU 测量结果。
+[p264] 4.2 宽带 FFT 频谱观测（WBFFTMon）
+[p265] 用于控制具有宽带频谱测量功能的监测设备，获得宽带频谱数据, 本功能对应的是经过多个 FFT 带宽拼接的频谱。
+[p275] 频谱数据，具体参见本规范 5.14 节“监测结果类型表 ”。
+[p279] 指定被测量的频段的带宽。
+[p282] u 检波方式（detector）
+[p283] 参见本规范 5.8 节“检波方式表”。
+[p291] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p294] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p299] 频谱数据，参见本规范 5.14 节“监测结果类型表”。
+[p312] <detector val='检波方式'/>
+[p319] <outputchannel mode='指定方' type='stream'>
+[p320] <stream host='IP 地址' port='连接端口' stc='标签'/>
+[p325] <URL host='IP 地址' port='连接端口' URI='文件'/>
+[p328] port='连接端口'
+[p342] <outputchannel mode='指定方' type='stream'>
+[p343] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p345] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p347] port='连接端口'
+[p362] --Step 3：异步接收测量数据结果
+[p363] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p365] 假定对辽宁省朝阳市（211300）的一个固定一类监测站（设施 ID 为 21130001110001）的一台监测接收机（设备 ID 为 89AEBF83A46F878E2389AEB879AE5F893EBX）发起宽带 FFT 频谱观测服务请求。
+[p378] 对以 98MHz 为中心频点的 20MHz 带宽的频段，以 100kHz 的步进，持续进行宽带 FFT频谱观测。
+[p390] <outputchannel mode='source' type='stream'>
+[p391] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p395] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的 5000端口使用 stream 的方式可以获得宽带 FFT 频谱数据。
+[p398] Step 3：服务消费方按照 step2 返回的响应结果以及数据结果返回方式持续不断的获得宽带 FFT 频谱数据。
+[p400] 该服务调用具备扫频频谱观测功能的设备，控制设备扫频，输出频段扫描数据。该数据可用于绘制动态频谱或其他需要频谱数据的业务。
+[p417] l 中频带宽（ifbw）
+[p418] 指定在测量频段内，每个 step 的中频测量带宽。
+[p420] 指定在每个频点上的驻留测量时间长度，单位：秒。
+[p421] u 检波方式（detector）
+[p422] 参见本规范 5.8 节“检波方式表”。
+[p428] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p433] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p451] <ifbw val='中频带宽'/>
+[p453] <detector val='检波方式'/>
+[p462] <outputchannel mode='指定方' type='stream'>
+[p463] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p465] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p467] port='连接端口'
+[p481] <ifbw val='中频带宽'/> <resulttype>
+[p485] <outputchannel mode='指定方' type='stream'>
+[p486] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p488] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p490] port='连接端口'
+[p502] --Step 3：异步接收测量数据结果
+[p503] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得
+[p522] 对 88MHz 到 108MHz 的 20MHz 带宽的频段，以 100kHz 的步进、100kHz 的中频带宽进行扫频频谱观测。
+[p535] <outputchannel mode='source' type='stream'>
+[p536] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p540] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的5000 端口使用 stream 的方式可以获得扫频频谱数据。
+[p541] Step 3：服务消费方按照 step2 返回的响应结果以及数据结果返回方式持续不断的获得扫频频谱数据。
+[p559] l 中频带宽（ifbw）
+[p560] 每一个被测频率的中频测量带宽。
+[p562] 指定在每个频点上的驻留测量时间长度，单位：秒。
+[p563] u 检波方怯（detector）
+[p564] 参见本规范 5.8 节“检波方怯表”。
+[p570] 在增益模怯为 MGC 时，此值有效，单位：dB。
+[p573] 在射频前端开启衰减模怯时，此值有效，单位：dB。
+[p593] <ifbw val='中频带宽'/> </point>
+[p596] <detector val='检波方式'/>
+[p606] <outputchannel mode='指定方' type='stream'>
+[p607] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p609] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p611] port='连接端口'
+[p628] <outputchannel mode='指定方' type='stream'>
+[p629] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p631] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p633] <URL host='IP 地址' port='连接端口'
+[p645] --Step 3：异步接收测量数据结果
+[p646] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p683] <outputchannel mode='source' type='stream'>
+[p684] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p688] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的5000 端口使用 stream 的方式可以获得频率表扫描结果数据。
+[p690] 4.5 中频 FFT 测向（IFDF）
+[p691] 该服务调用具备中频 FFT 测向功能的设备，对指定频点进行来波方向测定，生成 FFT实时带宽内包含示向度信息的中频频谱数据，可用于需要示向度数据的业务。
+[p703] 指定期望得到的监测数据结果。包括频谱数据、单频测向数据、音频数据等的一种或几种，具体参见本规范 5.14 节“监测结果类型表 ”。
+[p706] l 测向带宽（dfbw）
+[p707] 指定被测量的频率的中频带宽。
+[p709] 中频带宽 <= 跨距，单位：Hz。
+[p710] u 分辨率带宽（RBW）
+[p711] u 检波方式（detector）
+[p712] 参见本规范 5.8 节“检波方式表”。
+[p713] u FFT 点数（fftsamples）
+[p714] 指定数据中频频谱的 FFT 点数。
+[p720] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p723] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p726] 指定输出示向度结果的频率范围，单位：Hz。
+[p728] 指定输出示向度结果的角度范围，单位：度。
+[p730] 指定输出示向度结果的电平范围，单位：dBμV。
+[p731] u 输出示向度的测向质量门限(dfqualitythreshold)
+[p732] 指定示向度测量的质量门限。
+[p752] <dfbw val='测向带宽'/>
+[p754] <detector val='检波方式'/>
+[p762] <dfqualitythreshold val='测向质量门限'/>
+[p770] <outputchannel mode='指定方' type='stream'>
+[p771] <stream host='IP 地址' port='连接端口' stc='标签'/>
+[p776] <URL host='IP 地址' port='连接端口' URI='文件'/>
+[p779] port='连接端口'
+[p790] <dfbw val='测向带宽'/>
+[p797] <outputchannel mode='指定方' type='stream'>
+[p798] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p800] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p802] port='连接端口'
+[p817] --Step 3：异步接收测量数据结果
+[p818] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p820] 假定对辽宁省朝阳市（211300）的一个固定一类监测站（设施 ID 为 21130001110001）的一台监测接收机（设备 ID 为 89AEBF83A46F878E2389AEB879AE5F893EBX）发起中频 FFT 测向服务请求。
+[p832] 对 103.9MHz 的单频信号以 200kHz 中频带宽，持续进行中频 FFT 测向测量。 Step 2：服务成功响应
+[p842] <outputchannel mode='source' type='stream'>
+[p843] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p847] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的 5000端口使用 stream 的方式可以获得中频 FFT 测向测量结果。
+[p848] Step 3：服务消费方按照 step2 返回的响应结果以及数据结果返回方式持续不断的获得中频 FFT 测向测量结果。
+[p862] 指定期望得到的监测数据结果。包括频谱数据、单频测向数据、音频数据等的一种或几种，具体参见本规范 5.14 节“监测结果类型表 ”。
+[p865] l 测向带宽（dfbw）
+[p866] 指定被测量的频率的测向带宽。
+[p868] 中频带宽 <= 跨距，单位：Hz。
+[p871] u 解调带宽（demodbw）
+[p872] 存在解调方式存在时，有效；如果此值不给出，则以中频带宽（ifbw）为解调带宽。
+[p873] u 检波方式（detector）
+[p874] 参见本规范 5.8 节“检波方式表”。
+[p880] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p883] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p887] u 测向电平门限(dfampthreshold)
+[p888] 指定输出示向度结果的电平门限，单位：dBμV。
+[p889] u 测向质量门限(dfqualitythreshold)
+[p890] 指定示向度测量的质量门限。
+[p908] <dfbw val='测向带宽'/> <span val='跨距'/>
+[p909] <demodmode val='调制方式'>解调带宽</demodmode>
+[p910] <detector val='检波方式'/>
+[p917] <dfampthreshold val='测向幅度门限'/>
+[p918] <dfqualitythreshold val='测向质量门限'/>
+[p927] <outputchannel mode='指定方' type='stream'>
+[p928] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p930] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p932] <URL host='IP 地址' port='连接端口'
+[p943] <dfbw val='测向带宽'/> <resulttype>
+[p948] <outputchannel mode='指定方' type='stream'>
+[p949] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p951] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p953] port='连接端口'
+[p967] --Step 3：异步接收测量数据结果
+[p968] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p982] 对 103.9MHz 的单频信号以 200kHz 中频带宽，持续进行单频测向测量。 Step 2：服务成功响应
+[p992] <outputchannel mode='source' type='stream'>
+[p993] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p1000] 端口使用 stream 的方怯可以获得单频测向测量结果。
+[p1002] 4.7 宽带 FFT 测向（WBDF）
+[p1003] 该服务调用具备宽带 FFT 测向功能的设备，对指定频段内的频点进行来波方向测定，生成 FFT 实时带宽内包含示向度信息的宽带频谱数据，可用于需要示向度数据的业务。
+[p1013] 指定期望得到的监测数据结果。包括频谱数据、宽带测向数据等的一种或几种，具体参见本规范 5.14 节“监测结果类型表”。
+[p1017] 指定被测量的频段的带宽。
+[p1020] u 检波方怯（detector）
+[p1021] 参见本规范 5.8 节“检波方怯表”。
+[p1027] 在增益模怯为 MGC 时，此值有效，单位：dB。
+[p1030] 在射频前端开启衰减模怯时，此值有效，单位：dB。
+[p1050] <detector val='检波方式'/>
+[p1059] <outputchannel mode='指定方' type='stream'>
+[p1060] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p1062] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p1064] port='连接端口'
+[p1081] <outputchannel mode='指定方' type='stream'>
+[p1082] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p1084] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p1086] <URL host='IP 地址' port='连接端口'
+[p1098] --Step 3：异步接收测量数据结果
+[p1099] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p1101] 假定对辽宁省朝阳市（211300）的一个固定一类监测站（设施 ID 为 21130001110001）的一台监测接收机（设备 ID 为 89AEBF83A46F878E2389AEB879AE5F893EBX）发起宽带 FFT 测向服务请求。
+[p1116] 对以 98MHz 为中心频点的 20MHz 带宽的频段，以 100kHz 步进持续进行宽带 FFT 测向。
+[p1128] <outputchannel mode='source' type='stream'>
+[p1129] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p1133] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的 5000端口使用 stream 的方式可以获得宽带 FFT 测向数据。
+[p1134] Step 3：服务消费方按照 step2 返回的响应结果以及数据结果返回方式持续不断的获得宽带 FFT 测向数据。
+[p1156] l 测向带宽（dfbw）
+[p1157] 指定在测量频段内，每个 step 的测向带宽。
+[p1159] 指定在每个频点上的驻留测量时间长度，单位：秒。
+[p1160] u 检波方式（detector）
+[p1161] 参见本规范 5.8 节“检波方式表”。
+[p1167] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p1170] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p1172] 指定输出示向度结果的频率范围，单位：Hz。
+[p1174] 指定输出示向度结果的角度范围，单位：度。
+[p1176] 指定输出示向度结果的电平范围，单位：dBμV。
+[p1177] u 输出示向度的测向质量门限(dfqualitythreshold)
+[p1178] 指定示向度测量的质量门限。
+[p1200] <dfbw val='测向带宽'/>
+[p1202] <detector val='检波方式'/>
+[p1209] <dfqualitythreshold val='测向质量门限'/>
+[p1216] <outputchannel mode='指定方' type='stream'>
+[p1217] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p1219] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p1223] <URL host='IP 地址' port='连接端口'
+[p1235] <dfbw val='测向带宽'/> <resulttype>
+[p1240] <outputchannel mode='指定方' type='stream'>
+[p1241] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p1243] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p1245] port='连接端口'
+[p1260] --Step 3：异步接收测量数据结果
+[p1261] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p1278] 对 88MHz 到 108MHz 的 20MHz 带宽的频段，以 100kHz 的步进、100kHz 的测向带宽进行扫频测向。
+[p1292] <outputchannel mode='source' type='stream'>
+[p1293] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p1299] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的5000 端口使用 stream 的方式可以获得扫频测向数据。
+[p1315] l 测向带宽（dfbw）
+[p1316] 每一个被测频率的测向带宽。
+[p1318] 指定在每个频点上的驻留测量时间长度，单位：秒。
+[p1319] u 检波方式（detector）
+[p1320] 参见本规范 5.8 节“检波方式表”。
+[p1326] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p1329] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p1331] 指定输出示向度结果的频率范围，单位：Hz。
+[p1335] 指定输出示向度结果的角度范围，单位：度。
+[p1337] 指定输出示向度结果的电平范围，单位：dBμV。
+[p1338] u 输出示向度的测向质量门限(dfqualitythreshold)
+[p1339] 指定示向度测量的质量门限。
+[p1357] <detector val='检波方式'/>
+[p1364] <dfqualitythreshold val='测向质量门限'/>
+[p1369] <dfbw val='测向带宽'/>
+[p1380] <outputchannel mode='指定方' type='stream'>
+[p1381] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p1383] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p1385] port='连接端口'
+[p1399] <outputchannel mode='指定方' type='stream'>
+[p1400] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p1402] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p1404] port='连接端口'
+[p1418] --Step 3：异步接收测量数据结果
+[p1419] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p1458] <outputchannel mode='source' type='stream'>
+[p1459] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p1463] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的5000 端口使用 stream 的方式可以获得频率表扫描测向结果数据。
+[p1481] l 中频带宽（ifbw）
+[p1482] 指定在测量频段内，每个 step 的中频测量带宽。
+[p1483] l 门限方式（thresholdtype）
+[p1486] 参见本规范 5.16 节“幅度门限类型 ”。
+[p1487] l 门限裕度（thresholdmargin）
+[p1488] 在指定的幅度门限之上，抬升的裕度，单位：dB。
+[p1508] <ifbw val='中频带宽'/>
+[p1509] <thresholdtype val='level'>门限值</thresholdtype>
+[p1514] <thresholdmargin val='门限裕度'/>
+[p1520] <outputchannel mode='指定方' type='stream'>
+[p1521] <stream host='IP 地址' port='连接端口' stc='标签'/>
+[p1526] <URL host='IP 地址' port='连接端口' URI='文件'/>
+[p1529] port='连接端口'
+[p1541] <ifbw val='中频带宽'/>
+[p1542] <thresholdtype val='level'>门限值</thresholdtype> <thresholdtype val=' environment '>
+[p1546] <thresholdmargin val='门限裕度'/>
+[p1552] <outputchannel mode='指定方' type='stream'>
+[p1553] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p1555] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p1557] <URL host='IP 地址' port='连接端口'
+[p1571] --Step 3：异步接收测量数据结果
+[p1572] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p1590] 对 88MHz 到 108MHz 的 20MHz 带宽的频段，以 100kHz 的步进、100kHz 的中频带宽进行扫频频谱观测。
+[p1607] <outputchannel mode='source' type='stream'>
+[p1608] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p1611] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的5000 端口使用 stream 的方式可以获得频段和信道占用度结果。
+[p1624] 频谱数据，具体参见本规范 5.14 节“监测结果类型表 ”。
+[p1627] l 中频带宽（ifbw）
+[p1628] 指定被测量的频率的中频带宽。
+[p1630] 中频带宽 <= 跨距，单位：Hz。
+[p1631] u 解析带宽（RBW）
+[p1632] u 检波方式（detector）
+[p1633] 参见本规范 5.8 节“检波方式表”。
+[p1634] u FFT 点数（fftsamples）
+[p1635] 指定数据中频频谱的 FFT 点数。
+[p1643] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p1646] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p1651] 频谱数据，参见本规范 5.14 节“监测结果类型表”。
+[p1662] <ifbw val='中频带宽'/>
+[p1664] <detector val='检波方式'/>
+[p1671] <outputchannel mode='指定方' type='stream'>
+[p1672] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p1676] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p1678] port='连接端口'
+[p1689] <ifbw val='中频带宽'/> <resulttype>
+[p1692] <outputchannel mode='指定方' type='stream'>
+[p1693] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p1695] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p1697] port='连接端口'
+[p1710] --Step 3：异步接收测量数据结果
+[p1711] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p1722] 对 103.9MHz 的单频信号以 200kHz 中频带宽、持续测量 ITU 结果。
+[p1733] <outputchannel mode='source' type='stream'>
+[p1740] 用于控制具有宽带 FFT 频谱功能的监测设备，获得一组电磁环境频谱数据模板。
+[p1752] 频谱数据，具体参见本规范 5.14 节“监测结果类型表 ”。
+[p1756] 指定被测量的频段的带宽。
+[p1757] l 解析带宽（rbw）
+[p1758] 指定被测量的频段的解析带宽。
+[p1759] u 检波方式（detector）
+[p1760] 参见本规范 5.8 节“检波方式表”。
+[p1766] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p1769] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p1774] 频谱数据，参见本规范 5.14 节“监测结果类型表”。
+[p1790] <rbw val='解析带宽'/>
+[p1791] <detector val='检波方式'/>
+[p1799] <outputchannel mode='指定方' type='stream'>
+[p1800] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p1802] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p1804] port='连接端口'
+[p1816] <rbw val='解析带宽'/> <resulttype>
+[p1819] <outputchannel mode='指定方' type='stream'>
+[p1822] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p1824] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p1826] port='连接端口'
+[p1837] --Step 3：异步接收测量数据结果
+[p1838] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p1850] 对以 98MHz 为中心频点的 20MHz 带宽的频段，以 100kHz 的步进，产生宽带频谱模板。
+[p1866] <outputchannel mode='source' type='stream'>
+[p1873] 用于控制具有扫频频谱的信号截收功能的监测设备，获得超出门限的一组信号。
+[p1883] 频谱数据，具体参见本规范 5.14 节“监测结果类型表 ”。
+[p1890] l 中频带宽（ifbw）
+[p1891] 指定在测量频段内，每个 step 的中频测量带宽。
+[p1893] 指定在每个频点上的驻留测量时间长度，单位：秒。
+[p1896] u 检波方式（detector）
+[p1897] 参见本规范 5.8 节“检波方式表”。
+[p1903] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p1906] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p1911] 频谱数据，参见本规范 5.14 节“监测结果类型表”。
+[p1924] <ifbw val='中频带宽'/>
+[p1926] <detector val='检波方式'/>
+[p1935] <outputchannel mode='指定方' type='stream'>
+[p1936] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p1938] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p1940] <URL host='IP 地址' port='连接端口'
+[p1952] <ifbw val='中频带宽'/> <resulttype>
+[p1955] <outputchannel mode='指定方' type='stream'>
+[p1956] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p1958] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p1960] <URL host='IP 地址' port='连接端口'
+[p1974] --Step 3：异步接收测量数据结果
+[p1975] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p1988] 对 88MHz 到 108MHz 的 20MHz 带宽的频段，以 100kHz 的步进、100kHz 的中频带宽产生宽带频谱模板数据。
+[p2001] <outputchannel mode='source' type='stream'>
+[p2009] 用于控制具有中频 FFT 频谱的信号截收功能的监测设备，获得超出门限的一组信号。
+[p2019] 指定期望得到的监测数据结果。包括频谱数据、信号数据（用频率表扫描数据格式）等的一种或几种，具体参见本规范 5.14 节“监测结果类型表”。
+[p2022] l 中频带宽（ifbw）
+[p2023] 指定被测量的频率的中频带宽。
+[p2024] l 门限方式（thresholdtype）
+[p2025] 参见本规范 5.16 节“幅度门限类型 ”。
+[p2026] l 门限裕度（thresholdmargin）
+[p2027] 在指定的幅度门限之上，抬升的裕度，单位：dB。
+[p2029] 中频带宽 <= 跨距，单位：Hz。
+[p2030] u 解析带宽（RBW）
+[p2031] u 检波方式（detector）
+[p2032] 参见本规范 5.8 节“检波方式表”。
+[p2033] u FFT 点数（fftsamples）
+[p2034] 指定数据中频频谱的 FFT 点数。
+[p2043] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p2046] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p2062] <ifbw val='中频带宽'/>
+[p2063] <thresholdtype val='level'>门限值</thresholdtype>
+[p2068] <thresholdmargin val='门限裕度'/>
+[p2070] <detector val='检波方式'/>
+[p2082] <outputchannel mode='指定方' type='stream'>
+[p2083] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2085] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2087] <URL host='IP 地址' port='连接端口'
+[p2098] <ifbw val='中频带宽'/>
+[p2099] <thresholdtype val='level'>门限值</thresholdtype> <thresholdtype val=' environment '>
+[p2103] <thresholdmargin val='门限裕度'/>
+[p2109] <outputchannel mode='指定方' type='stream'>
+[p2110] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2112] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2114] port='连接端口'
+[p2127] --Step 3：异步接收测量数据结果
+[p2128] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p2141] 对 103.9MHz 的单频信号以 200kHz 中频带宽、持续测量 ITU 结果。
+[p2156] <outputchannel mode='source' type='stream'>
+[p2157] <stream host='172.18.225.78' port='5000' stc='101'/> </outputchannel>
+[p2159] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的 5000端口使用 stream 的方式可以获得中频频谱信号截收测量结果。
+[p2162] 用于控制具有宽带 FFT 频谱的信号截收功能的监测设备，获得超出门限的一组信号。
+[p2172] 指定期望得到的监测数据结果。包括频谱数据、信号数据（用频率表扫描数据格式）等的一种或几种，具体参见本规范 5.14 节“监测结果类型表”。
+[p2176] 指定被测量的频段的带宽。
+[p2177] l 解析带宽（rbw）
+[p2178] 指定被测量的频段的解析带宽。
+[p2179] l 门限方式（thresholdtype）
+[p2180] 参见本规范 5.16 节“幅度门限类型 ”。
+[p2181] l 门限裕度（thresholdmargin）
+[p2182] 在指定的幅度门限之上，抬升的裕度，单位：dB。
+[p2183] u 检波方式（detector）
+[p2184] 参见本规范 5.8 节“检波方式表”。
+[p2192] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p2195] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p2213] <rbw val='解析带宽'/>
+[p2214] <thresholdtype val='level'>门限值</thresholdtype>
+[p2219] <thresholdmargin val='门限裕度'/>
+[p2220] <detector val='检波方式'/>
+[p2232] <outputchannel mode='指定方' type='stream'>
+[p2233] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2235] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2237] port='连接端口'
+[p2249] <rbw val='解析带宽'/>
+[p2250] <thresholdtype val='level'>门限值</thresholdtype> <thresholdtype val=' environment '>
+[p2254] <thresholdmargin val='门限裕度'/>
+[p2260] <outputchannel mode='指定方' type='stream'>
+[p2261] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2263] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2267] port='连接端口'
+[p2278] --Step 3：异步接收测量数据结果
+[p2279] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p2293] 对以 98MHz 为中心频点的 20MHz 带宽的频段，以 100kHz 的步进，持续进行宽带频谱信号截收测量。
+[p2309] <outputchannel mode='source' type='stream'>
+[p2310] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p2313] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的 5000端口使用 stream 的方式可以获得宽带频谱信号截收服务截获的信号数据。
+[p2316] 用于控制具有扫频频谱的信号截收功能的监测设备，获得超出门限的一组信号。
+[p2333] l 中频带宽（ifbw）
+[p2334] 指定在测量频段内，每个 step 的中频测量带宽。
+[p2335] l 门限方式（thresholdtype）
+[p2336] 参见本规范 5.16 节“幅度门限类型 ”。
+[p2337] l 门限裕度（thresholdmargin）
+[p2338] 在指定的幅度门限之上，抬升的裕度，单位：dB。
+[p2340] 指定在每个频点上的驻留测量时间长度，单位：秒。
+[p2343] u 检波方式（detector）
+[p2344] 参见本规范 5.8 节“检波方式表”。
+[p2350] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p2353] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p2370] <ifbw val='中频带宽'/>
+[p2371] <thresholdtype val='level'>门限值</thresholdtype>
+[p2376] <thresholdmargin val='门限裕度'/>
+[p2380] <detector val='检波方式'/>
+[p2391] <outputchannel mode='指定方' type='stream'>
+[p2392] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2394] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2396] port='连接端口'
+[p2408] <ifbw val='中频带宽'/>
+[p2409] <thresholdtype val='level'>门限值</thresholdtype> <thresholdtype val=' environment '>
+[p2413] <thresholdmargin val='门限裕度'/>
+[p2420] <outputchannel mode='指定方' type='stream'>
+[p2421] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2423] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2425] <URL host='IP 地址' port='连接端口'
+[p2436] --Step 3：异步接收测量数据结果
+[p2437] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p2454] 对 88MHz 到 108MHz 的 20MHz 带宽的频段，以 100kHz 的步进、100kHz 的中频带宽进行扫频频谱信号截收测量。
+[p2470] <outputchannel mode='source' type='stream'>
+[p2471] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p2474] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的5000 端口使用 stream 的方式可以获得扫频频谱截收服务测量得到的信号数据和频谱数据。
+[p2475] Step 3：服务消费方按照 step2 返回的响应结果以及数据结果返回方式持续不断的获得信号数据和频谱数据。
+[p2487] 指定期望得到的监测数据结果。包括频谱数据、解调后的音频流、视频流、字符流、图片以及调制样式、调制度、码速率（子体数据格式参照 ITU 测量数据）
+[p2493] l 中频带宽（ifbw）
+[p2494] 指定被测量的频率的中频带宽。
+[p2500] 在增益模式为 MGC 时，此值有效，单位：dB。
+[p2503] 在射频前端开启衰减模式时，此值有效，单位：dB。
+[p2527] <ifbw val='中频带宽'/>
+[p2546] <outputchannel mode='指定方' type='stream'>
+[p2547] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2549] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2551] port='连接端口'
+[p2562] <ifbw val='中频带宽'/>
+[p2573] <outputchannel mode='指定方' type='stream'>
+[p2574] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2576] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2578] <URL host='IP 地址' port='连接端口'
+[p2590] --Step 3：异步接收测量数据结果
+[p2591] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p2607] 对 449.0MHz 的单频信号以 25kHz 中频带宽，持续进行数字信号解调测量。
+[p2618] <outputchannel mode='source' type='stream'>
+[p2619] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p2623] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的 5000端口使用 stream 的方式可以获得数字信号解调结果。
+[p2636] 指定期望得到的监测数据结果。包括频谱数据、IQ 数据、解调后的音频数据、视频数据等的一种或几种，具体参见本规范 5.14 节“监测结果类型表 ”。
+[p2668] <outputchannel mode='指定方' type='stream'>
+[p2669] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2671] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2675] <URL host='IP 地址' port='连接端口'
+[p2692] <outputchannel mode='指定方' type='stream'>
+[p2693] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2695] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2697] port='连接端口'
+[p2709] --Step 3：异步接收测量数据结果
+[p2712] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p2739] <outputchannel mode='source' type='stream'>
+[p2740] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p2744] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的 5000端口使用 stream 的方式可以获得解调后的音视频数据。
+[p2759] 指定期望得到的监测数据结果。包括频谱数据、IQ 数据、解调后的音频数据、视频数据等的一种或几种，具体参见本规范 5.14 节“监测结果类型表 ”。
+[p2789] <outputchannel mode='指定方' type='stream'>
+[p2790] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2792] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2794] port='连接端口'
+[p2811] <outputchannel mode='指定方' type='stream'>
+[p2812] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2814] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2816] port='连接端口'
+[p2830] --Step 3：异步接收测量数据结果
+[p2831] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p2858] <outputchannel mode='source' type='stream'>
+[p2859] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p2865] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的 5000端口使用 stream 的方式可以获得解调后的音视频数据。
+[p2878] 指定期望得到的监测数据结果。包括频谱数据、IQ 数据、解调后的音频数据等的一种或几种，具体参见本规范 5.14 节“监测结果类型表”。
+[p2907] <outputchannel mode='指定方' type='stream'>
+[p2908] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2910] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2912] port='连接端口'
+[p2928] <outputchannel mode='指定方' type='stream'>
+[p2929] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p2931] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p2933] port='连接端口'
+[p2947] --Step 3：异步接收测量数据结果
+[p2948] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p2970] <outputchannel mode='source' type='stream'>
+[p2971] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p2976] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的 5000端口使用 stream 的方式可以获得解调后的音频数据。
+[p2993] u 中频带宽（ifbw）
+[p2994] 指定中频分析带宽，单位：Hz 。
+[p2996] 指定信号解码的波特率，单位：bits/s。
+[p3017] <ifbw val='中频分析带宽'/>
+[p3026] <outputchannel mode='指定方' type='stream'>
+[p3027] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p3029] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p3031] <URL host='IP 地址' port='连接端口'
+[p3051] <outputchannel mode='指定方' type='stream'>
+[p3052] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p3054] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p3056] port='连接端口'
+[p3068] --Step 3：异步接收测量数据结果
+[p3069] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p3091] <outputchannel mode='source' type='stream'>
+[p3092] <stream host='172.18.225.78' port='5000' stc='101'/>
+[p3095] 设备端成功响应，对请求测量参数给予确认，并声明在 172.18.225.78 主机上的 5000端口使用 stream 的方式可以获得解调后的文本数据。
+[p3166] <URL host='IP 地址' port='连接端口'
+[p3180] port='连接端口'
+[p3193] --Step 3：异步接收测量数据结果
+[p3194] 在 step2 成功返回响应结果后，使用 outputchannel 指定的数据传输方式，获得resulttype 给出的测量数据结果。
+[p3341] <outputchannel mode='指定方' type='stream'>
+[p3342] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p3344] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p3346] port='连接端口'
+[p3361] <outputchannel mode='指定方' type='stream'>
+[p3362] <stream host='IP 地址' port='连接端口' stc='标签'/> </outputchannel>
+[p3364] <URL host='IP 地址' port='连接端口' URI='文件'/> </outputchannel>
+[p3366] <URL host='IP 地址' port='连接端口'
+[p3471] 5.8 检波方式表
+[p3478] 5.10    带宽测量模式
+[p3499] 5.16    幅度门限类型
+[p3504] 数据类型采用 ANSI C 的数据类型进行描述，规定多字节数据元素在数据帧中传输时，低字节先被传送。
+[p3518] --LEADER：数据帧引导符，4 个字节，十六进制数值为 EEEEEEEE。
+[p3520] --STC：同步传输编码，唯一标识一路数据传输通路，UINT32 类型整数，4 个字节。
+[p3539] 2)  频谱数据
+[p3542] 频率序号对应描述头返回的频率顺序，编号从 0 开始。频率序号与频率数量相加得到的值不大于频率总数量。
+[p3568] 频率序号对应描述头返回的频率顺序，编号从 0 开始。频率序号与频率数量相加得到的值不大于频率总数量。
+[t0r1] TCP/IP联网络协议 | Transmission Control Protocol/Internet Protocol 传输控制协议/互
+[t0r3] FTP | File Transfer Protocol 文件传输协议
+[t3r1] 1
+2
+3
+4
+5
+6
+7
+8
+9
+1
+0
+1
+1
+1
+2
+1
+3
+1
+4
+1
+5
+1
+6
+1
+7
+1
+8
+1 | SglFreqMeasure
+WBFFTMon
+FScan
+MScan
+IFDF
+SglFreqDF
+WBDF
+FScanDF
+MScanDF
+DigitalSignalRecDecode
+
+AnalogTVDemod
+
+DigitalTVDem
+
+DigitalBroadcastDem
+
+SpecCommSysSignalDem
+
+MultiStationLocate
+
+OccupancyMeas
+
+IFSignalIntercept
+
+WBSignalIntercept
+FS
+[t7r2] 2 | stream | l host，被连接 IP 地址。
+l port，被连接端口。
+l stc， stream 唯一标识。 | 异步返回测量结果，对于长时间连续测量结果数据，使用 tcp/ip协议的 socket 字的实时流（stream）方式传输。
+[t7r3] 3 | URL | l host，主机 IP 地址
+l port，主机端口
+l URI，文件存在的具体路径 | 异步返回测量结果，
+URL（Uniform Resoure Locator）是文件存储链接地址，测量结果数据以文件方式存储。
+[t7r4] 4 | FTP | l host，ftp 服务 IP 地址。
+l port，ftp 服务端口
+l file，文件全路径，包括文件名称。
+l user，ftp 服务用户名。
+l password，ftp 服务密码。 | 异步返回测量结果，结果数据在ftp服务器上以文件方式存储。
+[t7r5] 5 | database | / | 异步返回测量结果，数据库同步方式获得测量结果。
+[t8r0] 中文名 | 参数名称 | 单位 | 值域 | 备注
+[t9r4] 测向带宽 | dfbw | Hz |  | 
+[t9r5] 分辨率带宽 | rbw | Hz |  | 
+[t9r6] 最大占用带宽 | maxbw | Hz |  | 
+[t9r7] 解调带宽 | demodbw | Hz |  | 
+[t9r11] 检波方式 | detector |  | peak/avg/fa
+st/rms/qbk/
+-peak/sampl e | 峰值/平均值/实 时 值 / 均方根/准峰值/负峰值/采样
+[t9r12] 静噪门限开关 | squelchswitch |  | on/off | 开/关
+[t9r13] 静噪门限值 | squelchthreshold | dBμV |  | 静噪门限开关为 on 时此值有效
+[t9r23] 采样点数 | samples |  |  | 
+[t9r24] FFT 点数 | fftsamples |  |  | 
+[t10r2] 门限方式 | thresholdtype |  |  | 幅度门限类型
+[t10r3] 门限裕度 | thresholdmargin | dB |  | 
+[t10r4] 质量门限 | qualitythreshold | % | 0~100 | 
+[t10r5] 测向质量门限 | dfqualitythreshold | % | 0~100 | 
+[t10r6] 测向电平门限 | dfampthreshold | dBμV |  | 
+[t10r12] 测向电平值范围 | dfamprange | dBμV |  | 指定输出示向度结果的电平范围
+[t10r13] 参考电平 | reflevel | dBμV |  | 
+[t10r14] 带宽测量模式 | bwmeasuremode |  | xdb/beta/al l | 
+[t10r16] β %带宽 | betapercent | % |  | 
+[t11r11] 中频频谱数据 | spectrum |  |  | 
+[t11r15] 幅度单位 | ampuint |  |  | 
+[t17r0] 序号 | 检波类型 | 描述
+[t17r1] 1 | fast | 实时
+[t17r2] 2 | avg | 平均
+[t21r2] 2 | mgc | 人工增益，单位：dB
+[t24r1] 7 | spectrum | 7 | 频谱数据
+[t25r0] 代码 | 编码格式 | 通道 | 采样率(kHz) | 平均速率/s | 位数
+[t26r1] 1 | level | 水平门限
+[t28r2] 中频带宽 | FLOAT32 | 4 | 1 | 信号滤波带宽
+[t28r3] 采样率 | FLOAT32 | 4 | 1 | 信号采样率
+[t29r2] 起始频率 | FLOAT64 | 8 | 1 | 测量起始频率，单位：Hz
+[t29r3] 步进 | FLOAT32 | 4 | 1 | 频率点间隔，单位：Hz
+[t29r4] 频率序号 | UINT32 | 4 | 1 | 当前帧的起始点序号
+[t29r5] 频率数量 | UINT32 | 4 | 1 | 当前帧频率数量,m
+[t29r6] 频谱数据 | INT16 | 2 | R5 (m) | 单位 0.1：dBμV
+[t32r3] 3 | xdB 带宽 | 10 | 
+[t32r4] 4 | β带宽 | 11 | 
+[t33r2] 起始频率 | FLOAT64 | 8 | R1(n) | 每个频段第一个信道起始频率值，单位 Hz
+[t33r3] 步长 | FLOAT32 | 4 | R1 | 单位：Hz。
+[t33r5] 电平 | INT16 | 2 | R1/R2(m) | 单位 0.1：dBμV
+[t34r2] 频率 | FLOAT64 | 8 | R1(n) | 单位：Hz
+[t34r3] 电平 | INT16 | 1 | R1 | 单位 0.1：dBμV
+[t35r2] 中心频率 | FLOAT64 | 8 | 0，1 | 单位：Hz
+[t35r4] 示向度 | UINT16 | 2 | 0    ，
+R1(n) | 单位：（0.1 ° ), 取值范围：[0,3600)基准方位为地理正北，顺时针方向递增
+[t35r5] 电平 | INT16 | 2 | 0，R1 | 单位：（0.1）dBuv
+[t35r6] 俯仰角 | INT16 | 2 | 0，R1 | 单 位 ：（ 0.1 ° ) ,  取 值 范 围 ： [-900,900]水平方向为 0° , 向上为正
+[t37r2] 频率 | FLOAT64 | 8 | R1(n) | 单位：Hz
+[t37r3] 示向度 | UINT16 | 2 | R1 | 单位 ：（0.1 ° ) , 取值范 围： [0,3600)
+基准方位为地理正北，顺时针方向递增
+[t37r4] 俯仰角 | INT16 | 2 | R1 | 单位 ：（0.1 ° ) , 取值范 围 ： [-900,900] 水 平 方 向 定 义 为0° , 向上为正
+[t37r6] 电平 | INT16 | 1 | R1 | 单位 0.1：dBμV
+[t38r2] 起始频率 | FLOAT64 | 8 | 1 | 测量起始频率，单位：Hz
+[t38r3] 步进 | FLOAT32 | 4 | 1 | 频率点间隔，单位：Hz
+[t38r4] 频率序号 | UINT32 | 4 | 1 | 当前帧的起始点序号
+[t38r5] 频率数量 | UINT32 | 4 | 1 | 当前帧频率数量,m
+[t38r6] 示向度 | UINT16 | 2 | R5(m) | 单位：（0.1 ° ),取值范围： [0,3600)
+基准方位为地理正北，顺时针方向递增
+[t38r7] 俯仰角 | INT16 | 2 | R5 | 单位：（0.1 ° ),取值范围： [-900,900]水平方向定义为0° , 向上为正
+[t38r9] 信号电平 | INT16 | 1 | R5 | 单位 0.1：dBμV
+[t41r1] 经度 | INT64 | 8 | 1 | 单位：（0.00000001°)
+取值范围：
+[-18000000000,18000000000]，东经为正，西经为负 | 经纬度同时取值 0 代表设备不支持此信息
+[t41r2] 纬度 | INT64 | 8 | 1 | 单位：（0.00000001°), 取值范围：[-9000000000,9000000000]，北纬为正，南纬为负 | 经纬度同时取值 0 代表设备不支持此信息
+[t42r1] 信号频率 | FLOAT64 | 8 | 1 | 单位：Hz
+[t42r4] 长轴长度 | FLOAT32 | 4 | 1 | 单位：m
+[t42r5] 短轴长度 | FLOAT32 | 4 | 1 | 单位：m
+[t42r6] 长轴方位角 | FLOAT32 | 4 | 1 | 单位：（0.1 ° ),取值范围： [0,3600)基准方位为地理正北，顺时针方向递增
+[t43r2] 起始频率 | FLOAT64 | 8 | R1(n) | 每个频段第一个信道起始频率值，单位 Hz
+[t43r3] 步长 | FLOAT32 | 4 | R1 | 单位：Hz。
+[t43r4] 频段占用度 | UINT16 | 2 | R1 | 单位 0.01%
+[t43r6] 信道占用度 | UINT16 | 2 | R1/R2(m) | 单位：0.01%
+[t43r7] 电平 | INT16 | 2 | R1/R2(m) | 单位 0.1：dBμV
+[t43r8] 噪声 | INT16 | 2 | R1/R2(m) | 单位 0.1：dBμV
+[t44r2] 起始频率 | FLOAT64 | 8 | 1 | 测量起始频率，单位：Hz
+[t44r3] 步进 | FLOAT32 | 4 | 1 | 频率点间隔，单位：Hz
+[t45r0] 频率序号 | UINT32 | 4 | 1 | 当前帧的起始点序号
+[t45r1] 频率数量 | UINT32 | 4 | 1 | 当前帧频率数量,m
+[t45r2] 天线因子数据 | INT16 | 2 | R1(n) | 单位 0.1：dBμV

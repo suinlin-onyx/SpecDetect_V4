@@ -197,54 +197,56 @@ def parse_atom_frame(data):
                 'taskid': taskid,
             }
 
-    # 2. 获取 uint32_5 (offset 20-24) 和 uint32_6 (offset 24-28)
-    if len(data) >= 28:
-        try:
-            uint32_5 = struct.unpack('<I', data[20:24])[0]
-            uint32_6 = struct.unpack('<I', data[24:28])[0]
-        except struct.error as e:
-            return None
+    # 2. 帧头验证
+    if data[:4] != bytes.fromhex('eeeeeeee'):
+        return None
 
-        # 3. 状态帧: offset 20 == 0, 65字节
-        if uint32_5 == 0 and len(data) == 65:
-            payload = data[28:]
-            if len(payload) % 2 != 0:
-                payload = payload[:-1]
-            num_levels = len(payload) // 2
-            if num_levels > 0:
+    if len(data) < 28:
+        return None
+
+    # 3. offset 16-17: 帧编号 (uint16, little-endian)
+    # 4. offset 18: 帧计数器 (递增)
+    # 5. offset 19: FSCAN 类型 (0x00=STATUS, 0x26=FSCAN-529, 0x68=FSCAN-434)
+    seq_num = struct.unpack('<H', data[16:18])[0]
+    fscan_type = data[19]  # byte at offset 19
+
+    # 状态帧: offset 19 == 0, 65字节
+    if fscan_type == 0 and len(data) == 65:
+        payload = data[28:]
+        if len(payload) % 2 != 0:
+            payload = payload[:-1]
+        num_levels = len(payload) // 2
+        if num_levels > 0:
+            levels = struct.unpack(f'<{num_levels}h', payload)
+            return {
+                'type': 'STATUS',
+                'length': len(data),
+                'level_count': num_levels,
+                'levels': levels,
+                'level_min': min(levels),
+                'level_max': max(levels),
+            }
+
+    # FSCAN 帧: offset 19 == 0x26 (529) 或 0x68 (434)
+    if fscan_type in (0x26, 0x68):
+        frame_type = 'FSCAN-434' if fscan_type == 0x68 else 'FSCAN-529'
+        payload = data[28:]
+        if len(payload) % 2 != 0:
+            payload = payload[:-1]
+        num_levels = len(payload) // 2
+        if num_levels > 0:
+            try:
                 levels = struct.unpack(f'<{num_levels}h', payload)
                 return {
-                    'type': 'STATUS',
+                    'type': frame_type,
                     'length': len(data),
-                    'dt_type': uint32_6 & 0xFF,
                     'level_count': num_levels,
                     'levels': levels,
                     'level_min': min(levels),
                     'level_max': max(levels),
                 }
-
-        # 4. FSCAN 帧: offset 20 == 3 (434) 或 4 (529)
-        # 注意: 可能是 65字节分片帧 或 896/1086字节完整帧
-        if uint32_5 in (3, 4):
-            frame_type = 'FSCAN-434' if uint32_5 == 3 else 'FSCAN-529'
-            payload = data[28:]
-            if len(payload) % 2 != 0:
-                payload = payload[:-1]
-            num_levels = len(payload) // 2
-            if num_levels > 0:
-                try:
-                    levels = struct.unpack(f'<{num_levels}h', payload)
-                    return {
-                        'type': frame_type,
-                        'length': len(data),
-                        'dt_type': uint32_6 & 0xFF,
-                        'level_count': num_levels,
-                        'levels': levels,
-                        'level_min': min(levels),
-                        'level_max': max(levels),
-                    }
-                except struct.error:
-                    return None
+            except struct.error:
+                return None
 
     return None
 
@@ -282,6 +284,9 @@ def connect_and_receive(host, port, taskid=None, timeout=30):
         nonlocal spectrum_output_count
         spectrum_output_count += 1
 
+        # 获取当前时间戳
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+
         # 计算原始值范围
         valid_levels = [v for v in levels if v != SS_MIN]
         if valid_levels:
@@ -291,9 +296,14 @@ def connect_and_receive(host, port, taskid=None, timeout=30):
             dbm_min = min(v for v in dbm_values if v is not None)
             dbm_max = max(v for v in dbm_values if v is not None)
 
-            msg = f"[{elapsed:.1f}s] 频谱 #{spectrum_output_count}: {frame_type} levels={len(levels)}"
+            msg = f"[{timestamp}] 频谱 #{spectrum_output_count}: {frame_type} levels={len(levels)}"
             print(msg)
             log_fp.write(msg + "\n")
+
+            # 前17个元数据值
+            meta = levels[:17]
+            print(f"  [元数据] 前17个值 = {list(meta)}")
+            log_fp.write(f"  [元数据] 前17个值 = {list(meta)}\n")
 
             # 原始值范围
             range_msg = f"  原始值范围: [{raw_min}, {raw_max}]"
@@ -305,19 +315,22 @@ def connect_and_receive(host, port, taskid=None, timeout=30):
             print(dbm_range_msg)
             log_fp.write(dbm_range_msg + "\n")
 
-            # 前10电平样本 (原始值和 dBm)
-            sample = levels[:10]
+            # 前100个电平样本 (原始值和 dBm)
+            sample = levels[:100]
             sample_parts = []
             dbm_parts = []
             for v in sample:
                 sample_parts.append(str(v))
                 dbm = streamsrc_to_dbm(v)
                 dbm_parts.append(f"{dbm:.1f}" if dbm is not None else "N/A")
-            log_fp.write(f"  前10原始值: [{', '.join(sample_parts)}]\n")
-            log_fp.write(f"  前10 dBm: [{', '.join(dbm_parts)}]\n")
-            print(f"  前10 dBm: [{', '.join(dbm_parts)}]")
+
+            # 输出原始值
+            log_fp.write(f"  原始值(前100): [{', '.join(sample_parts)}]\n")
+            # 输出 dBm 值
+            log_fp.write(f"  dBm(前100): [{', '.join(dbm_parts)}]\n")
+            print(f"  dBm(前100): [{', '.join(dbm_parts)}]")
         else:
-            msg = f"[{elapsed:.1f}s] 频谱 #{spectrum_output_count}: {frame_type} levels={len(levels)} (全部无效)"
+            msg = f"[{timestamp}] 频谱 #{spectrum_output_count}: {frame_type} levels={len(levels)} (全部无效)"
             print(msg)
             log_fp.write(msg + "\n")
 
@@ -341,10 +354,11 @@ def connect_and_receive(host, port, taskid=None, timeout=30):
         start_time = time.time()
         frame_count = 0
         recv_buffer = b''
+        size_tracker = {}  # 记录所有收到的帧大小
 
         while time.time() - start_time < timeout:
             try:
-                chunk = sock.recv(8192)
+                chunk = sock.recv(65536)
                 if not chunk:
                     elapsed = time.time() - start_time
                     print(f"\n[!] 连接关闭 (收到 {frame_count} 帧, 耗时 {elapsed:.1f}s)")
@@ -372,6 +386,9 @@ def connect_and_receive(host, port, taskid=None, timeout=30):
 
                     frame_count += 1
                     result = parse_atom_frame(frame_data)
+                    # 追踪所有帧大小
+                    sz = len(frame_data)
+                    size_tracker[sz] = size_tracker.get(sz, 0) + 1
 
                     # 写入原始帧数据到日志
                     try:
@@ -388,6 +405,8 @@ def connect_and_receive(host, port, taskid=None, timeout=30):
                     elapsed = time.time() - start_time
                     if result and result['type'] == 'TASKID':
                         print(f"[{elapsed:.1f}s] 帧 #{frame_count}: TASKID = {result['taskid']}")
+                    elif result and result['type'] == 'STATUS':
+                        print(f"[{elapsed:.1f}s] 帧 #{frame_count}: STATUS levels={result['level_count']} range=[{result['level_min']}, {result['level_max']}]")
                     elif result and result['type'] == 'FSCAN-434':
                         # 收集 FSCAN-434 分片
                         buffer_434.extend(result['levels'])
@@ -409,12 +428,11 @@ def connect_and_receive(host, port, taskid=None, timeout=30):
                         print(msg)
                         log_fp.write(msg + "\n")
                     else:
-                        if frame_count <= 3:
-                            uint32_5 = struct.unpack('<I', frame_data[20:24])[0]
-                            uint32_6 = struct.unpack('<I', frame_data[24:28])[0]
-                            print(f"[{elapsed:.1f}s] 帧 #{frame_count}: UNKNOWN "
-                                  f"len={len(frame_data)} "
-                                  f"u32_5={uint32_5} u32_6&FF={uint32_6&0xFF}")
+                        if frame_count <= 5 or result is None:
+                            ftype19 = frame_data[19] if len(frame_data) > 19 else -1
+                            ftype20 = frame_data[20] if len(frame_data) > 20 else -1
+                            print(f"[{elapsed:.1f}s] 帧 #{frame_count}: {result['type'] if result else 'None'} "
+                                  f"len={len(frame_data)} type19=0x{ftype19:02x} type20=0x{ftype20:02x}")
 
             except socket.timeout:
                 continue
@@ -430,7 +448,9 @@ def connect_and_receive(host, port, taskid=None, timeout=30):
             print(f"[{elapsed:.1f}s] 剩余 FSCAN-529: {len(buffer_529)} 电平")
 
         print(f"\n[+] 总计: {frame_count} 原始帧, {spectrum_output_count} 完整频谱")
+        print(f"[+] 帧大小分布: {dict(sorted(size_tracker.items()))}")
         log_fp.write(f"\n总计: {frame_count} 原始帧, {spectrum_output_count} 完整频谱\n")
+        log_fp.write(f"帧大小分布: {dict(sorted(size_tracker.items()))}\n")
         log_fp.write(f"日志结束: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         log_fp.close()
         raw_log_fp.close()
@@ -534,7 +554,7 @@ def main():
 
         # Step 2: 连接 streamsrc 并接收数据
         # 接收 30 秒后自动停止 (足够收集多个完整频谱)
-        result = connect_and_receive(host, port, taskid, timeout=30)
+        result = connect_and_receive(host, port, taskid, timeout=90)
         frame_count, spectrum_count = result if isinstance(result, tuple) else (result, 0)
 
         if frame_count > 0:
