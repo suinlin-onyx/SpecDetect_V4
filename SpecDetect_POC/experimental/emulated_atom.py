@@ -2232,63 +2232,16 @@ class EmulatedAtomService:
         log(f"创建 MSCAN 待关联会话: taskid={taskid}, frequency={frequency}", "SESSION")
 
     def _handle_pscan(self, client, params):
-        """处理 PScan 参差扫描请求"""
-        log("_handle_pscan 开始")
+        """处理 PScan 请求 - Real Atom 实际返回 FSCAN 格式 (DT:12)
 
-        # 解析频率参数
-        def parse_freq(val):
-            if isinstance(val, int):
-                return val
-            val = str(val).strip()
-            if val.endswith('MHz'):
-                return int(float(val[:-3]) * 1000000)
-            elif val.endswith('kHz'):
-                return int(float(val[:-3]) * 1000)
-            elif val.endswith('Hz'):
-                return int(val[:-2])
-            else:
-                return int(val)
+        根据 Real Atom 抓包分析:
+        - B_PScan 请求返回的是 FSCAN 格式 (DT=12)
+        - 不是任务文档描述的 PScan 三帧格式 (DT:7/101/8)
+        """
+        log("_handle_pscan 开始 (使用 FSCAN 格式)")
 
-        # PScan 参数解析
-        # startfreq/stopfreq: 扫描范围
-        # step: 频率步进
-        # centerfreq: 中心频率 (用于电平帧和ITU帧)
-        start_freq = parse_freq(params.get('startfreq', params.get('StartFreq', 80000000)))
-        end_freq = parse_freq(params.get('stopfreq', params.get('StopFreq', 120000000)))
-        step = parse_freq(params.get('step', 25000))
-        center_freq = parse_freq(params.get('centerfreq', params.get('CenterFreq', 100000000)))
-
-        log(f"PSCAN: {start_freq} - {end_freq}, step={step}, center={center_freq}")
-
-        # 发送 SOAP 响应
-        taskid = generate_taskid()
-        import time
-        stc = int(time.time())
-        outputchannel = {
-            'host': '127.0.0.1',
-            'port': 18013,
-            'stc': stc,
-            'mode': 'source',
-            'datachannel': 'stream'
-        }
-        response = build_soap_response(True, taskid=taskid, outputchannel=outputchannel,
-                                      equpara={'startfreq': start_freq, 'stopfreq': end_freq, 'step': step})
-        client.sendall(response)
-        client.close()
-
-        # 创建待关联的会话
-        pscan_params = {
-            'start_freq': start_freq,
-            'end_freq': end_freq,
-            'step': step,
-            'center_freq': center_freq,
-            'taskid': taskid,
-            'stc': stc
-        }
-        pending_session = StreamSession(streamsrc_client=None, taskid=taskid, fscan_params=pscan_params)
-        with self.session_manager.lock:
-            self.pending_sessions[taskid] = pending_session
-        log(f"创建 PSCAN 待关联会话: taskid={taskid}, range={start_freq}-{end_freq}", "SESSION")
+        # 直接调用 _handle_fscan 处理，因为 Real Atom 返回 FSCAN 格式
+        self._handle_fscan(client, params)
 
     def _cleanup_stale_sessions(self, timeout: float = 30.0):
         """清理超时的待关联会话"""
