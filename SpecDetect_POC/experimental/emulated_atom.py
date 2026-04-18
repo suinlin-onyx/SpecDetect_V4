@@ -1156,8 +1156,8 @@ class StreamSrcServer:
             frame = bytearray(reg_data)
             ts = int(time.time() * 10000000) + 116444736000000000
             struct.pack_into('<Q', frame, 10, ts)
-            # 修正 indicator 为 Registration ACK (0x0029)
-            struct.pack_into('>H', frame, 18, 0x0029)
+            # 修正 indicator 为 Registration ACK (0x0129，与Real Atom一致)
+            struct.pack_into('>H', frame, 18, 0x0129)
         else:
             # 构造 65 字节的 Registration ACK 帧
             frame = bytearray(65)
@@ -1166,7 +1166,7 @@ class StreamSrcServer:
             struct.pack_into('<I', frame, 6, 0)
             ts = int(time.time() * 10000000) + 116444736000000000
             struct.pack_into('<Q', frame, 10, ts)
-            struct.pack_into('>H', frame, 18, 0x0029)
+            struct.pack_into('>H', frame, 18, 0x0129)
             struct.pack_into('<I', frame, 20, 0)
             struct.pack_into('<H', frame, 24, 0x0024)
             for i in range(36):
