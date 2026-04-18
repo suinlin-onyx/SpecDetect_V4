@@ -654,6 +654,204 @@ def build_mscan_frame(dbm_level: int, stc: int = None, ts: bytes = None) -> byte
     return bytes(frame)
 
 
+# PScan 帧类型常量
+DT_PSCANDATA = 7      # PScan 频谱数据
+DT_PSCANLEVEL = 101   # PScan 电平数据
+DT_PSCANITU = 8       # PScan ITU数据
+
+
+def build_pscan_level_frame(dbm_level: int, frequency: int = None, stc: int = None, ts: bytes = None) -> bytes:
+    """构建 PScan 电平数据帧 (VER:16, DT:101, 40字节)
+
+    帧格式:
+    - Offset 0-3:   Sync (0xEEEEEEEE, 大端)
+    - Offset 4-5:   VER (16, 小端, 特殊版本标记)
+    - Offset 6-9:   STC (小端)
+    - Offset 10-17: TS (8 bytes)
+    - Offset 18-19: PL (16, 大端)
+    - Offset 20-21: EL (0, 大端)
+    - Offset 22-23: PAD (0)
+
+    Payload (16字节):
+    - Offset 24: DT (101)
+    - Offset 25: DL (11)
+    - Offset 26-33: 中心频率 (8字节, Hz)
+    - Offset 34-35: 信号电平 (2字节, 小端)
+
+    Args:
+        dbm_level: 信号电平值
+        frequency: 中心频率 Hz (默认 100MHz)
+        stc: 同步通道号 (默认自动生成)
+        ts: 时间戳 (默认自动生成)
+
+    Returns:
+        40字节 PScan 电平数据帧 (bytes)
+    """
+    if stc is None:
+        stc = _get_current_stc()
+    if ts is None:
+        ts = _get_streamsrc_timestamp()
+    if frequency is None:
+        frequency = 100000000  # 默认 100MHz
+
+    frame = bytearray(40)
+
+    # 帧头 24字节
+    frame[0:4] = struct.pack('>I', 0xEEEEEEEE)      # LEADER (大端)
+    frame[4:6] = struct.pack('<H', 16)              # VER = 16 (小端, 特殊版本)
+    frame[6:10] = struct.pack('<I', stc)           # STC (小端)
+    frame[10:18] = ts                               # TS (8 bytes)
+    frame[18:20] = struct.pack('>H', 16)           # PL (大端) = 16
+    frame[20:22] = struct.pack('>H', 0)             # EL (大端) = 0
+    frame[22:24] = struct.pack('>H', 0)            # PAD = 0
+
+    # Payload (16字节)
+    frame[24] = DT_PSCANLEVEL  # DT = 101
+    frame[25] = 11              # DL = 11
+
+    # 中心频率 (offset 26-33, 8字节, 大端)
+    frame[26:34] = struct.pack('>Q', frequency)
+
+    # 信号电平 (offset 34-35, 小端, 2字节)
+    struct.pack_into('<H', frame, 34, dbm_level)
+
+    return bytes(frame)
+
+
+def build_pscan_itu_frame(itu_value: float, frequency: int = None, stc: int = None, ts: bytes = None) -> bytes:
+    """构建 PScan ITU数据帧 (VER:16, DT:8, 36字节)
+
+    帧格式:
+    - Offset 0-3:   Sync (0xEEEEEEEE, 大端)
+    - Offset 4-5:   VER (16, 小端, 特殊版本标记)
+    - Offset 6-9:   STC (小端)
+    - Offset 10-17: TS (8 bytes)
+    - Offset 18-19: PL (12, 大端)
+    - Offset 20-21: EL (0, 大端)
+    - Offset 22-23: PAD (0)
+
+    Payload (12字节):
+    - Offset 24: DT (8)
+    - Offset 25: DL (7)
+    - Offset 26: 数据项个数 (1)
+    - Offset 27-34: ITU测量值 (8字节, double)
+    - Offset 35: ? (可能是其他数据)
+
+    Args:
+        itu_value: ITU测量值 (如 4.82)
+        frequency: 中心频率 Hz (默认 100MHz, 未使用但保留)
+        stc: 同步通道号 (默认自动生成)
+        ts: 时间戳 (默认自动生成)
+
+    Returns:
+        36字节 PScan ITU数据帧 (bytes)
+    """
+    if stc is None:
+        stc = _get_current_stc()
+    if ts is None:
+        ts = _get_streamsrc_timestamp()
+
+    frame = bytearray(36)
+
+    # 帧头 24字节
+    frame[0:4] = struct.pack('>I', 0xEEEEEEEE)      # LEADER (大端)
+    frame[4:6] = struct.pack('<H', 16)              # VER = 16 (小端, 特殊版本)
+    frame[6:10] = struct.pack('<I', stc)            # STC (小端)
+    frame[10:18] = ts                               # TS (8 bytes)
+    frame[18:20] = struct.pack('>H', 12)           # PL (大端) = 12
+    frame[20:22] = struct.pack('>H', 0)            # EL (大端) = 0
+    frame[22:24] = struct.pack('>H', 0)            # PAD = 0
+
+    # Payload (12字节)
+    frame[24] = DT_PSCANITU   # DT = 8
+    frame[25] = 7             # DL = 7
+    frame[26] = 1             # 数据项个数 = 1
+
+    # ITU测量值 (offset 27-34, 8字节, double)
+    frame[27:35] = struct.pack('>d', itu_value)
+
+    # offset 35: 可能是校验或其他
+    frame[35] = 0
+
+    return bytes(frame)
+
+
+def build_pscan_spectrum_frame(spectrum_data: list, start_freq: int = 80000000, step: int = 25000, stc: int = None, ts: bytes = None) -> bytes:
+    """构建 PScan 频谱数据帧 (DT:7, 3256字节)
+
+    帧格式:
+    - Offset 0-3:   Sync (0xEEEEEEEE, 大端)
+    - Offset 4-5:   VER (1, 小端)
+    - Offset 6-9:   STC (小端)
+    - Offset 10-17: TS (8 bytes)
+    - Offset 18-19: PL (3232, 大端)
+    - Offset 20-21: EL (0, 大端)
+    - Offset 22-23: PAD (0)
+
+    Payload (3232字节):
+    - Offset 24: DT (7)
+    - Offset 25: DL (~3227)
+    - Offset 26-29: 帧频率数量 (1601, 大端)
+    - Offset 30-37: 起始频率 (8字节, Hz)
+    - Offset 38-41: 步进 (4字节, Hz)
+    - Offset 42-45: 频率序号 (4字节, 起始0)
+    - Offset 46-49: 帧频率数量重复 (4字节)
+    - Offset 50-...: 频谱数据 (1601 * 2 = 3202字节, int16 LE)
+
+    Args:
+        spectrum_data: 1601点频谱数据列表
+        start_freq: 起始频率 Hz (默认 80MHz)
+        step: 频率步进 Hz (默认 25kHz)
+        stc: 同步通道号 (默认自动生成)
+        ts: 时间戳 (默认自动生成)
+
+    Returns:
+        3256字节 PScan 频谱数据帧 (bytes)
+    """
+    if stc is None:
+        stc = _get_current_stc()
+    if ts is None:
+        ts = _get_streamsrc_timestamp()
+
+    frame = bytearray(3256)
+
+    # 帧头 24字节
+    frame[0:4] = struct.pack('>I', 0xEEEEEEEE)       # LEADER (大端)
+    frame[4:6] = struct.pack('<H', 1)                # VER (小端) = 1
+    frame[6:10] = struct.pack('<I', stc)             # STC (小端)
+    frame[10:18] = ts                                # TS (8 bytes)
+    frame[18:20] = struct.pack('>H', 3232)           # PL (大端) = 3232
+    frame[20:22] = struct.pack('>H', 0)              # EL (大端) = 0
+    frame[22:24] = struct.pack('>H', 0)             # PAD = 0
+
+    # Payload header (offset 24-49, 26字节)
+    frame[24] = DT_PSCANDATA  # DT = 7
+    frame[25] = 0              # DL (待计算)
+
+    freq_count = len(spectrum_data)  # 1601
+    frame[26:30] = struct.pack('>I', freq_count)     # 帧频率数量
+
+    # 起始频率 (offset 30-37, 8字节, 大端)
+    frame[30:38] = struct.pack('>Q', start_freq)
+
+    # 步进 (offset 38-42, 4字节, 大端)
+    frame[38:42] = struct.pack('>I', step)
+
+    # 频率序号 (offset 42-46, 4字节, 大端) - 起始为0
+    frame[42:46] = struct.pack('>I', 0)
+
+    # 帧频率数量重复 (offset 46-50, 4字节, 大端)
+    frame[46:50] = struct.pack('>I', freq_count)
+
+    # 频谱数据 (offset 50 开始, 每个频点2字节 int16 LE)
+    spectrum_offset = 50
+    for value in spectrum_data:
+        struct.pack_into('<h', frame, spectrum_offset, int(value))
+        spectrum_offset += 2
+
+    return bytes(frame)
+
+
 class BandCollector:
     """三频段收集器 - 使用 Queue 实现严格 FIFO 同步
 
@@ -1040,8 +1238,13 @@ class StreamSrcServer:
 
             # 启动持续推送线程
             if session.fscan_params:
-                # 区分 MSCAN 和 FSCAN：MSCAN 有 frequency，FSCAN 有 start_freq
-                if 'start_freq' in session.fscan_params:
+                # 区分 MSCAN、FSCAN 和 PSCAN:
+                # - MSCAN 有 frequency，无 start_freq
+                # - FSCAN 有 start_freq，无 center_freq
+                # - PSCAN 有 start_freq 和 center_freq
+                if 'center_freq' in session.fscan_params:
+                    self._start_pscan_push(session)
+                elif 'start_freq' in session.fscan_params:
                     self._start_fscan_push(session)
                 elif 'frequency' in session.fscan_params:
                     self._start_mscan_push(session)
@@ -1220,6 +1423,86 @@ class StreamSrcServer:
             if session.debug_file:
                 session.debug_file = None
             log(f"MSCAN 推送线程结束: taskid={session.taskid}", "STREAM")
+
+        session.push_thread = threading.Thread(target=push_loop, daemon=True)
+        session.push_thread.start()
+
+    def _start_pscan_push(self, session: StreamSession):
+        """启动 PScan 参差扫描持续推送线程
+
+        PScan 三帧交替推送:
+        1. 频谱帧 (DT:7, 3256B) - 1601点频谱数据
+        2. 电平帧 (DT:101, VER:16, 40B) - 中心频率+电平
+        3. ITU帧 (DT:8, VER:16, 36B) - ITU测量值
+
+        推送周期: 频谱帧 → 电平帧 → ITU帧 → 循环
+        """
+        def push_loop():
+            log(f"启动 PSCAN 推送线程: taskid={session.taskid}", "STREAM")
+            session.push_running = True
+            session._stop_event.clear()
+
+            # 调试：创建文件保存发送的帧
+            import os
+            debug_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'debug')
+            os.makedirs(debug_dir, exist_ok=True)
+            session.debug_file = os.path.join(debug_dir, f'sent_pscan_{int(time.time()*1000)}.bin')
+
+            stc = session.fscan_params.get('stc')
+            center_freq = session.fscan_params.get('center_freq', 100000000)
+
+            # 帧计数器 (用于三帧循环)
+            frame_count = 0
+
+            while not session._stop_event.is_set():
+                try:
+                    # 三帧循环: spectrum -> level -> ITU -> spectrum...
+                    frame_type = frame_count % 3
+
+                    if frame_type == 0:
+                        # 频谱帧 (DT:7, 3256B)
+                        # TODO: 需要实现频谱数据生成 (1601点)
+                        # 目前使用模拟数据
+                        spectrum_data = []
+                        for i in range(1601):
+                            spectrum_data.append(random.randint(-80, -40))
+                        streamsrc_frame = build_pscan_spectrum_frame(
+                            spectrum_data,
+                            start_freq=session.fscan_params.get('start_freq', 80000000),
+                            step=session.fscan_params.get('step', 25000),
+                            stc=stc
+                        )
+                        log(f"PSCAN 频谱帧: {len(streamsrc_frame)} bytes", "STREAM")
+
+                    elif frame_type == 1:
+                        # 电平帧 (DT:101, VER:16, 40B)
+                        dbm_level = random.randint(30, 60)
+                        streamsrc_frame = build_pscan_level_frame(dbm_level, center_freq, stc=stc)
+                        log(f"PSCAN 电平帧: level={dbm_level}", "STREAM")
+
+                    else:
+                        # ITU帧 (DT:8, VER:16, 36B)
+                        itu_value = random.uniform(4.0, 5.0)
+                        streamsrc_frame = build_pscan_itu_frame(itu_value, center_freq, stc=stc)
+                        log(f"PSCAN ITU帧: value={itu_value:.2f}", "STREAM")
+
+                    # 推送帧
+                    self.push_frame_to_session(session, streamsrc_frame)
+
+                    # 每 0.2 秒推送一帧
+                    session._stop_event.wait(timeout=0.2)
+                    frame_count += 1
+
+                except Exception as e:
+                    log(f"PSCAN 推送错误: {e}", "STREAM")
+                    break
+
+            # 清理
+            session.push_running = False
+            session._stop_event.clear()
+            if session.debug_file:
+                session.debug_file = None
+            log(f"PSCAN 推送线程结束: taskid={session.taskid}", "STREAM")
 
         session.push_thread = threading.Thread(target=push_loop, daemon=True)
         session.push_thread.start()
@@ -1819,7 +2102,9 @@ class EmulatedAtomService:
                 self._handle_stopmeas(client)
             elif operation == 'B_QueryDeviceInfo':
                 self._handle_query_device(client, params)
-            elif operation in ('B_FScan', 'B_PScan', 'B_FScanDF'):
+            elif operation == 'B_PScan':
+                self._handle_pscan(client, params)
+            elif operation in ('B_FScan', 'B_FScanDF'):
                 self._handle_fscan(client, params)
             elif operation == 'B_MScan':
                 self._handle_mscan(client, params)
@@ -1945,6 +2230,65 @@ class EmulatedAtomService:
         with self.session_manager.lock:
             self.pending_sessions[taskid] = pending_session
         log(f"创建 MSCAN 待关联会话: taskid={taskid}, frequency={frequency}", "SESSION")
+
+    def _handle_pscan(self, client, params):
+        """处理 PScan 参差扫描请求"""
+        log("_handle_pscan 开始")
+
+        # 解析频率参数
+        def parse_freq(val):
+            if isinstance(val, int):
+                return val
+            val = str(val).strip()
+            if val.endswith('MHz'):
+                return int(float(val[:-3]) * 1000000)
+            elif val.endswith('kHz'):
+                return int(float(val[:-3]) * 1000)
+            elif val.endswith('Hz'):
+                return int(val[:-2])
+            else:
+                return int(val)
+
+        # PScan 参数解析
+        # startfreq/stopfreq: 扫描范围
+        # step: 频率步进
+        # centerfreq: 中心频率 (用于电平帧和ITU帧)
+        start_freq = parse_freq(params.get('startfreq', params.get('StartFreq', 80000000)))
+        end_freq = parse_freq(params.get('stopfreq', params.get('StopFreq', 120000000)))
+        step = parse_freq(params.get('step', 25000))
+        center_freq = parse_freq(params.get('centerfreq', params.get('CenterFreq', 100000000)))
+
+        log(f"PSCAN: {start_freq} - {end_freq}, step={step}, center={center_freq}")
+
+        # 发送 SOAP 响应
+        taskid = generate_taskid()
+        import time
+        stc = int(time.time())
+        outputchannel = {
+            'host': '127.0.0.1',
+            'port': 18013,
+            'stc': stc,
+            'mode': 'source',
+            'datachannel': 'stream'
+        }
+        response = build_soap_response(True, taskid=taskid, outputchannel=outputchannel,
+                                      equpara={'startfreq': start_freq, 'stopfreq': end_freq, 'step': step})
+        client.sendall(response)
+        client.close()
+
+        # 创建待关联的会话
+        pscan_params = {
+            'start_freq': start_freq,
+            'end_freq': end_freq,
+            'step': step,
+            'center_freq': center_freq,
+            'taskid': taskid,
+            'stc': stc
+        }
+        pending_session = StreamSession(streamsrc_client=None, taskid=taskid, fscan_params=pscan_params)
+        with self.session_manager.lock:
+            self.pending_sessions[taskid] = pending_session
+        log(f"创建 PSCAN 待关联会话: taskid={taskid}, range={start_freq}-{end_freq}", "SESSION")
 
     def _cleanup_stale_sessions(self, timeout: float = 30.0):
         """清理超时的待关联会话"""
