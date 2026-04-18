@@ -958,35 +958,17 @@ class StreamSrcServer:
 
     def push_frame_to_session(self, session: StreamSession, frame: bytes):
         """推送帧到指定会话的 streamsrc 客户端"""
+        import struct
+
         # 调试：保存发送的帧到文件（一次fscan请求的所有帧保存在同一文件）
-        import os
         if session.debug_file:
             with open(session.debug_file, 'ab') as f:
                 f.write(frame)
 
-        # 调试：保存帧头信息用于分析 (所有帧，无论是否有debug_file)
-        import struct
-        import time
-        debug_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'push_debug')
-        os.makedirs(debug_dir, exist_ok=True)
-
+        # 解析帧头信息用于调试
         leader = struct.unpack('<I', frame[0:4])[0]
-        ver = struct.unpack('>H', frame[4:6])[0]
         indicator = struct.unpack('>H', frame[18:20])[0]
         dt = frame[24]
-        dl = struct.unpack('<I', frame[25:29])[0] if len(frame) >= 29 else 0
-
-        # 保存帧信息到日志文件
-        debug_info_file = os.path.join(debug_dir, f'push_debug_{int(time.time()*1000)}.txt')
-        with open(debug_info_file, 'w', encoding='utf-8') as f:
-            f.write(f"时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}\n")
-            f.write(f"帧长: {len(frame)}\n")
-            f.write(f"LEADER: {leader} (0x{leader:08X})\n")
-            f.write(f"VER: {ver}\n")
-            f.write(f"Indicator: 0x{indicator:04X}\n")
-            f.write(f"DT: {dt} (0x{dt:02X})\n")
-            f.write(f"DL: {dl}\n")
-            f.write(f"帧头 HEX: {frame[:62].hex()}\n")
 
         with self.lock:
             if session.streamsrc_client:
