@@ -973,7 +973,7 @@ class StreamSrcServer:
                 self.clients.append(client_socket)
 
             # 发送 Registration ACK (回显收到的 Registration frame)
-            self._send_registration_ack(client_socket, reg_data)
+            self._send_registration_ack(session, reg_data)
 
             log(f"关联 streamsrc 到 session: taskid={session.taskid}, rmcp={session.target_client is not None}", "STREAM")
 
@@ -995,7 +995,7 @@ class StreamSrcServer:
             self.clients.append(client_socket)
 
         # 发送 Registration ACK
-        self._send_registration_ack(client_socket, reg_data)
+        self._send_registration_ack(session, reg_data)
 
         log(f"新建会话: taskid={taskid}", "STREAM")
         return session
@@ -1143,52 +1143,13 @@ class StreamSrcServer:
             except Exception as e:
                 log(f"推送帧失败: {e}", "STREAM")
 
-    def _send_registration_ack(self, client_socket: socket.socket, reg_data: bytes = None):
-        """发送 Registration ACK (65 bytes)
+    def _send_registration_ack(self, session: StreamSession, reg_data: bytes = None):
+        """跳过发送 Registration ACK
 
-        真实设备在收到 registration 后回显相同的 frame
+        Real Atom 的 streamsrc 不发送 Registration ACK，test tool 不会显示它
+        因此 emulated_atom 也不发送 ACK，与 Real Atom 行为一致
         """
-        import struct
-        import time
-
-        if reg_data and len(reg_data) == 65:
-            # 回显收到的 Registration frame，只更新时间戳
-            frame = bytearray(reg_data)
-            ts = int(time.time() * 10000000) + 116444736000000000
-            struct.pack_into('<Q', frame, 10, ts)
-            # 修正 indicator 为 Registration ACK (0x0129，与Real Atom一致)
-            struct.pack_into('>H', frame, 18, 0x0129)
-        else:
-            # 构造 65 字节的 Registration ACK 帧
-            frame = bytearray(65)
-            struct.pack_into('<I', frame, 0, 0xEEEEEEEE)
-            struct.pack_into('>H', frame, 4, 0x0100)
-            struct.pack_into('<I', frame, 6, 0)
-            ts = int(time.time() * 10000000) + 116444736000000000
-            struct.pack_into('<Q', frame, 10, ts)
-            struct.pack_into('>H', frame, 18, 0x0129)
-            struct.pack_into('<I', frame, 20, 0)
-            struct.pack_into('<H', frame, 24, 0x0024)
-            for i in range(36):
-                frame[26 + i] = 0
-            struct.pack_into('<H', frame, 62, 0)
-            frame[64] = 0x38
-
-        try:
-            client_socket.sendall(bytes(frame))
-            # 调试日志：显示 ACK 的 indicator
-            import struct
-            indicator = struct.unpack('>H', frame[18:20])[0]
-            log(f"发送 Registration ACK: {len(frame)} bytes, indicator=0x{indicator:04x}", "STREAM")
-            # 调试：保存 ACK 到文件
-            import os
-            debug_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'debug')
-            os.makedirs(debug_dir, exist_ok=True)
-            debug_file = os.path.join(debug_dir, f'sent_ack_{int(time.time()*1000)}.bin')
-            with open(debug_file, 'wb') as f:
-                f.write(bytes(frame))
-        except Exception as e:
-            log(f"发送 Registration ACK 失败: {e}", "STREAM")
+        log(f"跳过发送 Registration ACK (与 Real Atom 一致)", "STREAM")
 
     def push_frame(self, frame: bytes):
         """推送帧到所有连接的客户端"""
