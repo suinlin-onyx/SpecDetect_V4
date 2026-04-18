@@ -571,6 +571,7 @@ class StreamSession:
         self.fscan_params = fscan_params or {}  # 存储 fscan 参数用于持续推送
         self.push_thread = None  # 推送线程
         self.push_running = False  # 推送运行标志
+        self.debug_file = None  # 调试文件（一次fscan请求的所有帧保存在同一文件）
 
     def attach_rmcp(self, rmcp_client: 'RMCPClient'):
         """关联 RMCP 客户端"""
@@ -870,6 +871,12 @@ class StreamSrcServer:
             session.push_running = True
             frame_counter = 0
 
+            # 调试：创建单一文件保存所有帧
+            import os
+            debug_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'debug')
+            os.makedirs(debug_dir, exist_ok=True)
+            session.debug_file = os.path.join(debug_dir, f'sent_fscan_{int(time.time()*1000)}.bin')
+
             # 三频段数据缓存 (从 rmcp_proxy 流式接收)
             fscan_bands = []  # 每元素: (spectrum, counters)
             bands_received_event = threading.Event()
@@ -938,6 +945,9 @@ class StreamSrcServer:
                     log(f"FSCAN 推送错误: {e}", "STREAM")
                     break
 
+            # 关闭调试文件
+            if session.debug_file:
+                session.debug_file = None
             log(f"FSCAN 推送线程结束: taskid={session.taskid}", "STREAM")
 
         session.push_thread = threading.Thread(target=push_loop, daemon=True)
@@ -945,13 +955,11 @@ class StreamSrcServer:
 
     def push_frame_to_session(self, session: StreamSession, frame: bytes):
         """推送帧到指定会话的 streamsrc 客户端"""
-        # 调试：保存发送的帧到文件
+        # 调试：保存发送的帧到文件（一次fscan请求的所有帧保存在同一文件）
         import os
-        debug_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'debug')
-        os.makedirs(debug_dir, exist_ok=True)
-        debug_file = os.path.join(debug_dir, f'sent_fscan_{int(time.time()*1000)}.bin')
-        with open(debug_file, 'wb') as f:
-            f.write(frame)
+        if session.debug_file:
+            with open(session.debug_file, 'ab') as f:
+                f.write(frame)
 
         with self.lock:
             if session.streamsrc_client:
