@@ -593,6 +593,67 @@ def build_streamsrc_frame_434(spectrum_data: list,
     return bytes(frame)
 
 
+def build_mscan_frame(dbm_level: int, stc: int = None, ts: bytes = None) -> bytes:
+    """构建 MSCAN 45字节频率表扫描帧
+
+    帧格式:
+    - Offset 0-3:   Sync (0xEEEEEEEE, 大端)
+    - Offset 4-5:   VER (1, 小端)
+    - Offset 6-9:   STC (小端)
+    - Offset 10-17:  TS (8 bytes, 与真实设备匹配)
+    - Offset 18-19: PL (21, 大端)
+    - Offset 20-21: EL (0, 大端)
+    - Offset 22-23: PAD (0)
+    - Offset 24:    DT (13)
+    - Offset 25:    DL (16)
+    - Offset 26-29: freq_count (1)
+    - Offset 30-37: 固定值 (0x0001000000000000)
+    - Offset 38-41: 固定值
+    - Offset 43-44: 电平值 (小端, 2字节)
+
+    Args:
+        dbm_level: 信号电平值 (0-100 范围)
+        stc: 同步通道号 (默认自动生成)
+        ts: 时间戳 (默认自动生成，8 bytes格式)
+
+    Returns:
+        45字节 MSCAN 数据帧 (bytes)
+    """
+    if stc is None:
+        stc = _get_current_stc()
+    if ts is None:
+        ts = _get_streamsrc_timestamp()
+
+    frame = bytearray(45)
+
+    # 帧头 24字节
+    frame[0:4] = struct.pack('>I', 0xEEEEEEEE)      # LEADER (大端)
+    frame[4:6] = struct.pack('<H', 1)               # VER (小端)
+    frame[6:10] = struct.pack('<I', stc)             # STC (小端)
+    frame[10:18] = ts                                # TS (8 bytes)
+    frame[18:20] = struct.pack('>H', 21)            # PL (大端) = 21
+    frame[20:22] = struct.pack('>H', 0)             # EL (大端) = 0
+    frame[22:24] = struct.pack('>H', 0)             # PAD = 0
+
+    # Payload (21字节)
+    frame[24] = DT_MSCAN  # DT = 13
+    frame[25] = 16        # DL = 16
+
+    # freq_count = 1 (offset 26-29, 大端)
+    frame[26:30] = struct.pack('>I', 1)
+
+    # 固定值 (offset 30-37)
+    frame[30:38] = bytes([0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+
+    # 固定值 (offset 38-41)
+    frame[38:42] = bytes([0x00, 0x84, 0xD7, 0x97])
+
+    # 电平值 (offset 43-44, 小端)
+    struct.pack_into('<H', frame, 43, dbm_level)
+
+    return bytes(frame)
+
+
 class BandCollector:
     """三频段收集器 - 使用 Queue 实现严格 FIFO 同步
 
@@ -979,7 +1040,13 @@ class StreamSrcServer:
 
             # 启动持续推送线程
             if session.fscan_params:
-                self._start_fscan_push(session)
+                # 区分 MSCAN 和 FSCAN：MSCAN 有 frequency，FSCAN 有 start_freq
+                if 'start_freq' in session.fscan_params:
+                    self._start_fscan_push(session)
+                elif 'frequency' in session.fscan_params:
+                    self._start_mscan_push(session)
+                else:
+                    log(f"未知的 fscan_params 类型: {session.fscan_params}", "STREAM")
 
             return session
 
@@ -1109,6 +1176,50 @@ class StreamSrcServer:
                 session._band_collector.clear()
                 session._band_collector = None
             log(f"FSCAN 推送线程结束: taskid={session.taskid}", "STREAM")
+
+        session.push_thread = threading.Thread(target=push_loop, daemon=True)
+        session.push_thread.start()
+
+    def _start_mscan_push(self, session: StreamSession):
+        """启动 MSCAN 单点测量持续推送线程"""
+        def push_loop():
+            log(f"启动 MSCAN 推送线程: taskid={session.taskid}", "STREAM")
+            session.push_running = True
+            session._stop_event.clear()
+
+            # 调试：创建文件保存发送的帧
+            import os
+            debug_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'debug')
+            os.makedirs(debug_dir, exist_ok=True)
+            session.debug_file = os.path.join(debug_dir, f'sent_mscan_{int(time.time()*1000)}.bin')
+
+            stc = session.fscan_params.get('stc')
+            frequency = session.fscan_params.get('frequency')
+
+            while not session._stop_event.is_set():
+                try:
+                    # 模拟电平值：在 30-60 范围内随机波动
+                    dbm_level = random.randint(30, 60)
+
+                    # 构建 MSCAN 帧 (45字节)
+                    streamsrc_frame = build_mscan_frame(dbm_level, stc=stc)
+
+                    # 推送帧
+                    self.push_frame_to_session(session, streamsrc_frame)
+
+                    # 每 0.2 秒推送一帧
+                    session._stop_event.wait(timeout=0.2)
+
+                except Exception as e:
+                    log(f"MSCAN 推送错误: {e}", "STREAM")
+                    break
+
+            # 清理
+            session.push_running = False
+            session._stop_event.clear()
+            if session.debug_file:
+                session.debug_file = None
+            log(f"MSCAN 推送线程结束: taskid={session.taskid}", "STREAM")
 
         session.push_thread = threading.Thread(target=push_loop, daemon=True)
         session.push_thread.start()
@@ -1710,6 +1821,8 @@ class EmulatedAtomService:
                 self._handle_query_device(client, params)
             elif operation in ('B_FScan', 'B_PScan', 'B_FScanDF'):
                 self._handle_fscan(client, params)
+            elif operation == 'B_MScan':
+                self._handle_mscan(client, params)
             elif params and any(k in params for k in ('startfreq', 'stopfreq', 'step')):
                 # operation 为空但包含 FSCAN 参数时，也当作 FSCAN 处理
                 log(f"operation 为空但检测到 FSCAN 参数，当作 B_FScan 处理")
@@ -1782,6 +1895,56 @@ class EmulatedAtomService:
 
         # 不在这里获取数据，等待 streamsrc 客户端连接后再推送
         # 这样可以确保客户端已连接，能收到数据
+
+    def _handle_mscan(self, client, params):
+        """处理 MSCAN 单点测量请求"""
+        log("_handle_mscan 开始")
+
+        # 解析频率参数
+        def parse_freq(val):
+            if isinstance(val, int):
+                return val
+            val = str(val).strip()
+            if val.endswith('MHz'):
+                return int(float(val[:-3]) * 1000000)
+            elif val.endswith('kHz'):
+                return int(float(val[:-3]) * 1000)
+            elif val.endswith('Hz'):
+                return int(val[:-2])
+            else:
+                return int(val)
+
+        # MSCAN 使用 frequency 参数（单频点）
+        frequency = parse_freq(params.get('frequency', params.get('Frequency', 100000000)))
+
+        log(f"MSCAN: frequency={frequency} Hz ({frequency/1000000:.1f} MHz)")
+
+        # 发送 SOAP 响应
+        taskid = generate_taskid()
+        import time
+        stc = int(time.time())  # session time counter
+        outputchannel = {
+            'host': '127.0.0.1',
+            'port': 18013,
+            'stc': stc,
+            'mode': 'source',
+            'datachannel': 'stream'
+        }
+        response = build_soap_response(True, taskid=taskid, outputchannel=outputchannel,
+                                      equpara={'frequency': frequency})
+        client.sendall(response)
+        client.close()
+
+        # 创建待关联的会话（等待 streamsrc 客户端连接）
+        mscan_params = {
+            'frequency': frequency,
+            'taskid': taskid,
+            'stc': stc  # 保存 STC 以便在数据帧中使用
+        }
+        pending_session = StreamSession(streamsrc_client=None, taskid=taskid, fscan_params=mscan_params)
+        with self.session_manager.lock:
+            self.pending_sessions[taskid] = pending_session
+        log(f"创建 MSCAN 待关联会话: taskid={taskid}, frequency={frequency}", "SESSION")
 
     def _cleanup_stale_sessions(self, timeout: float = 30.0):
         """清理超时的待关联会话"""
