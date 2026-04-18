@@ -55,13 +55,23 @@ os.makedirs(LOG_DIR, exist_ok=True)
 USE_MOCK_DATA = False  # 设为 False 尝试连接 Real Device
 
 # 日志文件
-DEBUG_LOG = open(os.path.join(LOG_DIR, 'emulated_debug.log'), 'w', encoding='utf-8')
+LOG_FILE = os.path.join(LOG_DIR, f'emul_atom_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
+DEBUG_LOG = open(LOG_FILE, 'w', encoding='utf-8')
 
 
-def log(msg):
-    """日志输出"""
+def log(msg, prefix="ATOM"):
+    """日志输出 - 带清晰前缀标识来源
+
+    前缀规则:
+    - ATOM: 主服务日志 (默认)
+    - STREAM: streamsrc 服务器相关
+    - SOAP: SOAP 处理相关
+    - SESSION: Session 管理相关
+    - RMCP: RMCP 通信相关
+    - PARSE: 数据解析相关
+    """
     ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-    line = f"[{ts}] {msg}"
+    line = f"[{ts}] [{prefix:6}] {msg}"
     print(line, flush=True)
     DEBUG_LOG.write(line + '\n')
     DEBUG_LOG.flush()
@@ -550,9 +560,9 @@ class StreamSession:
         """关闭所有连接（幂等操作）"""
         with self.lock:
             if self.streamsrc_client is None and self.rmcp_client is None:
-                log(f"[Session {self.taskid}] 连接已关闭，跳过")
+                log(f"连接已关闭，跳过", "SESSION")
                 return
-            log(f"[Session {self.taskid}] 关闭所有连接")
+            log(f"关闭所有连接", "SESSION")
             # 停止推送线程
             self.push_running = False
             # 关闭 streamsrc 客户端
@@ -560,14 +570,14 @@ class StreamSession:
                 try:
                     self.streamsrc_client.close()
                 except Exception as e:
-                    log(f"[Session {self.taskid}] 关闭 streamsrc 失败: {e}")
+                    log(f"关闭 streamsrc 失败: {e}", "SESSION")
                 self.streamsrc_client = None
             # 关闭 RMCP 客户端
             if self.rmcp_client:
                 try:
                     self.rmcp_client.disconnect()
                 except Exception as e:
-                    log(f"[Session {self.taskid}] 关闭 rmcp_client 失败: {e}")
+                    log(f"关闭 rmcp_client 失败: {e}", "SESSION")
                 self.rmcp_client = None
 
     def update_data_time(self):
@@ -590,7 +600,7 @@ class SessionManager:
         with self.lock:
             self.sessions[streamsrc_client] = session
             self.taskid_to_session[taskid] = session
-        log(f"[SessionManager] 创建会话: taskid={taskid}, client={streamsrc_client.getpeername()}")
+        log(f"创建会话: taskid={taskid}, client={streamsrc_client.getpeername()}", "SESSION")
         return session
 
     def get_session_by_socket(self, sock: socket.socket) -> Optional[StreamSession]:
@@ -657,14 +667,14 @@ class StreamSrcServer:
 
     def _accept_loop(self):
         """接受连接的循环"""
-        log(f"[StreamServer] _accept_loop started, running={self.running}")
+        log(f"_accept_loop started, running={self.running}", "STREAM")
         last_check_time = time.time()
         while self.running:
             try:
                 self.server_socket.settimeout(1.0)
                 try:
                     client_socket, client_addr = self.server_socket.accept()
-                    log(f"[StreamServer] 客户端连接: {client_addr}")
+                    log(f"客户端连接: {client_addr}", "STREAM")
 
                     with self.lock:
                         self.clients.append(client_socket)
@@ -696,15 +706,15 @@ class StreamSrcServer:
                         data = client.recv(1, socket.MSG_PEEK)
                         if data == b'':
                             # 客户端关闭了连接
-                            log(f"[StreamServer] 检测到死客户端")
+                            log(f"检测到死客户端", "STREAM")
                             disconnected.append(client)
                     except socket.timeout:
                         pass  # 客户端还活着
                     except (ConnectionResetError, BrokenPipeError, OSError) as e:
-                        log(f"[StreamServer] 客户端已断开: {e}")
+                        log(f"客户端已断开: {e}", "STREAM")
                         disconnected.append(client)
                 except Exception as e:
-                    log(f"[StreamServer] 检测客户端状态异常: {e}")
+                    log(f"检测客户端状态异常: {e}", "STREAM")
                     disconnected.append(client)
 
         # 移除死客户端并关闭对应的 RMCP 连接
@@ -712,17 +722,17 @@ class StreamSrcServer:
             with self.lock:
                 if client in self.clients:
                     self.clients.remove(client)
-                    log(f"[StreamServer] 移除死客户端，剩余: {len(self.clients)}")
+                    log(f"移除死客户端，剩余: {len(self.clients)}", "STREAM")
                 else:
-                    log(f"[StreamServer] 客户端不在 clients 列表中，可能已移除")
+                    log(f"客户端不在 clients 列表中，可能已移除", "STREAM")
             # 成对关闭 RMCP - 先从 session_manager 移除，避免重复关闭
             session = self.session_manager.get_session_by_socket(client)
             if session:
                 self.session_manager.remove_session(client)  # 确保只移除一次
-                log(f"[StreamServer] 找到对应 session={session.taskid}，调用关闭")
+                log(f"找到对应 session={session.taskid}，调用关闭", "STREAM")
                 self._close_session_with_stop(session)
             else:
-                log(f"[StreamServer] 未找到对应 session")
+                log(f"未找到对应 session", "STREAM")
 
     def _try_match_pending_session(self, client_socket: socket.socket):
         """尝试将新客户端关联到等待中的会话
@@ -744,7 +754,7 @@ class StreamSrcServer:
 
         atom = self.atom_service
         if not atom:
-            log("[StreamServer] 没有 atom_service 引用，无法匹配 pending_session")
+            log("没有 atom_service 引用，无法匹配 pending_session", "STREAM")
             return
 
         # 接收 registration frame (65 bytes)
@@ -754,37 +764,37 @@ class StreamSrcServer:
             while len(reg_data) < 65:
                 chunk = client_socket.recv(65 - len(reg_data))
                 if not chunk:
-                    log("[StreamServer] Registration frame 接收不完整")
+                    log("Registration frame 接收不完整", "STREAM")
                     client_socket.close()
                     return
                 reg_data += chunk
-            log(f"[StreamServer] 收到 Registration frame: {reg_data[:20].hex()}...")
+            log(f"收到 Registration frame: {reg_data[:20].hex()}...", "STREAM")
         except socket.timeout:
-            log("[StreamServer] 接收 Registration frame 超时")
+            log("接收 Registration frame 超时", "STREAM")
             client_socket.close()
             return
         except Exception as e:
-            log(f"[StreamServer] 接收 Registration frame 失败: {e}")
+            log(f"接收 Registration frame 失败: {e}", "STREAM")
             client_socket.close()
             return
 
         # 解析 taskid (offset 29, 36 bytes ASCII)
         if reg_data[0:4] == b'\xee\xee\xee\xee':
             taskid_from_client = reg_data[29:65].decode('ascii', errors='replace').strip('\x00')
-            log(f"[StreamServer] 从 Registration 提取 taskid: {taskid_from_client}")
+            log(f"从 Registration 提取 taskid: {taskid_from_client}", "STREAM")
         else:
             taskid_from_client = None
-            log("[StreamServer] Registration frame sync 不正确")
+            log("Registration frame sync 不正确", "STREAM")
 
         # 查找匹配的 pending_session
         session = None
         if taskid_from_client:
             with atom.session_manager.lock:
-                log(f"[StreamServer] pending_sessions: {list(atom.pending_sessions.keys())}")
-                log(f"[StreamServer] taskid_from_client: {taskid_from_client}")
+                log(f"pending_sessions: {list(atom.pending_sessions.keys())}", "STREAM")
+                log(f"taskid_from_client: {taskid_from_client}", "STREAM")
                 if taskid_from_client in atom.pending_sessions:
                     session = atom.pending_sessions.pop(taskid_from_client)
-                    log(f"[StreamServer] 按 taskid 匹配 pending_session: {taskid_from_client}")
+                    log(f"按 taskid 匹配 pending_session: {taskid_from_client}", "STREAM")
 
         # 如果没找到，按先进先出匹配
         if not session:
@@ -792,7 +802,7 @@ class StreamSrcServer:
                 if atom.pending_sessions:
                     oldest_taskid = next(iter(atom.pending_sessions))
                     session = atom.pending_sessions.pop(oldest_taskid)
-                    log(f"[StreamServer] 无 exact match，按 FIFO 匹配: {session.taskid}")
+                    log(f"无 exact match，按 FIFO 匹配: {session.taskid}", "STREAM")
 
         if session:
             # 关联 streamsrc 客户端
@@ -807,7 +817,7 @@ class StreamSrcServer:
             # 发送 Registration ACK (回显收到的 Registration frame)
             self._send_registration_ack(client_socket, reg_data)
 
-            log(f"[StreamServer] 关联 streamsrc 到 session: taskid={session.taskid}, rmcp={session.rmcp_client is not None}")
+            log(f"关联 streamsrc 到 session: taskid={session.taskid}, rmcp={session.rmcp_client is not None}", "STREAM")
 
             # 启动持续推送线程
             if session.fscan_params:
@@ -829,13 +839,13 @@ class StreamSrcServer:
         # 发送 Registration ACK
         self._send_registration_ack(client_socket, reg_data)
 
-        log(f"[StreamServer] 新建会话: taskid={taskid}")
+        log(f"新建会话: taskid={taskid}", "STREAM")
         return session
 
     def _start_fscan_push(self, session: StreamSession):
         """启动 FSCAN 持续推送线程"""
         def push_loop():
-            log(f"[StreamServer] 启动 FSCAN 推送线程: taskid={session.taskid}")
+            log(f"启动 FSCAN 推送线程: taskid={session.taskid}", "STREAM")
             session.push_running = True
             frame_counter = 0
 
@@ -866,10 +876,10 @@ class StreamSrcServer:
                     time.sleep(0.2)
 
                 except Exception as e:
-                    log(f"[StreamServer] FSCAN 推送错误: {e}")
+                    log(f"FSCAN 推送错误: {e}", "STREAM")
                     break
 
-            log(f"[StreamServer] FSCAN 推送线程结束: taskid={session.taskid}")
+            log(f"FSCAN 推送线程结束: taskid={session.taskid}", "STREAM")
 
         session.push_thread = threading.Thread(target=push_loop, daemon=True)
         session.push_thread.start()
@@ -895,11 +905,11 @@ class StreamSrcServer:
                         indicator = struct.unpack('>H', frame[18:20])[0]
                         meta0 = struct.unpack('<h', frame[48:50])[0]
                         meta5 = struct.unpack('<h', frame[58:60])[0]
-                        log(f"[StreamServer] 发送 FSCAN-529: indicator=0x{indicator:04x}, meta[0]={meta0}, meta[5]={meta5}")
+                        log(f"发送 FSCAN-529: indicator=0x{indicator:04x}, meta[0]={meta0}, meta[5]={meta5}", "STREAM")
                     elif len(frame) == 896:
-                        log(f"[StreamServer] 发送 FSCAN-434: {len(frame)} bytes")
+                        log(f"发送 FSCAN-434: {len(frame)} bytes", "STREAM")
                 except Exception as e:
-                    log(f"[StreamServer] 推送帧失败: {e}")
+                    log(f"推送帧失败: {e}", "STREAM")
 
     def _send_registration_ack(self, client_socket: socket.socket, reg_data: bytes = None):
         """发送 Registration ACK (65 bytes)
@@ -937,7 +947,7 @@ class StreamSrcServer:
             # 调试日志：显示 ACK 的 indicator
             import struct
             indicator = struct.unpack('>H', frame[18:20])[0]
-            log(f"[StreamServer] 发送 Registration ACK: {len(frame)} bytes, indicator=0x{indicator:04x}")
+            log(f"发送 Registration ACK: {len(frame)} bytes, indicator=0x{indicator:04x}", "STREAM")
             # 调试：保存 ACK 到文件
             import os
             debug_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'debug')
@@ -946,7 +956,7 @@ class StreamSrcServer:
             with open(debug_file, 'wb') as f:
                 f.write(bytes(frame))
         except Exception as e:
-            log(f"[StreamServer] 发送 Registration ACK 失败: {e}")
+            log(f"发送 Registration ACK 失败: {e}", "STREAM")
 
     def push_frame(self, frame: bytes):
         """推送帧到所有连接的客户端"""
@@ -954,7 +964,7 @@ class StreamSrcServer:
             log(f"推送帧无效: length={len(frame) if frame else 0}")
             return
 
-        log(f"[StreamServer] push_frame: {len(self.clients)} clients, frame_len={len(frame)}")
+        log(f"push_frame: {len(self.clients)} clients, frame_len={len(frame)}", "STREAM")
 
         disconnected = []
         with self.lock:
@@ -987,18 +997,18 @@ class StreamSrcServer:
     def _close_session_with_stop(self, session: StreamSession):
         """关闭会话并发送 B_StopMeas 请求"""
         taskid = session.taskid
-        log(f"[Session {taskid}] 客户端断开，发送 B_StopMeas...")
+        log(f"客户端断开，发送 B_StopMeas...", "SESSION")
 
         # 发送 B_StopMeas 到设备
         try:
             xml_content = build_stopmeas_xml()
             result = send_to_rmcp_proxy(xml_content, timeout=3.0)
             if result:
-                log(f"[Session {taskid}] B_StopMeas 响应成功")
+                log(f"B_StopMeas 响应成功", "SESSION")
             else:
-                log(f"[Session {taskid}] B_StopMeas 无响应")
+                log(f"B_StopMeas 无响应", "SESSION")
         except Exception as e:
-            log(f"[Session {taskid}] B_StopMeas 失败: {e}")
+            log(f"B_StopMeas 失败: {e}", "SESSION")
 
         # 关闭所有连接
         session.close_all()
@@ -1351,7 +1361,7 @@ class RMCPClient:
             self.sock.settimeout(10.0)
             self.sock.connect((self.host, self.port))
             local = self.sock.getsockname()
-            log(f"已连接到 rmcp_proxy {self.host}:{self.port} (本地: {local[0]}:{local[1]})")
+            log(f"已连接到 rmcp_proxy {self.host}:{self.port} (本地: {local[0]}:{local[1]})", "RMCP")
             return True
         except Exception as e:
             log(f"连接 rmcp_proxy 失败: {e}")
@@ -1476,7 +1486,7 @@ class EmulatedAtomService:
                     break
 
             log(f"收到数据: {len(data)} bytes")
-            log(f"数据前100字节: {data[:100]}")
+            log(f"数据前100字节: {data[:100]}", "SOAP")
 
             if not data:
                 client.close()
@@ -1564,7 +1574,7 @@ class EmulatedAtomService:
         pending_session = StreamSession(streamsrc_client=None, taskid=taskid, fscan_params=fscan_params)
         with self.session_manager.lock:
             self.pending_sessions[taskid] = pending_session
-        log(f"[Session] 创建待关联会话: taskid={taskid}, pending_sessions={list(self.pending_sessions.keys())}")
+        log(f"创建待关联会话: taskid={taskid}, pending_sessions={list(self.pending_sessions.keys())}", "SESSION")
 
         # 不在这里获取数据，等待 streamsrc 客户端连接后再推送
         # 这样可以确保客户端已连接，能收到数据
@@ -1580,7 +1590,7 @@ class EmulatedAtomService:
             for taskid in stale_taskids:
                 session = self.pending_sessions.pop(taskid, None)
                 if session:
-                    log(f"[Session] 清理超时会话: taskid={taskid}")
+                    log(f"清理超时会话: taskid={taskid}", "SESSION")
 
     def _get_fscan_spectrum(self, start_freq: int, end_freq: int, step: int, taskid: str = None) -> Optional[list]:
         """获取 FSCAN 频谱数据"""
@@ -1659,7 +1669,7 @@ class EmulatedAtomService:
 
     def _get_fscan_from_rmcp_proxy(self, start_freq: int, end_freq: int, step: int, taskid: str = None) -> Optional[list]:
         """直接从 rmcp_proxy 获取 FSCAN 数据（流式推送版本）"""
-        log(f"[RMCP] _get_fscan_from_rmcp_proxy 开始: taskid={taskid}")
+        log(f"_get_fscan_from_rmcp_proxy 开始: taskid={taskid}", "RMCP")
         session = None
         if taskid:
             with self.session_manager.lock:
@@ -1680,9 +1690,9 @@ class EmulatedAtomService:
             # 关联 RMCP 客户端到会话（成对管理）
             if session:
                 session.attach_rmcp(rmcp_client)
-                log(f"[Session {taskid}] 已关联 RMCP 客户端: rmcp_client={session.rmcp_client is not None}")
+                log(f"已关联 RMCP 客户端: rmcp_client={session.rmcp_client is not None}", "SESSION")
             else:
-                log(f"[Session {taskid}] 未找到 pending_session，无法关联 RMCP")
+                log(f"未找到 pending_session，无法关联 RMCP", "SESSION")
 
             rmcp_client.sock.sendall(cmd)
             log("已发送 RMCP REQUEST")
@@ -1815,7 +1825,7 @@ class EmulatedAtomService:
 
             # 检查是否是 FSCAN 类型
             if n_bd_type != 15:
-                log(f"[Parse] 非 FSCAN 类型: n_bd_type={n_bd_type}")
+                log(f"非 FSCAN 类型: n_bd_type={n_bd_type}", "PARSE")
                 return None
 
             # counters (4 x int16 little-endian), counters[0] = nArrays
@@ -1823,7 +1833,7 @@ class EmulatedAtomService:
             n_arrays = counters[0]
 
             if n_arrays == 0 or n_arrays > 2000:
-                log(f"[Parse] 无效 n_arrays: {n_arrays}")
+                log(f"无效 n_arrays: {n_arrays}", "PARSE")
                 return None
 
             # Spectrum starts at byte 11, little-endian int16
@@ -1838,12 +1848,12 @@ class EmulatedAtomService:
                 spectrum_offset += 2
 
             if len(spectrum) > 0:
-                log(f"[Parse] FSCAN: n_bd_type={n_bd_type}, n_arrays={n_arrays}, counters={counters}, spectrum_len={len(spectrum)}")
+                log(f"FSCAN: n_bd_type={n_bd_type}, n_arrays={n_arrays}, counters={counters}, spectrum_len={len(spectrum)}", "PARSE")
 
             return spectrum
 
         except Exception as e:
-            log(f"[Parse] 解析 FSCAN 帧失败: {e}")
+            log(f"解析 FSCAN 帧失败: {e}", "PARSE")
             return None
 
     def _parse_rmcp_fscan_response(self, data: bytes) -> Optional[list]:
@@ -1961,7 +1971,7 @@ class EmulatedAtomService:
                 except:
                     pass
             self.streamsrc_server.clients.clear()
-        log(f"[StreamServer] 清理 clients 完成")
+        log(f"清理 clients 完成", "STREAM")
 
         # 关闭所有待关联会话
         for taskid in list(self.pending_sessions.keys()):
