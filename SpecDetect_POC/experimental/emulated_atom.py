@@ -849,6 +849,27 @@ class StreamSrcServer:
             session.push_running = True
             frame_counter = 0
 
+            # 三频段数据缓存 (从 rmcp_proxy 流式接收)
+            fscan_bands = []  # 每元素: (spectrum, counters)
+            bands_received_event = threading.Event()
+
+            def rmcp_stream_thread():
+                """后台接收 RMCP 流式数据"""
+                spectrum = self.atom_service._get_fscan_from_rmcp_proxy(
+                    session.fscan_params['start_freq'],
+                    session.fscan_params['end_freq'],
+                    session.fscan_params['step'],
+                    session.fscan_params['taskid']
+                )
+                # 返回空列表表示数据已通过流式推送
+                if spectrum is not None and len(spectrum) == 0:
+                    log("RMCP 流式接收完成", "STREAM")
+                bands_received_event.set()
+
+            # 启动后台 RMCP 接收线程
+            rmcp_thread = threading.Thread(target=rmcp_stream_thread, daemon=True)
+            rmcp_thread.start()
+
             while session.push_running:
                 try:
                     # 获取频谱数据
@@ -862,11 +883,28 @@ class StreamSrcServer:
                     if spectrum:
                         # 使用 FSCAN 请求时建立的 STC
                         stc = session.fscan_params.get('stc')
-                        # 交替发送 FSCAN-529 和 FSCAN-434
-                        if frame_counter % 2 == 0:
-                            streamsrc_frame = build_streamsrc_frame(spectrum, stc=stc)
+
+                        # 三频段循环: 529→529→434 (对应 band1, band2, band3)
+                        # band1: 512点, 起始序号 0, 137.0-149.775MHz
+                        # band2: 512点, 起始序号 512, 149.8-162.575MHz
+                        # band3: 417点, 起始序号 1024, 162.6-173.0MHz
+                        band_idx = frame_counter % 3
+                        if band_idx == 0:
+                            # band1: 512点 (索引 0-511)
+                            band_spectrum = spectrum[0:512] if len(spectrum) >= 512 else spectrum
+                            streamsrc_frame = build_streamsrc_frame(band_spectrum, stc=stc)
+                            log(f"推送 band1: {len(band_spectrum)} 点", "STREAM")
+                        elif band_idx == 1:
+                            # band2: 512点 (索引 512-1023)
+                            band_spectrum = spectrum[512:1024] if len(spectrum) >= 1024 else spectrum[0:512]
+                            streamsrc_frame = build_streamsrc_frame(band_spectrum, stc=stc)
+                            log(f"推送 band2: {len(band_spectrum)} 点", "STREAM")
                         else:
-                            streamsrc_frame = build_streamsrc_frame_434(spectrum, stc=stc)
+                            # band3: 417点 (索引 1024-1440)
+                            band_spectrum = spectrum[1024:1441] if len(spectrum) >= 1441 else spectrum[0:417]
+                            streamsrc_frame = build_streamsrc_frame_434(band_spectrum, stc=stc)
+                            log(f"推送 band3: {len(band_spectrum)} 点", "STREAM")
+
                         frame_counter += 1
 
                         # 推送帧
@@ -1633,7 +1671,16 @@ class EmulatedAtomService:
             return self._get_mock_spectrum()
 
     def _get_fscan_from_capture(self) -> Optional[list]:
-        """从 rmcp_proxy capture 日志获取最新 FSCAN 数据"""
+        """从 rmcp_proxy capture 日志获取最新 FSCAN 数据 (三频段合并)
+
+        设备返回三个 FSCAN 帧对应不同频段:
+        - Band 1: 512点, counters=(512, 0, 0, 0), 起始序号 0, 137.0-149.775MHz
+        - Band 2: 512点, counters=(512, 0, 512, 0), 起始序号 512, 149.8-162.575MHz
+        - Band 3: 417点, counters=(417, 0, 1024, 0), 起始序号 1024, 162.6-173.0MHz
+
+        Returns:
+            合并后的频谱数据 (1441 点) 或 None
+        """
         try:
             # 路径: experimental/emulated_atom.py -> 项目根目录/rmcp_proxy/capture/
             project_root = Path(os.path.dirname(os.path.abspath(__file__))).parent
@@ -1650,18 +1697,41 @@ class EmulatedAtomService:
             with open(latest, 'r', encoding='utf-8') as f:
                 data = json.load(f)
 
-            # 找 S->C 的 FSCAN 数据
-            for entry in reversed(data):
+            # 收集三个频段的 counters 信息用于调试
+            band_counters = []
+
+            # 找 S->C 的 FSCAN 数据 - 收集所有频段
+            all_bands = []
+            for entry in data:
                 if entry.get('direction') == 'S->C' and entry.get('data_type') == 'SIMPLE_FSCAN':
                     fscan = entry.get('fscan', {})
                     levels = fscan.get('levels', [])
+                    counters = fscan.get('counters', [0, 0, 0, 0])
 
-                    if levels and len(levels) >= 512:
-                        log(f"从 capture 获取 FSCAN: {len(levels)} 点")
-                        return [int(l) for l in levels[:512]]
+                    if levels:
+                        all_bands.append({
+                            'levels': [int(l) for l in levels],
+                            'counters': counters,
+                            'n_arrays': len(levels)
+                        })
+                        band_counters.append(counters)
 
-            log("capture 中没有 FSCAN 数据")
-            return None
+            if not all_bands:
+                log("capture 中没有 FSCAN 数据")
+                return None
+
+            # 按 counters[2] (起始序号) 排序
+            all_bands.sort(key=lambda x: x['counters'][2] if x['counters'] else 0)
+
+            # 合并三个频段
+            combined_spectrum = []
+            for band in all_bands:
+                combined_spectrum.extend(band['levels'])
+
+            log(f"从 capture 获取 FSCAN: {len(all_bands)} 频段, 共 {len(combined_spectrum)} 点")
+            log(f"Band counters: {band_counters}", "PARSE")
+
+            return combined_spectrum
 
         except Exception as e:
             log(f"从 capture 获取数据失败: {e}")
@@ -1750,35 +1820,47 @@ class EmulatedAtomService:
                                 # 解析 FSCAN payload (跳过 RMCP 帧头 18 字节)
                                 payload = frame_data[18:]
 
-                                spectrum = self._parse_single_fscan_frame(payload)
-                                if spectrum and len(spectrum) >= 512:
-                                    frame_count += 1
+                                result = self._parse_single_fscan_frame(payload)
+                                if result is None or result[0] is None:
+                                    continue
 
-                                    # 计算 dBm 范围
-                                    dbm_min = min(spectrum)
-                                    dbm_max = max(spectrum)
-                                    dbm_avg = sum(spectrum) / len(spectrum)
+                                spectrum, counters = result
+                                if len(spectrum) < 100:
+                                    continue
 
-                                    # 使用 RMCPFrameLogger 记录帧 (rmcp_proxy 风格)
-                                    self.rmcp_logger.log_frame('S->C', frame_data, (RMCP_PROXY_HOST, RMCP_PROXY_PORT))
+                                frame_count += 1
 
-                                    # 立即推送到 streamsrc
-                                    # 交替发送 FSCAN-529 (1086B) 和 FSCAN-434 (896B)
-                                    if not hasattr(self, '_fscan_alternation_counter'):
-                                        self._fscan_alternation_counter = 0
+                                # 计算 dBm 范围
+                                dbm_min = min(spectrum)
+                                dbm_max = max(spectrum)
+                                dbm_avg = sum(spectrum) / len(spectrum)
 
-                                    if self._fscan_alternation_counter % 2 == 0:
-                                        streamsrc_frame = build_streamsrc_frame(spectrum)
-                                    else:
-                                        streamsrc_frame = build_streamsrc_frame_434(spectrum)
-                                    self._fscan_alternation_counter += 1
-                                    self.streamsrc_server.push_frame(streamsrc_frame)
+                                # 使用 RMCPFrameLogger 记录帧 (rmcp_proxy 风格)
+                                self.rmcp_logger.log_frame('S->C', frame_data, (RMCP_PROXY_HOST, RMCP_PROXY_PORT))
 
-                                    # 控制推送频率（每秒最多5帧）
-                                    now = time.time()
-                                    if now - last_push_time < 0.2:
-                                        time.sleep(0.2 - (now - last_push_time))
-                                    last_push_time = time.time()
+                                # 根据 counters[2] (起始序号) 确定频段:
+                                # - 0: band1 (137.0-149.775MHz) → FSCAN-529
+                                # - 512: band2 (149.8-162.575MHz) → FSCAN-529
+                                # - 1024: band3 (162.6-173.0MHz) → FSCAN-434
+                                start_index = counters[2] if counters else 0
+                                n_arrays = counters[0] if counters else len(spectrum)
+
+                                if start_index == 1024 or n_arrays == 417:
+                                    # band3: 417点 → FSCAN-434
+                                    streamsrc_frame = build_streamsrc_frame_434(spectrum)
+                                    log(f"推送 band3 (1024): {len(spectrum)} 点", "STREAM")
+                                else:
+                                    # band1/band2: 512点 → FSCAN-529
+                                    streamsrc_frame = build_streamsrc_frame(spectrum)
+                                    log(f"推送 band{1 if start_index == 0 else 2} ({start_index}): {len(spectrum)} 点", "STREAM")
+
+                                self.streamsrc_server.push_frame(streamsrc_frame)
+
+                                # 控制推送频率（每秒最多5帧）
+                                now = time.time()
+                                if now - last_push_time < 0.2:
+                                    time.sleep(0.2 - (now - last_push_time))
+                                last_push_time = time.time()
 
                 except socket.timeout:
                     # 检查是否应该结束
@@ -1802,7 +1884,7 @@ class EmulatedAtomService:
             traceback.print_exc()
             return None
 
-    def _parse_single_fscan_frame(self, payload: bytes) -> Optional[list]:
+    def _parse_single_fscan_frame(self, payload: bytes) -> tuple:
         """解析单个 RMCP FSCAN 帧的 payload
 
         RMCP FSCAN payload 格式 (在 RMCPTP 帧头18字节之后):
@@ -1812,7 +1894,10 @@ class EmulatedAtomService:
         - bytes 11+: levels (int16 little-endian, 每帧通常是512点)
 
         Returns:
-            spectrum 列表 (dBm值, 已除以10) 或 None
+            (spectrum, counters) 元组
+            - spectrum: dBm值列表 (已除以10)
+            - counters: (n_arrays, ?, start_index, ?) 元组
+              start_index 用于判断频段: 0=band1, 512=band2, 1024=band3
         """
         if not payload or len(payload) < 25:
             return None
@@ -1850,11 +1935,12 @@ class EmulatedAtomService:
             if len(spectrum) > 0:
                 log(f"FSCAN: n_bd_type={n_bd_type}, n_arrays={n_arrays}, counters={counters}, spectrum_len={len(spectrum)}", "PARSE")
 
-            return spectrum
+            # 返回 (spectrum, counters) 元组
+            return spectrum, counters
 
         except Exception as e:
             log(f"解析 FSCAN 帧失败: {e}", "PARSE")
-            return None
+            return None, None
 
     def _parse_rmcp_fscan_response(self, data: bytes) -> Optional[list]:
         """解析 RMCP FSCAN 响应 (SIMPLE_FSCAN 格式)"""
