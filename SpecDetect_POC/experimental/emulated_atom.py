@@ -531,16 +531,17 @@ def build_streamsrc_frame_434(spectrum_data: list,
     struct.pack_into('<I', frame, 25, 867)
 
     # Offset 29-61: Private metadata (33 bytes) - FSCAN-434 特有
-    # 测试工具读取规则:
+    # 真实设备编码规则 (从 pcap 验证):
     # - frame[29] (pm[0]) = 频段序号 (应该是 0x01)
-    # - frame[58:60] (pm[29:30]) = 帧信道数量 (0x01A1 = 417 little-endian: low=0xa1, high=0x01)
-    # - frame[60:62] (pm[31:32]) = 起始频率序号 (0x0400 = 1024 little-endian: low=0x00, high=0x04)
+    # - frame[50:52] (pm[21:23]) = 起始频率序号 (0x0004 = 1024 little-endian: low=0x00, high=0x04)
+    # - frame[58:60] (pm[29:31]) = 帧信道数量 (0x01A1 = 417 little-endian: low=0xa1, high=0x01)
+    # 注意: 之前错误地认为 start_index 在 frame[60:62]，实际在 frame[50:52]
     private_metadata_434 = bytes([
-        0x01, 0xa1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  # 0-7
+        0x01, 0xa1, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00,  # 0-7
         0x80, 0xe8, 0x54, 0xa0, 0x41, 0x00, 0x00, 0x00,  # 8-15
-        0x30, 0xc5, 0xda, 0xa1, 0x41, 0x00, 0x00, 0x00,  # 16-23
+        0x30, 0xc5, 0xda, 0xa1, 0x41, 0x00, 0x04, 0x00,  # 16-23 (pm[22]=0x04 -> frame[51]=0x04)
         0x00, 0x00, 0x50, 0xc3, 0x46, 0xa1, 0x01, 0x00,  # 24-31
-        0x04                                           # 32 (start_index high byte)
+        0x00                                           # 32 (should be 0x00, not 0x04)
     ])
     frame[29:62] = private_metadata_434
 

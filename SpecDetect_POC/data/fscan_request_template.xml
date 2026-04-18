@@ -1,0 +1,85 @@
+# FSCAN 请求格式 (从 pcap 20260416_171917_9996.pcap 提取)
+
+## 设备信息
+- mfid: 53090001140012
+- equid: 51cd8dfe-e543-40c9-bdc3-a292766fee7f
+- funcid: 15 (B_FScan)
+
+## RMCP 帧结构
+- RMCPTP Header: 18 bytes
+- dwLength: 699
+- nVersion: 7
+- nMsgType: 90 (REQUEST)
+- nFlags: 0x01
+
+## SOAP XML 格式 (完整参数)
+
+```xml
+<?xml version="1.0" encoding="gb2312" ?>
+<action id="1">
+    <parameter groups="1" stationid="53090001" deviceid="00106" devicename="MS845" funcid="15">
+        <group index="0">
+            <item name="startfreq" value="137MHz" />
+            <item name="stopfreq" value="173MHz" />
+            <item name="step" value="25kHz" />
+            <item name="gainctrl" value="AGC" />
+            <item name="rfworkmode" value="0" />
+            <item name="scanmode" value="0" />
+            <item name="antpol" value="垂直" />
+            <item name="antetype" value="OFF" />
+            <item name="ifatt" value="0" />
+        </group>
+    </parameter>
+    <other_param />
+</action>
+```
+
+## 关键差异 (vs emulated_atom 发送)
+
+| 字段 | 真实客户端 | emulated_atom (错误) |
+|------|-----------|---------------------|
+| startfreq | `137MHz` | `137000000Hz` |
+| stopfreq | `173MHz` | `173000000Hz` |
+| step | `25kHz` | `25000Hz` |
+| gainctrl | `AGC` | ❌ 缺少 |
+| rfworkmode | `0` | ❌ 缺少 |
+| scanmode | `0` | ❌ 缺少 |
+| antpol | `垂直` | ❌ 缺少 |
+| antetype | `OFF` | ❌ 缺少 |
+| ifatt | `0` | ❌ 缺少 |
+
+## 设备支持的参数 (来自 53090001140012_51cd8dfe-e543-40c9-bdc3-a292766fee7f.xml)
+
+### B_FScan 参数定义:
+1. **startfreq** (double): 起始频率, 默认 137MHz, 范围 20MHz ~ 6GHz
+2. **stopfreq** (double): 终止频率, 默认 173MHz, 范围 20MHz ~ 8GHz
+3. **step** (String): 步进, 可选值: 3.125kHz, 6.25kHz, 12.5kHz, 25kHz, 50kHz, 100kHz
+4. **gain** (String): 增益模式, 可选值: AGC, MGC
+5. **rfworkmode** (String): 射频模式, 可选值: 0(宽带), 1(选频), 2(选频衰减)
+6. **scanmode** (String): 扫描模式, 可选值: 0(普通), 1(精确)
+
+## streamsrc 回调格式
+
+设备响应后, streamsrc 会推送 1086B 帧:
+- Sync: 0xEEEEEEEE
+- Header: 44 bytes (offset 4-47)
+- Metadata: 7 × int16 (offset 48-61)
+- Spectrum: 512 × int16 (offset 62+)
+
+## 回调 SOAP Response 格式
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+<soapenv:Body><srrc:responsebody>
+<srrc:result><srrc:success>true</srrc:success></srrc:result>
+<srrc:taskid>{taskid}</srrc:taskid>
+<srrc:outputchannel>
+    <srrc:mode>source</srrc:mode>
+    <srrc:datachannel>stream</srrc:datachannel>
+    <srrc:host>127.0.0.1</srrc:host>
+    <srrc:port>18013</srrc:port>
+    <srrc:stc>12345678</srrc:stc>
+</srrc:outputchannel>
+</srrc:responsebody></soapenv:Body></soapenv:Envelope>
+```

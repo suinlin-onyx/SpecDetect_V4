@@ -1,0 +1,3 @@
+timestamp,event,client_ip,client_port,server_ip,server_port,duration_ms,bytes_sent,bytes_recv
+2026-04-17 15:27:24.397,CONNECT,127.0.0.1,54598,100.72.95.36,1449,0,0,0
+2026-04-17 15:27:24.410,DEVICE_CONNECT,100.72.95.36,1449,100.72.95.36,1449,0,0,0

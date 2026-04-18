@@ -3,6 +3,12 @@
 # 代理监听配置
 PROXY_HOST = "127.0.0.1"
 PROXY_PORT = 9996
+PROXY_PORT_2 = 9997  # 第二个监听端口（可选）
+
+# 日志输出配置
+ENABLE_JSON_OUTPUT = True  # 设为 False 禁用 .json 文件输出
+ENABLE_RAW_OUTPUT = True    # 设为 False 禁用 .raw 文件输出
+ENABLE_CONNECTIONS_CSV = True  # 设为 False 禁用 connections CSV 文件输出
 
 # 已淘汰目标设备配置
 # 100.89.170.72:9997

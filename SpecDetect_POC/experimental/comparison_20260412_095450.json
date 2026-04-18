@@ -1,5 +1,0 @@
-{
-  "direct": {
-    "error": "'gbk' codec can't encode character '\\ufffd' in position 38: illegal multibyte sequence"
-  }
-}

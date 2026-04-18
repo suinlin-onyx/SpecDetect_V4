@@ -5,18 +5,20 @@
             <soapenv:Header>
                 <srrc:ProviderResponse>
                     <srrc:bizResCd>BIZ-000001</srrc:bizResCd>
-                    <srrc:bizResText>µ÷ÓÃ³É¹¦</srrc:bizResText>
+                    <srrc:bizResText>ï¿½ï¿½ï¿½Ã³É¹ï¿½</srrc:bizResText>
                 </srrc:ProviderResponse>
             </soapenv:Header>
             <soapenv:Body>
                 <srrc:responsebody>
                     <srrc:result>
+                        <srrc:appid>123456</srrc:appid>
+                        <srrc:userid>RX_admin</srrc:userid>
                         <srrc:mfid>53090001140012</srrc:mfid>
                         <srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
                         <srrc:equname>MS845</srrc:equname>
                         <srrc:equtype>01</srrc:equtype>
                         <srrc:equstatus>01</srrc:equstatus>
-                        <srrc:equimanu>RX</srrc:equimanu>
+                        <srrc:equimanu>KYB</srrc:equimanu>
                         <srrc:equmodel>MS845</srrc:equmodel>
                         <srrc:equsn>12345678</srrc:equsn>
                         <srrc:host></srrc:host>
@@ -45,11 +47,11 @@
                                     <srrc:parameter>
                                         <srrc:name>frequency</srrc:name>
                                         <srrc:type>double</srrc:type>
-                                        <srrc:displayname>ÆµÂÊ</srrc:displayname>
+                                        <srrc:displayname>Æµï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>100000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÆµÂÊÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>false</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -62,11 +64,11 @@
                                     <srrc:parameter>
                                         <srrc:name>ifbw</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÖÐÆµ´ø¿í</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>40000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÖÐÆµ´ø¿íÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -189,11 +191,11 @@
                                     <srrc:parameter>
                                         <srrc:name>gain</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÔöÒæÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½Ä£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>AGC</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÔöÒæÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -212,11 +214,11 @@
                                     <srrc:parameter>
                                         <srrc:name>rfworkmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÉäÆµÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ÆµÄ£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>0</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÉäÆµÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ÆµÄ£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -224,26 +226,26 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>0</srrc:val>
-                                                <srrc:display>³£Ì¬</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ì¬</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>1</srrc:val>
-                                                <srrc:display>µÍÔëÉù</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>2</srrc:val>
-                                                <srrc:display>µÍÊ§Õæ</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ê§ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
                                     <srrc:parameter>
                                         <srrc:name>audiotype</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÒôÆµÊý¾ÝÀàÐÍ</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>off</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÒôÆµÊý¾ÝÀàÐÍÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -251,26 +253,26 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>GSM610</srrc:val>
-                                                <srrc:display>GSM610ÒôÆµÊý¾Ý¿ª</srrc:display>
+                                                <srrc:display>GSM610ï¿½ï¿½Æµï¿½ï¿½ï¿½Ý¿ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>PCM</srrc:val>
-                                                <srrc:display>PCMÒôÆµÊý¾Ý¿ª</srrc:display>
+                                                <srrc:display>PCMï¿½ï¿½Æµï¿½ï¿½ï¿½Ý¿ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>off</srrc:val>
-                                                <srrc:display>ÒôÆµ¹Ø</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Æµï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
                                     <srrc:parameter>
                                         <srrc:name>demodmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>½âµ÷Ä£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½Ä£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>FM</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>½âµ÷Ä£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -301,11 +303,11 @@
                                     <srrc:parameter>
                                         <srrc:name>demodbw</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>½âµ÷´ø¿í</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>200000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>½âµ÷´ø¿íÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -364,11 +366,11 @@
                                     <srrc:parameter>
                                         <srrc:name>spectrumswitch</srrc:name>
                                         <srrc:type>string</srrc:type>
-                                        <srrc:displayname>ÆµÆ×Êý¾Ý¿ª¹Ø</srrc:displayname>
+                                        <srrc:displayname>Æµï¿½ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>on</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÆµÆ×Êý¾Ý¿ª¹ØÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>Æµï¿½ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:isreadonly>true</srrc:isreadonly>
                                         <srrc:selectonly>true</srrc:selectonly>
@@ -376,22 +378,22 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>off</srrc:val>
-                                                <srrc:display>ÆµÆ×¹Ø</srrc:display>
+                                                <srrc:display>Æµï¿½×¹ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>on</srrc:val>
-                                                <srrc:display>ÆµÆ×¿ª</srrc:display>
+                                                <srrc:display>Æµï¿½×¿ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
                                     <srrc:parameter>
                                         <srrc:name>ITUSwitch</srrc:name>
                                         <srrc:type>string</srrc:type>
-                                        <srrc:displayname>ITUÊý¾Ý¿ª¹Ø</srrc:displayname>
+                                        <srrc:displayname>ITUï¿½ï¿½ï¿½Ý¿ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>on</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ITUÀàÐÍ¿ª¹ØÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ITUï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:isreadonly>true</srrc:isreadonly>
                                         <srrc:selectonly>true</srrc:selectonly>
@@ -399,11 +401,11 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>off</srrc:val>
-                                                <srrc:display>ITU¹Ø</srrc:display>
+                                                <srrc:display>ITUï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>on</srrc:val>
-                                                <srrc:display>ITU¿ª</srrc:display>
+                                                <srrc:display>ITUï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
@@ -415,11 +417,11 @@
                                     <srrc:parameter>
                                         <srrc:name>frequency</srrc:name>
                                         <srrc:type>double</srrc:type>
-                                        <srrc:displayname>ÆµÂÊ</srrc:displayname>
+                                        <srrc:displayname>Æµï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>100000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÆµÂÊÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>false</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -432,11 +434,11 @@
                                     <srrc:parameter>
                                         <srrc:name>dfmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>²âÏòÐÅºÅÑ¡Ôñ</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½ï¿½Åºï¿½Ñ¡ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>1</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>²âÏòÐÅºÅÑ¡ÔñÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½ï¿½Åºï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -444,22 +446,22 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>0</srrc:val>
-                                                <srrc:display>ÖÐÐÄµã</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½Äµï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>1</srrc:val>
-                                                <srrc:display>´øÄÚ×î´óÖµ</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
                                     <srrc:parameter>
                                         <srrc:name>ifbw</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÖÐÆµ´ø¿í</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>40000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÖÐÆµ´ø¿íÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -582,11 +584,11 @@
                                     <srrc:parameter>
                                         <srrc:name>gain</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÔöÒæÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½Ä£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>AGC</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÔöÒæÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -605,11 +607,11 @@
                                     <srrc:parameter>
                                         <srrc:name>rfworkmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÉäÆµÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ÆµÄ£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>0</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÉäÆµÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ÆµÄ£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -617,26 +619,26 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>0</srrc:val>
-                                                <srrc:display>³£Ì¬</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ì¬</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>1</srrc:val>
-                                                <srrc:display>µÍÔëÉù</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>2</srrc:val>
-                                                <srrc:display>µÍÊ§Õæ</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ê§ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
                                     <srrc:parameter>
                                         <srrc:name>dftype</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>²âÏò·½Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½Ê½</srrc:displayname>
                                         <srrc:defaultvalue>0</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>²âÏò·½Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -644,22 +646,22 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>0</srrc:val>
-                                                <srrc:display>³£¹æ²âÏò</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>1</srrc:val>
-                                                <srrc:display>½Ø»ñ²âÏò</srrc:display>
+                                                <srrc:display>ï¿½Ø»ï¿½ï¿½ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
                                     <srrc:parameter>
                                         <srrc:name>spectrumswitch</srrc:name>
                                         <srrc:type>string</srrc:type>
-                                        <srrc:displayname>ÆµÆ×Êý¾Ý¿ª¹Ø</srrc:displayname>
+                                        <srrc:displayname>Æµï¿½ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>on</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÆµÆ×Êý¾Ý¿ª¹ØÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>Æµï¿½ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:isreadonly>true</srrc:isreadonly>
                                         <srrc:selectonly>true</srrc:selectonly>
@@ -667,11 +669,11 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>off</srrc:val>
-                                                <srrc:display>ÆµÆ×¹Ø</srrc:display>
+                                                <srrc:display>Æµï¿½×¹ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>on</srrc:val>
-                                                <srrc:display>ÆµÆ×¿ª</srrc:display>
+                                                <srrc:display>Æµï¿½×¿ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
@@ -683,11 +685,11 @@
                                     <srrc:parameter>
                                         <srrc:name>frequency</srrc:name>
                                         <srrc:type>double</srrc:type>
-                                        <srrc:displayname>ÆµÂÊ</srrc:displayname>
+                                        <srrc:displayname>Æµï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>100000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÆµÂÊÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>false</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -700,11 +702,11 @@
                                     <srrc:parameter>
                                         <srrc:name>ifbw</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÖÐÆµ´ø¿í</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>40000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÖÐÆµ´ø¿íÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -827,11 +829,11 @@
                                     <srrc:parameter>
                                         <srrc:name>gain</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÔöÒæÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½Ä£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>AGC</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÔöÒæÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -850,11 +852,11 @@
                                     <srrc:parameter>
                                         <srrc:name>rfworkmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÉäÆµÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ÆµÄ£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>0</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÉäÆµÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ÆµÄ£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -862,15 +864,15 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>0</srrc:val>
-                                                <srrc:display>³£Ì¬</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ì¬</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>1</srrc:val>
-                                                <srrc:display>µÍÔëÉù</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>2</srrc:val>
-                                                <srrc:display>µÍÊ§Õæ</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ê§ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
@@ -882,11 +884,11 @@
                                     <srrc:parameter>
                                         <srrc:name>startfreq</srrc:name>
                                         <srrc:type>double</srrc:type>
-                                        <srrc:displayname>ÆðÊ¼ÆµÂÊ</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½Ê¼Æµï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>137000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÆðÊ¼ÆµÂÊÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½Ê¼Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>false</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -899,11 +901,11 @@
                                     <srrc:parameter>
                                         <srrc:name>stopfreq</srrc:name>
                                         <srrc:type>double</srrc:type>
-                                        <srrc:displayname>ÖÕÖ¹ÆµÂÊ</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½Ö¹Æµï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>173000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÖÕÖ¹ÆµÂÊÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½Ö¹Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>false</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -916,11 +918,11 @@
                                     <srrc:parameter>
                                         <srrc:name>step</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>²½³¤</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>25000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>²½³¤ÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -955,11 +957,11 @@
                                     <srrc:parameter>
                                         <srrc:name>gain</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÔöÒæÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½Ä£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>AGC</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÔöÒæÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -978,11 +980,11 @@
                                     <srrc:parameter>
                                         <srrc:name>rfworkmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÉäÆµÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ÆµÄ£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>0</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÉäÆµÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ÆµÄ£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -990,26 +992,26 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>0</srrc:val>
-                                                <srrc:display>³£Ì¬</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ì¬</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>1</srrc:val>
-                                                <srrc:display>µÍÔëÉù</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>2</srrc:val>
-                                                <srrc:display>µÍÊ§Õæ</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ê§ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
                                     <srrc:parameter>
                                         <srrc:name>scanmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>É¨ÃèÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>É¨ï¿½ï¿½Ä£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>0</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>É¨ÃèÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>É¨ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1017,11 +1019,11 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>0</srrc:val>
-                                                <srrc:display>¿ìËÙ</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>1</srrc:val>
-                                                <srrc:display>¾«È·</srrc:display>
+                                                <srrc:display>ï¿½ï¿½È·</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
@@ -1033,11 +1035,11 @@
                                     <srrc:parameter>
                                         <srrc:name>startfreq</srrc:name>
                                         <srrc:type>double</srrc:type>
-                                        <srrc:displayname>ÆðÊ¼ÆµÂÊ</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½Ê¼Æµï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>137000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÆðÊ¼ÆµÂÊÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½Ê¼Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>false</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1050,11 +1052,11 @@
                                     <srrc:parameter>
                                         <srrc:name>stopfreq</srrc:name>
                                         <srrc:type>double</srrc:type>
-                                        <srrc:displayname>ÖÕÖ¹ÆµÂÊ</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½Ö¹Æµï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>173000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÖÕÖ¹ÆµÂÊÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½Ö¹Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>false</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1067,11 +1069,11 @@
                                     <srrc:parameter>
                                         <srrc:name>step</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>²½³¤</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>25000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>²½³¤ÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1106,11 +1108,11 @@
                                     <srrc:parameter>
                                         <srrc:name>gain</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÔöÒæÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½Ä£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>AGC</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÔöÒæÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1129,11 +1131,11 @@
                                     <srrc:parameter>
                                         <srrc:name>rfworkmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÉäÆµÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ÆµÄ£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>0</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÉäÆµÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ÆµÄ£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1141,26 +1143,26 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>0</srrc:val>
-                                                <srrc:display>³£Ì¬</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ì¬</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>1</srrc:val>
-                                                <srrc:display>µÍÔëÉù</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>2</srrc:val>
-                                                <srrc:display>µÍÊ§Õæ</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ê§ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
                                     <srrc:parameter>
                                         <srrc:name>keepmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>±£³Ö·½Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½Ö·ï¿½Ê½</srrc:displayname>
                                         <srrc:defaultvalue>0</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>±£³Ö·½Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½Ö·ï¿½Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1168,15 +1170,15 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>0</srrc:val>
-                                                <srrc:display>×î´ó±£³Ö</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ó±£³ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>1</srrc:val>
-                                                <srrc:display>×îÐ¡±£³Ö</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>2</srrc:val>
-                                                <srrc:display>Æ½¾ù±£³Ö</srrc:display>
+                                                <srrc:display>Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
@@ -1188,11 +1190,11 @@
                                     <srrc:parameter>
                                         <srrc:name>startfreq</srrc:name>
                                         <srrc:type>double</srrc:type>
-                                        <srrc:displayname>ÆðÊ¼ÆµÂÊ</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½Ê¼Æµï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>137000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÆðÊ¼ÆµÂÊÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½Ê¼Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>false</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1205,11 +1207,11 @@
                                     <srrc:parameter>
                                         <srrc:name>stopfreq</srrc:name>
                                         <srrc:type>double</srrc:type>
-                                        <srrc:displayname>ÖÕÖ¹ÆµÂÊ</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½Ö¹Æµï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>173000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÖÕÖ¹ÆµÂÊÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½Ö¹Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>false</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1222,11 +1224,11 @@
                                     <srrc:parameter>
                                         <srrc:name>step</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>²½³¤</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>25000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>²½³¤ÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1261,11 +1263,11 @@
                                     <srrc:parameter>
                                         <srrc:name>rfworkmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÉäÆµÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ÆµÄ£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>0</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÉäÆµÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ÆµÄ£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1273,26 +1275,26 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>0</srrc:val>
-                                                <srrc:display>³£Ì¬</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ì¬</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>1</srrc:val>
-                                                <srrc:display>µÍÔëÉù</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>2</srrc:val>
-                                                <srrc:display>µÍÊ§Õæ</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ê§ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
                                     <srrc:parameter>
                                         <srrc:name>gain</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÔöÒæÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½Ä£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>AGC</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÔöÒæÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1316,11 +1318,11 @@
                                     <srrc:parameter>
                                         <srrc:name>frequency</srrc:name>
                                         <srrc:type>double</srrc:type>
-                                        <srrc:displayname>ÆµÂÊ</srrc:displayname>
+                                        <srrc:displayname>Æµï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>100000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÆµÂÊÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>false</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1333,11 +1335,11 @@
                                     <srrc:parameter>
                                         <srrc:name>ifbw</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÖÐÆµ´ø¿í</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>40000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÖÐÆµ´ø¿íÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1460,11 +1462,11 @@
                                     <srrc:parameter>
                                         <srrc:name>gain</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÔöÒæÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½Ä£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>AGC</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÔöÒæÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1483,11 +1485,11 @@
                                     <srrc:parameter>
                                         <srrc:name>rfworkmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÉäÆµÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ÆµÄ£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>0</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÉäÆµÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ÆµÄ£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1495,15 +1497,15 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>0</srrc:val>
-                                                <srrc:display>³£Ì¬</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ì¬</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>1</srrc:val>
-                                                <srrc:display>µÍÔëÉù</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>2</srrc:val>
-                                                <srrc:display>µÍÊ§Õæ</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ê§ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
@@ -1515,11 +1517,11 @@
                                     <srrc:parameter>
                                         <srrc:name>frequency</srrc:name>
                                         <srrc:type>double</srrc:type>
-                                        <srrc:displayname>ÆµÂÊ</srrc:displayname>
+                                        <srrc:displayname>Æµï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>100000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÆµÂÊÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>false</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1532,11 +1534,11 @@
                                     <srrc:parameter>
                                         <srrc:name>dfmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>²âÏòÐÅºÅÑ¡Ôñ</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½ï¿½Åºï¿½Ñ¡ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>1</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>²âÏòÐÅºÅÑ¡ÔñÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½ï¿½Åºï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1544,22 +1546,22 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>0</srrc:val>
-                                                <srrc:display>ÖÐÐÄµã</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½Äµï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>1</srrc:val>
-                                                <srrc:display>´øÄÚ×î´óÖµ</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
                                     <srrc:parameter>
                                         <srrc:name>ifbw</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÖÐÆµ´ø¿í</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>40000000</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÖÐÆµ´ø¿íÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1682,11 +1684,11 @@
                                     <srrc:parameter>
                                         <srrc:name>gain</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÔöÒæÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½Ä£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>AGC</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÔöÒæÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1705,11 +1707,11 @@
                                     <srrc:parameter>
                                         <srrc:name>rfworkmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ÉäÆµÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ÆµÄ£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>0</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ÉäÆµÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ÆµÄ£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1717,15 +1719,15 @@
                                         <srrc:listitems>
                                             <srrc:listitem>
                                                 <srrc:val>0</srrc:val>
-                                                <srrc:display>³£Ì¬</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ì¬</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>1</srrc:val>
-                                                <srrc:display>µÍÔëÉù</srrc:display>
+                                                <srrc:display>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                             <srrc:listitem>
                                                 <srrc:val>2</srrc:val>
-                                                <srrc:display>µÍÊ§Õæ</srrc:display>
+                                                <srrc:display>ï¿½ï¿½Ê§ï¿½ï¿½</srrc:display>
                                             </srrc:listitem>
                                         </srrc:listitems>
                                     </srrc:parameter>
@@ -1761,11 +1763,11 @@
                                     <srrc:resultParameter>
                                         <srrc:name>ifatt</srrc:name>
                                         <srrc:type>INT32</srrc:type>
-                                        <srrc:displayname>Ë¥¼õ</srrc:displayname>
+                                        <srrc:displayname>Ë¥ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>0</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>Ë¥¼õÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>Ë¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>false</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1778,11 +1780,11 @@
                                     <srrc:resultParameter>
                                         <srrc:name>CombinedFunc</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>ºÏ²¢¹¦ÄÜÄ£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½Ï²ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>AsIFFQ</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>ºÏ²¢¹¦ÄÜÄ£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½Ï²ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1821,11 +1823,11 @@
                                     <srrc:resultParameter>
                                         <srrc:name>demodmode</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>½âµ÷Ä£Ê½</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½Ä£Ê½</srrc:displayname>
                                         <srrc:defaultvalue>FM</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>½âµ÷Ä£Ê½ÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1856,11 +1858,11 @@
                                     <srrc:resultParameter>
                                         <srrc:name>demodbw</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>½âµ÷´ø¿í</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>200kHz</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>½âµ÷´ø¿íÉèÖÃ, µ¥Î»:Hz</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î»:Hz</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1935,11 +1937,11 @@
                                     <srrc:resultParameter>
                                         <srrc:name>gathertimes</srrc:name>
                                         <srrc:type>String</srrc:type>
-                                        <srrc:displayname>»ýÀÛ´ÎÊý</srrc:displayname>
+                                        <srrc:displayname>ï¿½ï¿½ï¿½Û´ï¿½ï¿½ï¿½</srrc:displayname>
                                         <srrc:defaultvalue>1024</srrc:defaultvalue>
                                         <srrc:advanced>false</srrc:advanced>
-                                        <srrc:category>³£¹æÉèÖÃ</srrc:category>
-                                        <srrc:description>»ýÀÛ´ÎÊýÉèÖÃ</srrc:description>
+                                        <srrc:category>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:category>
+                                        <srrc:description>ï¿½ï¿½ï¿½Û´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</srrc:description>
                                         <srrc:isbrowsable>true</srrc:isbrowsable>
                                         <srrc:selectonly>true</srrc:selectonly>
                                         <srrc:isreadonly>false</srrc:isreadonly>
@@ -1972,11 +1974,11 @@
         </soapenv:Envelope>
     </devinfo>
     <rxinfo>
-        <station id="53090017" staname="²×Ô´µ¥¼×Õ¾" serverip="172.18.114.166" serverport="9999" protocol="rmcp" testself="no" btelnet="no" reconn="no" querytask="no" statusip="" statusport="5050" longitude="" latitude="" audioopenval="ON" audiocloseval="OFF" />
+        <station id="53090001" staname="ï¿½ï¿½ï¿½ï¿½Õ¾" serverip="127.0.0.1" serverport="9996" protocol="rmcp" testself="no" btelnet="no" reconn="no" querytask="no" statusip="" statusport="5050" longitude="" latitude="" audioopenval="ON" audiocloseval="OFF" />
         <device id="00106" name="" maxtaskcount="1" analogaudio="false">
             <func atomfuncname="B_SglFreqMeas" rxfuncid="11">
                 <param>
-                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="´¹Ö±" atomparamname="" />
+                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="ï¿½ï¿½Ö±" atomparamname="" />
                     <item rxparamname="antetype" atomparamunit="" rxparamunit="" rxparamdefault="OFF" atomparamname="" />
                     <item rxparamname="frequency" atomparamunit="Hz" rxparamunit="MHz" rxparamdefault="100.0" atomparamname="frequency" />
                     <item rxparamname="ifbw" atomparamunit="" rxparamunit="" rxparamdefault="40000kHz" atomparamname="ifbw">
@@ -2034,7 +2036,7 @@
             </func>
             <func atomfuncname="B_SglFreqDF" rxfuncid="13">
                 <param>
-                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="´¹Ö±" atomparamname="" />
+                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="ï¿½ï¿½Ö±" atomparamname="" />
                     <item rxparamname="antetype" atomparamunit="" rxparamunit="" rxparamdefault="OFF" atomparamname="" />
                     <item rxparamname="frequency" atomparamunit="Hz" rxparamunit="MHz" rxparamdefault="100.0" atomparamname="frequency" />
                     <item rxparamname="dfmode" atomparamunit="" rxparamunit="" rxparamdefault="1" atomparamname="dfmode" />
@@ -2080,7 +2082,7 @@
             </func>
             <func atomfuncname="B_MScan" rxfuncid="14">
                 <param>
-                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="´¹Ö±" atomparamname="" />
+                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="ï¿½ï¿½Ö±" atomparamname="" />
                     <item rxparamname="antetype" atomparamunit="" rxparamunit="" rxparamdefault="OFF" atomparamname="" />
                     <item rxparamname="frequency" atomparamunit="Hz" rxparamunit="MHz" rxparamdefault="100.0" atomparamname="frequency" />
                     <item rxparamname="ifbw" atomparamunit="" rxparamunit="" rxparamdefault="40000kHz" atomparamname="ifbw">
@@ -2120,7 +2122,7 @@
             </func>
             <func atomfuncname="B_FScan" rxfuncid="15">
                 <param>
-                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="´¹Ö±" atomparamname="" />
+                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="ï¿½ï¿½Ö±" atomparamname="" />
                     <item rxparamname="antetype" atomparamunit="" rxparamunit="" rxparamdefault="OFF" atomparamname="" />
                     <item rxparamname="startfreq" atomparamunit="Hz" rxparamunit="MHz" rxparamdefault="137.0" atomparamname="startfreq" />
                     <item rxparamname="stopfreq" atomparamunit="Hz" rxparamunit="MHz" rxparamdefault="173.0" atomparamname="stopfreq" />
@@ -2140,7 +2142,7 @@
             </func>
             <func atomfuncname="B_PScan" rxfuncid="16">
                 <param>
-                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="´¹Ö±" atomparamname="" />
+                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="ï¿½ï¿½Ö±" atomparamname="" />
                     <item rxparamname="antetype" atomparamunit="" rxparamunit="" rxparamdefault="OFF" atomparamname="" />
                     <item rxparamname="startfreq" atomparamunit="Hz" rxparamunit="MHz" rxparamdefault="137.0" atomparamname="startfreq" />
                     <item rxparamname="stopfreq" atomparamunit="Hz" rxparamunit="MHz" rxparamdefault="173.0" atomparamname="stopfreq" />
@@ -2160,7 +2162,7 @@
             </func>
             <func atomfuncname="B_FScanDF" rxfuncid="21">
                 <param>
-                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="´¹Ö±" atomparamname="" />
+                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="ï¿½ï¿½Ö±" atomparamname="" />
                     <item rxparamname="antetype" atomparamunit="" rxparamunit="" rxparamdefault="OFF" atomparamname="" />
                     <item rxparamname="startfreq" atomparamunit="Hz" rxparamunit="MHz" rxparamdefault="137.0" atomparamname="startfreq" />
                     <item rxparamname="stopfreq" atomparamunit="Hz" rxparamunit="MHz" rxparamdefault="173.0" atomparamname="stopfreq" />
@@ -2181,7 +2183,7 @@
             </func>
             <func atomfuncname="B_WBDF" rxfuncid="25">
                 <param>
-                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="´¹Ö±" atomparamname="" />
+                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="ï¿½ï¿½Ö±" atomparamname="" />
                     <item rxparamname="antetype" atomparamunit="" rxparamunit="" rxparamdefault="OFF" atomparamname="" />
                     <item rxparamname="frequency" atomparamunit="Hz" rxparamunit="MHz" rxparamdefault="100.0" atomparamname="frequency" />
                     <item rxparamname="ifbw" atomparamunit="" rxparamunit="" rxparamdefault="40000kHz" atomparamname="ifbw">
@@ -2226,7 +2228,7 @@
             </func>
             <func atomfuncname="B_MScanDF" rxfuncid="32">
                 <param>
-                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="´¹Ö±" atomparamname="" />
+                    <item rxparamname="antpol" atomparamunit="" rxparamunit="" rxparamdefault="ï¿½ï¿½Ö±" atomparamname="" />
                     <item rxparamname="antetype" atomparamunit="" rxparamunit="" rxparamdefault="OFF" atomparamname="" />
                     <item rxparamname="frequency" atomparamunit="Hz" rxparamunit="MHz" rxparamdefault="100.0" atomparamname="frequency" />
                     <item rxparamname="dfmode" atomparamunit="" rxparamunit="" rxparamdefault="1" atomparamname="dfmode" />

@@ -456,4 +456,239 @@ SERVICES['atom']['port'] = 9090
 | 失败 | 0 |
 | 完成率 | 17% |
 
-**最后更新**: 2026-04-06
+**最后更新**: 2026-04-13
+
+---
+
+## 2026-04-13 streamsrc (18012) 数据回调分析
+
+### 问题背景
+
+TestTool 如何从 Real Atom 接收 streaming 数据回调？
+
+### 测试方法
+
+1. 启动 streamsrc_sniffer.py 监听 18012 端口
+2. 发送 SOAP B_FScan 请求到 Real Atom
+3. 解析 outputchannel 获取 18012 和 stc
+4. 连接 18012 等待数据回调
+
+### 关键发现
+
+| 项目 | 结果 |
+|------|------|
+| SOAP 请求 | ✓ 成功，返回 outputchannel |
+| streamsrc 连接 | ✓ Real Atom 接受连接 |
+| 数据接收 | ✗ ACE_Asynch_Read_Stream::Acceptor read fail |
+
+### 数据流架构
+
+```
+TestTool ──SOAP──> Real Atom ──RMCP──> Device
+                │
+                └── streamsrc (18012) <── TestTool 连接等待
+                          │
+                          └── 持续推送 DATA 帧
+```
+
+### Real Atom 日志分析
+
+```
+[22:07:53.355155] 127.0.0.1:18012 接收来自 127.0.0.1:27120 的连接请求，协议 atom
+[22:07:53.358978] ACE_Asynch_Read_Stream::Acceptor read fail
+```
+
+- Real Atom 接受了 streamsrc 连接
+- 但读取数据失败 - **注册数据格式不正确**
+
+### SOAP B_FScan 请求格式
+
+```xml
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+<soapenv:Body><srrc:requestbody>
+<srrc:appid>123456</srrc:appid>
+<srrc:userid>RX_admin</srrc:userid>
+<srrc:priority>9</srrc:priority>
+<srrc:executetime>0</srrc:executetime>
+<srrc:mfid>53090001140012</srrc:mfid>
+<srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+<srrc:equpara><srrc:groupitems><srrc:groupitem><srrc:groupid>1</srrc:groupid>
+<srrc:items>
+  <srrc:item><srrc:paraname>startfreq</srrc:paraname><srrc:paravalue>137000000</srrc:paravalue></srrc:item>
+  <srrc:item><srrc:paraname>stopfreq</srrc:paraname><srrc:paravalue>173000000</srrc:paravalue></srrc:item>
+  <srrc:item><srrc:paraname>step</srrc:paraname><srrc:paravalue>25000</srrc:paravalue></srrc:item>
+  <srrc:item><srrc:paraname>gain</srrc:paraname><srrc:paravalue>AGC</srrc:paravalue></srrc:item>
+  <srrc:item><srrc:paraname>rfworkmode</srrc:paraname><srrc:paravalue>0</srrc:paravalue></srrc:item>
+  <srrc:item><srrc:paraname>scanmode</srrc:paraname><srrc:paravalue>0</srrc:paravalue></srrc:item>
+</srrc:items></srrc:groupitem></srrc:groupitems></srrc:equpara>
+<srrc:outputchannel><srrc:mode>source</srrc:mode><srrc:datachannel>stream</srrc:datachannel></srrc:outputchannel>
+</srrc:requestbody></soapenv:Body></soapenv:Envelope>
+```
+
+### streamsrc 连接响应
+
+```xml
+<srrc:outputchannel>
+  <srrc:mode>source</srrc:mode>
+  <srrc:datachannel>stream</srrc:datachannel>
+  <srrc:host>127.0.0.1</srrc:host>
+  <srrc:port>18012</srrc:port>
+  <srrc:stc>1776089273</srrc:stc>
+</srrc:outputchannel>
+```
+
+### streamsrc 注册数据格式（最新测试）
+
+**协议说明**: 72字节 = nTaskid(8字节) + szUser[64]
+
+**测试发现**:
+1. 原始 71 字节数据 → ACE_Asynch_Read_Stream::Acceptor read fail
+2. 修正为 72 字节后 → 未显示 read fail 错误
+3. 但仍无数据回调，原因：SOAP 请求失败（设备冲突）
+
+**正确数据格式**:
+```
+# RMCP帧头(18字节) + 数据(72字节) = 90字节
+payload = struct.pack('<q', stc) + (b'RX_admin' + b'\x00' * 56)  # 72字节
+header = dwLength(4) + tmStamp(8) + nVersion(2) + nDataType(1) + nFlags(1) + nCheckSum(2)
+register_data = header + payload  # 90字节
+```
+
+### 待解决问题
+
+1. **SOAP 请求设备冲突** - 需要在发送 B_FScan 前先停止之前的任务
+2. streamsrc 注册数据格式已基本正确
+3. 需要正确停止旧任务后再测试完整流程
+
+### 相关文件
+
+| 文件 | 说明 |
+|------|------|
+| `experimental/test_soap_full.py` | streamsrc 测试脚本 |
+| `experimental/streamsrc_sniffer.py` | 18012 抓包工具 |
+| `RXAtomSvcV3/log/Atomsvc-*.log` | Real Atom 日志 |
+
+---
+
+## 下一步任务
+
+### 任务 #13: streamsrc 数据格式分析（已完成）
+
+**状态**: ✅ 完成
+**结论**: streamsrc 数据格式正确，Real Atom SOAP 处理链路有问题
+
+### 任务 #14: 排查 Real Atom SOAP → rmcp_proxy 问题
+
+**状态**: ⬜ 待开始
+
+**问题**: Real Atom SOAP 请求返回 nRetCvt=2 错误，但直接连接设备成功
+
+**可能原因**:
+1. Real Atom SOAP 请求格式不正确
+2. rmcp_proxy 转换有问题
+3. Real Atom 与 rmcp_proxy 通信问题
+
+**下一步**:
+1. 检查 rmcp_proxy 日志
+2. 对比 streaming_receiver.py 和 Real Atom 发送的 RMCP 命令差异
+3. 分析 nRetCvt=2 错误码含义
+
+---
+
+## 2026-04-13 关键发现：Real Atom 数据回调架构
+
+### 数据流架构（已确认）
+
+```
+TestTool                    Real Atom                  streaming_receiver.py        Device
+   |                           |                              |                       |
+   |---- SOAP B_FScan ------> |                              |                       |
+   |                           |                              |                       |
+   |<--- outputchannel ------ |                              |                       |
+   |    (127.0.0.1:18012)     |                              |                       |
+   |                           |                              |                       |
+   |---- Connect 18012 ------> |                              |                       |
+   |    (注册 stc)             |                              |                       |
+   |                           |                              |                       |
+   |                           |====== TpOpen 9996 ==========>|                       |
+   |                           |    (连接成功)                 |                       |
+   |                           |                              |<--- Connect 1449 ---->|
+   |                           |    nRetCvt=2 (错误!)          |    (获取设备数据)     |
+   |                           |                              |                       |
+   |<--- (无数据回调) -------- |                              |                       |
+   |                           |                              |                       |
+```
+
+### Real Atom 日志关键信息
+
+```
+[16:26:58.662673] Construct freq scan data process unit
+[16:26:58.664256] strOPCHost=127.0.0.1,strOPCPort=18012
+[16:26:58.666256] m_ConnDevServer...
+[16:26:58.669767] TpOpen[127.0.0.1:9996] succeed     <-- 成功连接到 streaming_receiver.py
+[16:26:58.671505] m_bIsConnected=1
+[16:26:58.673699] 数据处理链路就绪
+[16:26:58.675281] POP CMD RMCP
+[16:26:58.689039] nRetCvt=2                       <-- 数据转换错误!
+[16:26:58.726854] 127.0.0.1:18012 accept connection from 127.0.0.1:34942
+```
+
+### 关键发现
+
+1. **Real Atom 不直接连接设备**
+   - Real Atom 通过 streaming_receiver.py (port 9996) 获取设备数据
+   - streaming_receiver.py 才是直接连接 Device (100.72.95.36:1449) 的组件
+
+2. **nRetCvt=2 错误**
+   - Real Atom 成功连接 streaming_receiver.py
+   - 但在数据转换/处理时返回 nRetCvt=2
+   - 导致没有数据通过 18012 推送给 TestTool
+
+3. **streamsrc (18012) 作用**
+   - Real Atom 监听 18012 等待 TestTool 连接
+   - TestTool 连接后发送 stc 注册信息
+   - Real Atom 应该通过此连接推送数据给 TestTool
+   - 但由于 nRetCvt=2 错误，没有数据推送
+
+### nRetCvt=2 可能含义
+
+| 值 | 可能含义 |
+|----|----------|
+| 1 | 成功 |
+| 2 | 数据转换/格式化失败 |
+| 3 | 协议不匹配 |
+| 4 | 超时 |
+| 5 | 设备未连接 |
+
+### 待解决问题
+
+1. **nRetCvt=2 根因分析**
+   - streaming_receiver.py 收到的数据格式 Real Atom 无法处理?
+   - RMCP 命令构建差异?
+   - 数据帧格式不匹配?
+
+2. **streamsrc 数据推送机制**
+   - Real Atom 是否正确处理 18012 收到的注册信息?
+   - stc 值是否匹配?
+
+### 相关文件
+
+| 文件 | 说明 |
+|------|------|
+| `experimental/test_soap_full.py` | 完整 SOAP + streamsrc 测试 |
+| `experimental/streaming_receiver.py` | 设备直连接收器 (port 9996) |
+| `experimental/streamsrc_sniffer.py` | 18012 抓包工具 |
+| `RXAtomSvcV3/log/Atomsvc-*.log` | Real Atom 日志 |
+
+---
+
+## 任务追踪
+
+| ID | 任务 | 状态 | 完成日期 |
+|----|------|------|----------|
+| #10 | 测试 18012 数据回调条件 | ✅ 完成 | 2026-04-13 |
+| #11 | 探索 TestTool 其他数据连接方式 | ✅ 完成 | 2026-04-13 |
+| #12 | 测试 SOAP 长连接持续回调 | ✅ 完成 | 2026-04-13 |
+| #13 | 分析 streamsrc 正确的数据格式 | ✅ 完成 | 2026-04-13 |
+| #14 | 分析 Real Atom 数据回调架构 | ✅ 完成 | 2026-04-13 |
+| #15 | 排查 nRetCvt=2 错误原因 | ⬜ 待开始 | - |

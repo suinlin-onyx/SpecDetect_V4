@@ -1,0 +1,1037 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Emulated Atom Service - 简化版
+
+替代 Real Atom 的能力:
+1. 接收 SOAP 请求，转发到 rmcp_proxy
+2. 接收 rmcp_proxy 回传的数据
+3. 整理并转发给调用侧:
+   - SOAP 回调 (HTTP响应)
+   - streamsrc 回传 (TCP 18013端口)
+
+端口映射:
+- SOAP: 8283
+- streamsrc: 18013
+- rmcp_proxy: 9997 (emulated_atom 专用)
+
+注意: 此版本使用模拟数据进行测试，因为 Real Device 可能不支持我们的命令格式
+"""
+
+import socket
+import struct
+import threading
+import time
+import random
+import json
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, Any, Optional
+import sys
+import os
+import io
+
+# 设置输出编码
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+
+# 配置
+SOAP_PORT = 8283
+STREAMSRC_PORT = 18013
+RMCP_PROXY_HOST = '127.0.0.1'
+RMCP_PROXY_PORT = 9997  # 使用 9997 端口（emulated_atom 专用测试通道）
+# RMCP_PROXY_PORT = 9996  # 使用 9996 端口（与真实 Atom 相同）
+# RMCP_PROXY_HOST = '100.72.95.36'  # 设备IP
+# RMCP_PROXY_PORT = 1449             # 设备端口
+
+# 日志
+LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'emulated_atom')
+os.makedirs(LOG_DIR, exist_ok=True)
+
+# 模拟数据开关
+USE_MOCK_DATA = False  # 设为 False 尝试连接 Real Device
+
+# 日志文件
+DEBUG_LOG = open(os.path.join(LOG_DIR, 'emulated_debug.log'), 'w', encoding='utf-8')
+
+
+def log(msg):
+    """日志输出"""
+    ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+    line = f"[{ts}] {msg}"
+    print(line, flush=True)
+    DEBUG_LOG.write(line + '\n')
+    DEBUG_LOG.flush()
+
+
+# ==================== GWJ004 5.17 streamsrc 帧格式 ====================
+
+# 数据帧头常量
+STREAMSRC_LEADER = 0xEEEEEEEE  # 帧同步 (4 bytes)
+STREAMSRC_VER = 0x0100         # 版本号 1.00 (2 bytes, big-endian)
+STREAMSRC_EL = 0               # 扩展帧头长度 (1 byte)
+
+# 数据类型 (GWJ004 5.14)
+DT_FSCAN = 12                  # 频率扫描数据
+DT_MSCAN = 13                 # 频率时间扫描
+DT_IQ = 6                     # IQ数据
+DT_SPECTRUM = 7               # 频谱数据
+
+# RMCP 功能 ID
+FUNCID_FSCAN = 15
+FUNCID_MSCAN = 16
+FUNCID_ITU = 20
+FUNCID_SPECTRUM = 30
+
+# FILETIME epoch (100纳秒间隔，从1601-01-01开始)
+FILETIME_EPOCH = 116444736000000000
+
+
+def _get_filetime() -> int:
+    """获取当前 FILETIME 时间戳"""
+    return int(time.time() * 10000000) + FILETIME_EPOCH
+
+
+def _get_current_stc() -> int:
+    """获取当前同步通道号 (简单的递增计数器)"""
+    # 使用时间作为基础，配合计数器避免重复
+    return int(time.time() * 1000) & 0xFFFFFFFF
+
+
+def build_streamsrc_frame(spectrum_data: list,
+                          dt: int = DT_FSCAN,
+                          stc: int = None,
+                          ts: int = None,
+                          metadata: list = None) -> bytes:
+    """
+    构建 GWJ004 5.17 标准的 streamsrc 数据帧
+
+    帧格式:
+    数据帧头 (19 bytes + ExHeader):
+      - LEADER: 4 bytes, 帧同步 = 0xEEEEEEEE
+      - VER: 2 bytes, 版本号 = 0x0100 (big-endian)
+      - STC: 4 bytes, 同步通道号 (UINT32, little-endian)
+      - TS: 8 bytes, FILETIME 时间戳
+      - PL: 4 bytes, 负载长度 (UINT32, little-endian)
+      - EL: 1 byte, 扩展帧头长度
+      - ExHeader: EL 指定的扩展帧头
+
+    数据帧体:
+      - DT: 1 byte, 数据解析类型 (12=FSCAN, 13=MSCAN, etc.)
+      - DL: 4 bytes, 数据长度 (UINT32, little-endian)
+      - DATA: 业务数据 (metadata + spectrum points)
+
+    Args:
+        spectrum_data: 频谱数据点 (list of int, 原始dBm值如 -73.5)
+        dt: 数据类型 (默认 12=FSCAN)
+        stc: 同步通道号 (默认自动生成)
+        ts: FILETIME 时间戳 (默认自动生成)
+        metadata: 元数据列表 (默认 [n_bd_type, 0, 0, n_arrays, ...])
+                  对于 FSCAN: [funcid, 0, 0, n_points, 512, n_points, 0]
+                  n_bd_type: 15=FSCAN, 16=MSCAN, etc.
+
+    Returns:
+        streamsrc 数据帧 (bytes)
+    """
+    # 转换频谱数据为原始值 (dBm * 10，参考协议文档)
+    # 协议文档中频谱数据使用 int16 LE，值为 level * 10
+    spectrum_raw = [int(level * 10) for level in spectrum_data[:512]]
+    n_points = len(spectrum_raw)
+
+    # 确定数据类型对应的 funcid
+    funcid_map = {DT_FSCAN: FUNCID_FSCAN, DT_MSCAN: FUNCID_MSCAN}
+    funcid = funcid_map.get(dt, dt)
+
+    # 默认 metadata: [funcid, 0, 0, n_arrays, n_points, n_points, 0]
+    # 注意: n_arrays 使用小值(1)避免超出 int16 范围
+    # 真实设备使用 16777216 (0x01000000)，但捕获显示 counters=[512,0,0,0]
+    if metadata is None:
+        metadata = [funcid, 0, 0, 1, n_points, n_points, 0]
+
+    # 元数据字节长度
+    metadata_bytes = b''.join(struct.pack('<h', val) for val in metadata[:7])
+
+    # 频谱数据字节 (int16 LE)
+    spectrum_bytes = b''.join(struct.pack('<h', val) for val in spectrum_raw)
+
+    # 业务数据 = 元数据(14 bytes) + 频谱数据(1024 bytes for 512 points)
+    business_data = metadata_bytes + spectrum_bytes
+    business_len = len(business_data)  # = 1038
+
+    # 同步通道号和时间戳
+    if stc is None:
+        stc = _get_current_stc()
+    if ts is None:
+        ts = _get_filetime()
+
+    # 计算总帧长度
+    # 帧头 = 4 + 2 + 4 + 8 + 4 + 1 + EL = 23 + EL
+    # 帧体 = 1(DT) + 4(DL) + business_len = 5 + business_len
+    el = STREAMSRC_EL
+    frame_header_len = 23 + el
+    frame_body_len = 5 + business_len
+    total_frame_len = frame_header_len + frame_body_len
+
+    # 构建帧
+    frame = bytearray(total_frame_len)
+    offset = 0
+
+    # 数据帧头
+    # LEADER (4 bytes)
+    struct.pack_into('<I', frame, offset, STREAMSRC_LEADER)
+    offset += 4
+
+    # VER (2 bytes, big-endian)
+    struct.pack_into('>H', frame, offset, STREAMSRC_VER)
+    offset += 2
+
+    # STC (4 bytes, little-endian)
+    struct.pack_into('<I', frame, offset, stc)
+    offset += 4
+
+    # TS (8 bytes, FILETIME)
+    struct.pack_into('<Q', frame, offset, ts)
+    offset += 8
+
+    # PL (4 bytes,负载长度 = business_len)
+    struct.pack_into('<I', frame, offset, business_len)
+    offset += 4
+
+    # EL (1 byte)
+    struct.pack_into('B', frame, offset, el)
+    offset += 1
+
+    # ExHeader (EL bytes, 默认无)
+    offset += el
+
+    # 数据帧体
+    # DT (1 byte)
+    struct.pack_into('B', frame, offset, dt)
+    offset += 1
+
+    # DL (4 bytes, 数据长度 = business_len)
+    struct.pack_into('<I', frame, offset, business_len)
+    offset += 4
+
+    # DATA (business_data)
+    frame[offset:offset + business_len] = business_data
+
+    return bytes(frame)
+
+
+def build_streamsrc_frame_simple(spectrum_data: list, n_bd_type: int = 15) -> bytes:
+    """
+    简化版 streamsrc 帧 (兼容旧接口)
+
+    Args:
+        spectrum_data: 512点频谱数据 (dBm值)
+        n_bd_type: 数据类型 (15=FSCAN)
+
+    Returns:
+        1086字节的 streamsrc 帧
+    """
+    return build_streamsrc_frame(spectrum_data, dt=DT_FSCAN)
+
+
+# ==================== streamsrc 服务器 ====================
+
+class StreamSrcServer:
+    """streamsrc TCP 服务器 - 推送数据到连接的客户端"""
+
+    def __init__(self, port: int):
+        self.port = port
+        self.server_socket = None
+        self.running = False
+        self.clients = []
+        self.lock = threading.Lock()
+
+    def start(self):
+        """启动服务器"""
+        try:
+            self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.server_socket.bind(('0.0.0.0', self.port))
+            self.server_socket.listen(5)
+            self.running = True
+            log(f"streamsrc 服务器已启动: 0.0.0.0:{self.port}")
+
+            thread = threading.Thread(target=self._accept_loop, daemon=True)
+            thread.start()
+
+        except Exception as e:
+            log(f"streamsrc 服务器启动失败: {e}")
+            raise
+
+    def _accept_loop(self):
+        """接受连接的循环"""
+        print(f"[DEBUG] _accept_loop started, running={self.running}")
+        while self.running:
+            try:
+                self.server_socket.settimeout(1.0)
+                try:
+                    client_socket, client_addr = self.server_socket.accept()
+                    print(f"[DEBUG] streamsrc 客户端连接: {client_addr}")
+                    with self.lock:
+                        self.clients.append(client_socket)
+                        print(f"[DEBUG] clients count now: {len(self.clients)}")
+                except socket.timeout:
+                    continue
+            except Exception as e:
+                if self.running:
+                    log(f"接受连接错误: {e}")
+
+    def push_frame(self, frame: bytes):
+        """推送帧到所有连接的客户端"""
+        print(f"[DEBUG] push_frame called, frame len={len(frame) if frame else 0}")
+        if not frame or len(frame) != 1086:
+            log(f"推送帧无效: length={len(frame) if frame else 0}")
+            return
+
+        disconnected = []
+        with self.lock:
+            print(f"[DEBUG] push_frame: clients count = {len(self.clients)}")
+            for client in self.clients:
+                try:
+                    client.sendall(frame)
+                    print(f"[DEBUG] push_frame: sent to client")
+                except Exception as e:
+                    log(f"推送失败: {e}")
+                    disconnected.append(client)
+
+            for client in disconnected:
+                try:
+                    client.close()
+                except:
+                    pass
+                if client in self.clients:
+                    self.clients.remove(client)
+
+        if disconnected:
+            log(f"已移除 {len(disconnected)} 个断开的客户端")
+
+    def stop(self):
+        """停止服务器"""
+        self.running = False
+        with self.lock:
+            for client in self.clients:
+                try:
+                    client.close()
+                except:
+                    pass
+            self.clients.clear()
+        if self.server_socket:
+            try:
+                self.server_socket.close()
+            except:
+                pass
+        log("streamsrc 服务器已停止")
+
+
+# ==================== SOAP 处理 ====================
+
+def parse_soap_request(request: bytes) -> Dict[str, Any]:
+    """解析 SOAP 请求 (支持完整 HTTP 请求或纯 SOAP XML)"""
+    try:
+        text = request.decode('utf-8', errors='replace')
+
+        import re
+        action_match = re.search(r'SOAPAction:\s*"?([^"\n]+)"?', text)
+        operation = action_match.group(1).strip() if action_match else ''
+
+        # 提取 SOAP XML (从 <soapenv: 开始)
+        soap_start = text.find('<soapenv:Envelope')
+        if soap_start == -1:
+            soap_start = text.find('<soap:Envelope')
+        if soap_start == -1:
+            soap_start = text.find('<srrc:requestbody')
+        if soap_start == -1:
+            log(f"未找到 SOAP XML 开始标签")
+            return {'operation': operation, 'params': {}}
+
+        soap_xml = text[soap_start:]
+        log(f"提取到 SOAP XML: {len(soap_xml)} 字符")
+
+        try:
+            from lxml import etree
+            root = etree.fromstring(soap_xml.encode('utf-8'))
+            params = {}
+            NS = {'srrc': 'http://www.srrc.org.cn', 'soapenv': 'http://schemas.xmlsoap.org/soap/envelope/'}
+            # 尝试多个命名空间
+            for ns_prefix, ns_uri in NS.items():
+                equpara = root.find(f'.//{{{ns_uri}}}equpara')
+                if equpara is not None:
+                    break
+            if equpara is not None:
+                for item in equpara.findall(f'.//{{{ns_uri}}}item', namespaces=NS):
+                    paraname = item.find(f'{{{ns_uri}}}paraname')
+                    paravalue = item.find(f'{{{ns_uri}}}paravalue')
+                    if paraname is not None and paravalue is not None:
+                        params[paraname.text] = paravalue.text
+            else:
+                # 尝试直接从 B_FScanRequest / B_PScanRequest 等子元素提取参数
+                for ns_prefix, ns_uri in NS.items():
+                    # 查找 B_FScanRequest 或 B_PScanRequest
+                    for req_name in ['B_FScanRequest', 'B_PScanRequest', 'B_FScanDFRequest']:
+                        req_elem = root.find(f'.//{{{ns_uri}}}{req_name}')
+                        if req_elem is not None:
+                            break
+                    if req_elem is not None:
+                        break
+                if req_elem is not None:
+                    # 直接提取所有子元素作为参数
+                    for child in req_elem:
+                        tag = child.tag.split('}')[-1]  # 去掉命名空间前缀
+                        params[tag] = child.text
+            return {'operation': operation, 'params': params}
+        except ImportError:
+            return {'operation': operation, 'params': {}}
+        except Exception as e:
+            log(f"lxml 解析失败: {e}")
+            return {'operation': operation, 'params': {}}
+
+    except Exception as e:
+        log(f"SOAP 解析失败: {e}")
+        return {'operation': '', 'params': {}}
+
+
+def build_soap_response(success: bool, taskid: str = None, error: str = None) -> bytes:
+    """构建 SOAP 响应"""
+    if success:
+        body = f'''<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+<soapenv:Body><srrc:responsebody>
+<srrc:result><srrc:success>true</srrc:success></srrc:result>
+<srrc:taskid>{taskid or 'TASK-ID'}</srrc:taskid>
+<srrc:outputchannel><srrc:mode>source</srrc:mode><srrc:datachannel>stream</srrc:datachannel><srrc:host>127.0.0.1</srrc:host><srrc:port>{STREAMSRC_PORT}</srrc:port><srrc:stc>12345678</srrc:stc></srrc:outputchannel>
+</srrc:responsebody></soapenv:Body></soapenv:Envelope>'''
+    else:
+        body = f'''<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+<soapenv:Body><srrc:responsebody>
+<srrc:error>{error or "Unknown error"}</srrc:error>
+</srrc:responsebody></soapenv:Body></soapenv:Envelope>'''
+
+    response = f'''HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: {len(body)}
+
+{body}'''
+    return response.encode('utf-8')
+
+
+# ==================== SOAP -> RMCP 请求构建 ====================
+
+def build_rmcp_frame(xml_content: str, funcid: int = 15) -> bytes:
+    """
+    构建 RMCP REQUEST 帧
+
+    Args:
+        xml_content: SOAP XML 字符串
+        funcid: 功能 ID (默认 15 = B_FScan)
+
+    Returns:
+        完整的 RMCP 二进制帧
+    """
+    import struct
+    import time
+
+    # SOAP XML 编码为 GB2312
+    xml_bytes = xml_content.encode('gb2312')
+
+    # 计算 FILETIME 时间戳
+    FILETIME_EPOCH = 116444736000000000  # 100纳秒间隔
+    filetime = int(time.time() * 10000000) + FILETIME_EPOCH
+
+    # 计算总长度 = 帧头(18) + XML 长度 + 1 (null)
+    xml_length = len(xml_bytes) + 1  # XML + null terminator
+    total_length = 18 + xml_length  # header(18) + payload
+
+    # 构建帧头 (18字节)
+    header = struct.pack(
+        '<IQ',        # dwLength(4) + tmStamp(8)
+        total_length,
+        filetime
+    )
+    # nVersion 单独用 big-endian 存储
+    header += struct.pack('>H', 7)  # nVersion = 7
+    # nMsgType + nFlags + nCheckSum
+    header += struct.pack('BBH', 90, 1, 0)  # nMsgType, nFlags, nCheckSum
+
+    # 组合帧
+    frame = header + xml_bytes + b'\x00'
+
+    # 计算校验和 (协议文档算法)
+    checksum = _calculate_rmcp_checksum(frame)
+    frame = frame[:16] + struct.pack('<H', checksum) + frame[18:]
+
+    return frame
+
+
+def _calculate_rmcp_checksum(frame: bytes) -> int:
+    """
+    RMCP 帧头校验和算法 (来自协议文档):
+    1. length + timestamp (64位)
+    2. 第一次折半移位: 高32位 + 低32位
+    3. 第二次折半移位: 高16位 + 低16位 (循环直到 <= 0xFFFF)
+    4. 取反码 (~result)
+    """
+    length = struct.unpack('<I', frame[0:4])[0]
+    timestamp = struct.unpack('<Q', frame[4:12])[0]
+
+    total = timestamp + length
+
+    # 第一次折半移位
+    high = (total >> 32) & 0xFFFFFFFF
+    low = total & 0xFFFFFFFF
+    result1 = high + low
+
+    # 第二次折半移位 (循环处理溢出)
+    result2 = (result1 >> 16) + (result1 & 0xFFFF)
+    while result2 > 0xFFFF:
+        result2 = ((result2 >> 16) & 0xFFFF) + (result2 & 0xFFFF)
+
+    # 取反码
+    return (~result2) & 0xFFFF
+
+
+def build_stopmeas_xml() -> str:
+    """构建 B_StopMeas 请求 XML"""
+    soap_xml = '''<?xml version="1.0" encoding="gb2312" ?>
+<action id="1">
+    <parameter groups="1" stationid="53090001" deviceid="00106" devicename="MS845" funcid="17">
+        <group index="0">
+        </group>
+    </parameter>
+    <other_param />
+</action>'''
+    return soap_xml
+
+
+def build_query_device_xml() -> str:
+    """构建 B_QueryDeviceInfo 请求 XML"""
+    soap_xml = '''<?xml version="1.0" encoding="gb2312" ?>
+<action id="1">
+    <parameter groups="1" stationid="53090001" deviceid="00106" devicename="MS845" funcid="">
+        <group index="0">
+        </group>
+    </parameter>
+    <other_param />
+</action>'''
+    return soap_xml
+
+
+def send_to_rmcp_proxy(xml_content: str, timeout: float = 5.0) -> Optional[bytes]:
+    """
+    发送 XML 到 rmcp_proxy 并接收响应
+
+    Args:
+        xml_content: SOAP XML 字符串
+        timeout: 超时时间(秒)
+
+    Returns:
+        响应数据或 None
+    """
+    try:
+        rmcp_frame = build_rmcp_frame(xml_content)
+        log(f"RMCP REQUEST 帧: {len(rmcp_frame)} bytes")
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        sock.connect((RMCP_PROXY_HOST, RMCP_PROXY_PORT))
+        log(f"已连接到 rmcp_proxy {RMCP_PROXY_HOST}:{RMCP_PROXY_PORT}")
+
+        sock.sendall(rmcp_frame)
+        log("已发送 RMCP REQUEST")
+
+        # 接收响应
+        all_data = b''
+        while True:
+            try:
+                chunk = sock.recv(8192)
+                if not chunk:
+                    break
+                all_data += chunk
+                if len(all_data) > 1000:
+                    break
+            except socket.timeout:
+                break
+
+        sock.close()
+
+        if all_data:
+            log(f"收到 RMCP 响应: {len(all_data)} bytes")
+            return all_data
+
+        return None
+
+    except Exception as e:
+        log(f"发送 RMCP 请求失败: {e}")
+        return None
+
+
+# ==================== RMCP 客户端 ====================
+
+class RMCPClient:
+    """RMCP 客户端 - 连接到 rmcp_proxy"""
+
+    def __init__(self, host: str, port: int):
+        self.host = host
+        self.port = port
+        self.sock = None
+
+    def connect(self) -> bool:
+        """连接到 rmcp_proxy"""
+        try:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(10.0)
+            self.sock.connect((self.host, self.port))
+            log(f"已连接到 rmcp_proxy {self.host}:{self.port}")
+            return True
+        except Exception as e:
+            log(f"连接 rmcp_proxy 失败: {e}")
+            return False
+
+    def disconnect(self):
+        """断开连接"""
+        if self.sock:
+            try:
+                self.sock.close()
+            except:
+                pass
+            self.sock = None
+
+    def send_and_receive(self, data: bytes) -> Optional[bytes]:
+        """发送数据并接收响应"""
+        if not self.sock:
+            return None
+
+        try:
+            self.sock.sendall(data)
+            header = self.sock.recv(18)
+            if not header or len(header) < 18:
+                return None
+
+            dw_length = struct.unpack('<I', header[0:4])[0]
+            log(f"RMCPTP 帧头: length={dw_length}")
+
+            remaining = b''
+            if dw_length > 0:
+                while len(remaining) < dw_length:
+                    chunk = self.sock.recv(dw_length - len(remaining))
+                    if not chunk:
+                        break
+                    remaining += chunk
+
+            return header + remaining
+
+        except socket.timeout:
+            log("接收响应超时")
+            return None
+        except Exception as e:
+            log(f"接收响应失败: {e}")
+            return None
+
+
+# ==================== 主服务 ====================
+
+class EmulatedAtomService:
+    """Emulated Atom 服务"""
+
+    def __init__(self):
+        self.streamsrc_server = StreamSrcServer(STREAMSRC_PORT)
+        self.running = False
+        self.threads = []
+
+    def start(self):
+        """启动服务"""
+        log("=" * 60)
+        log("Emulated Atom Service 启动 (简化版)")
+        log(f"  SOAP 端口: {SOAP_PORT}")
+        log(f"  streamsrc 端口: {STREAMSRC_PORT}")
+        log(f"  rmcp_proxy: {RMCP_PROXY_HOST}:{RMCP_PROXY_PORT}")
+        log(f"  模拟数据: {USE_MOCK_DATA}")
+        log("=" * 60)
+
+        # 启动 streamsrc 服务器
+        self.streamsrc_server.start()
+
+        # 启动 SOAP 服务器
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server.bind(('0.0.0.0', SOAP_PORT))
+        server.listen(5)
+        self.running = True
+
+        log(f"SOAP 服务器已启动: 0.0.0.0:{SOAP_PORT}")
+
+        try:
+            while self.running:
+                server.settimeout(1.0)
+                try:
+                    client, addr = server.accept()
+                    log(f"SOAP 客户端连接: {addr}")
+                    # 每个连接使用独立线程处理
+                    thread = threading.Thread(
+                        target=self._handle_client,
+                        args=(client, addr)
+                    )
+                    thread.daemon = True
+                    thread.start()
+                except socket.timeout:
+                    continue
+        except KeyboardInterrupt:
+            log("收到中断信号")
+        finally:
+            self.stop()
+
+    def _handle_client(self, client, addr):
+        """处理客户端请求"""
+        try:
+            client.settimeout(10.0)
+            data = b''
+            while True:
+                chunk = client.recv(4096)
+                if not chunk:
+                    break
+                data += chunk
+                if b'</soapenv:Envelope>' in data:
+                    break
+                if len(data) > 10000:  # Safety limit
+                    break
+
+            log(f"收到数据: {len(data)} bytes")
+            log(f"数据前100字节: {data[:100]}")
+
+            if not data:
+                client.close()
+                return
+
+            # 解析 SOAP 请求
+            request = parse_soap_request(data)
+            operation = request.get('operation', '')
+            params = request.get('params', {})
+
+            log(f"收到 SOAP 请求: {operation}, 参数: {params}")
+
+            # 处理请求
+            if operation == 'B_StopMeas':
+                self._handle_stopmeas(client)
+            elif operation == 'B_QueryDeviceInfo':
+                self._handle_query_device(client)
+            elif operation in ('B_FScan', 'B_PScan', 'B_FScanDF'):
+                self._handle_fscan(client, params)
+            elif params and any(k in params for k in ('startfreq', 'stopfreq', 'step')):
+                # operation 为空但包含 FSCAN 参数时，也当作 FSCAN 处理
+                log(f"operation 为空但检测到 FSCAN 参数，当作 B_FScan 处理")
+                self._handle_fscan(client, params)
+            else:
+                response = build_soap_response(True, taskid='EMULATED-ATOM-001')
+                client.sendall(response)
+                client.close()
+
+        except Exception as e:
+            log(f"处理请求失败: {e}")
+            try:
+                client.close()
+            except:
+                pass
+
+    def _handle_fscan(self, client, params):
+        """处理 FSCAN 请求"""
+        log("_handle_fscan 开始")
+
+        # 解析频率参数 (支持 '137MHz', '25kHz', '137000000' 等格式)
+        def parse_freq(val):
+            if isinstance(val, int):
+                return val
+            val = str(val).strip()
+            if val.endswith('MHz'):
+                return int(float(val[:-3]) * 1000000)
+            elif val.endswith('kHz'):
+                return int(float(val[:-3]) * 1000)
+            elif val.endswith('Hz'):
+                return int(val[:-2])
+            else:
+                return int(val)
+
+        start_freq = parse_freq(params.get('startfreq', params.get('StartFreq', 137000000)))
+        end_freq = parse_freq(params.get('stopfreq', params.get('StopFreq', 173000000)))
+        step = parse_freq(params.get('step', 25000))
+
+        log(f"FSCAN: {start_freq} - {end_freq}, step={step}")
+
+        # 发送 SOAP 响应
+        taskid = f'EA-{int(time.time())}'
+        response = build_soap_response(True, taskid=taskid)
+        client.sendall(response)
+        client.close()
+
+        # 获取频谱数据
+        spectrum = self._get_fscan_spectrum(start_freq, end_freq, step)
+
+        if spectrum:
+            log(f"获取到 {len(spectrum)} 点频谱数据")
+
+            # 构建 streamsrc 帧并推送
+            streamsrc_frame = build_streamsrc_frame(spectrum)
+            self.streamsrc_server.push_frame(streamsrc_frame)
+            log(f"已推送 streamsrc 帧到 {len(self.streamsrc_server.clients)} 个客户端")
+        else:
+            log("未能获取频谱数据")
+
+    def _get_fscan_spectrum(self, start_freq: int, end_freq: int, step: int) -> Optional[list]:
+        """获取 FSCAN 频谱数据"""
+        if USE_MOCK_DATA:
+            # 使用模拟数据
+            log("使用模拟频谱数据")
+            # 生成 512 点模拟数据 (类似真实信号)
+            spectrum = []
+            base_level = -70  # 基础电平
+            for i in range(512):
+                # 添加一些随机变化和信号峰值
+                noise = random.gauss(0, 5)
+                # 在某些频率创建信号峰值
+                if 100 < i < 120 or 200 < i < 210 or 350 < i < 370:
+                    signal = random.uniform(10, 20)
+                else:
+                    signal = 0
+                value = base_level + noise + signal
+                spectrum.append(int(value))
+            return spectrum
+
+        # 尝试从 rmcp_proxy 获取真实数据
+        log("尝试从 rmcp_proxy 获取数据...")
+        try:
+            # 方法1: 从 capture 日志读取最新 FSCAN 数据
+            spectrum = self._get_fscan_from_capture()
+            if spectrum:
+                return spectrum
+
+            # 方法2: 直接连接 rmcp_proxy (备用)
+            spectrum = self._get_fscan_from_rmcp_proxy(start_freq, end_freq, step)
+            if spectrum:
+                return spectrum
+
+            log("未能从 rmcp_proxy 获取数据，使用模拟数据")
+            return self._get_mock_spectrum()
+
+        except Exception as e:
+            log(f"获取真实数据失败: {e}，使用模拟数据")
+            return self._get_mock_spectrum()
+
+    def _get_fscan_from_capture(self) -> Optional[list]:
+        """从 rmcp_proxy capture 日志获取最新 FSCAN 数据"""
+        try:
+            capture_dir = Path(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rmcp_proxy', 'capture'))
+            capture_files = sorted(capture_dir.glob("capture_*.json"), key=lambda p: p.stat().st_mtime)
+
+            if not capture_files:
+                log("没有找到 capture 文件")
+                return None
+
+            latest = capture_files[-1]
+            log(f"读取 capture: {latest.name}")
+
+            with open(latest, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            # 找 S->C 的 FSCAN 数据
+            for entry in reversed(data):
+                if entry.get('direction') == 'S->C' and entry.get('data_type') == 'SIMPLE_FSCAN':
+                    fscan = entry.get('fscan', {})
+                    levels = fscan.get('levels', [])
+
+                    if levels and len(levels) >= 512:
+                        log(f"从 capture 获取 FSCAN: {len(levels)} 点")
+                        return [int(l) for l in levels[:512]]
+
+            log("capture 中没有 FSCAN 数据")
+            return None
+
+        except Exception as e:
+            log(f"从 capture 获取数据失败: {e}")
+            return None
+
+    def _get_fscan_from_rmcp_proxy(self, start_freq: int, end_freq: int, step: int) -> Optional[list]:
+        """直接从 rmcp_proxy 获取 FSCAN 数据（备用方法）"""
+        try:
+            # 使用真实设备接受的格式构建 SOAP XML
+            from data.fscan_real_request import build_fscan_xml, build_rmcp_request_frame
+            soap_xml = build_fscan_xml(start_freq, end_freq, step)
+            cmd = build_rmcp_request_frame(soap_xml)
+            log(f"RMCP REQUEST 帧: {len(cmd)} bytes")
+
+            rmcp_client = RMCPClient(RMCP_PROXY_HOST, RMCP_PROXY_PORT)
+            if not rmcp_client.connect():
+                log("连接 rmcp_proxy 失败")
+                return None
+
+            rmcp_client.sock.sendall(cmd)
+            log("已发送 RMCP REQUEST")
+
+            # 接收响应 - 设备会发送多个 FSCAN 数据帧
+            # 策略：收到数据后等待 3 秒，设备停止发送后就处理
+            all_data = b''
+            data_received = False
+            last_data_time = time.time()
+
+            rmcp_client.sock.settimeout(1.0)  # 1秒超时检测
+
+            while True:
+                try:
+                    chunk = rmcp_client.sock.recv(8192)
+                    if chunk:
+                        all_data += chunk
+                        last_data_time = time.time()
+                        data_received = True
+                        log(f"收到数据: {len(chunk)} bytes, 累计: {len(all_data)} bytes")
+                except socket.timeout:
+                    if data_received:
+                        # 之前收到过数据，检查是否应该结束
+                        if time.time() - last_data_time > 3:
+                            # 超过3秒没新数据，认为发送完毕
+                            break
+                    else:
+                        # 还没收到过数据，设备可能还没开始发送，继续等待
+                        pass
+
+            rmcp_client.disconnect()
+
+            if all_data:
+                log(f"收到响应: {len(all_data)} bytes, {all_data.count(b'EEEE1DE6')} 个 FSCAN 帧")
+                return self._parse_rmcp_fscan_response(all_data)
+
+            return None
+
+        except Exception as e:
+            log(f"直接获取失败: {e}")
+            return None
+
+    def _parse_rmcp_fscan_response(self, data: bytes) -> Optional[list]:
+        """解析 RMCP FSCAN 响应 (SIMPLE_FSCAN 格式)"""
+        if not data or len(data) < 50:
+            return None
+
+        try:
+            # 解析 RMCPTP 帧头
+            if len(data) < 18:
+                log(f"数据长度 {len(data)} < 18")
+                return None
+
+            dw_length = struct.unpack('<I', data[0:4])[0]
+            n_msg_type = data[14]
+            log(f"RMCPTP: length={dw_length}, msg_type={n_msg_type}")
+
+            # 业务数据起始位置
+            payload = data[18:]
+            offset = 0
+
+            # 解析 SIMPLE_FSCAN 格式
+            # nBdType (1 byte) + nArrays (4 bytes) + counters (16 bytes) + levels
+            if len(payload) < 21:
+                log(f"Payload 太短: {len(payload)}")
+                return None
+
+            n_bd_type = payload[offset]  # 0x0F = 15 = FSCAN
+            offset += 1
+
+            n_arrays = struct.unpack('!I', payload[offset:offset+4])[0]
+            offset += 4
+
+            # counters (16 bytes = 4 * uint32)
+            counters = []
+            for i in range(4):
+                counters.append(struct.unpack('!I', payload[offset:offset+4])[0])
+                offset += 4
+
+            log(f"FSCAN: n_bd_type={n_bd_type}, n_arrays={n_arrays}, counters={counters}")
+
+            # 解析 levels (每个 level 是 2 bytes int16)
+            spectrum = []
+            for i in range(min(n_arrays, 512)):
+                if offset + 2 > len(payload):
+                    break
+                level = struct.unpack('!h', payload[offset:offset+2])[0]
+                spectrum.append(level)
+                offset += 2
+
+            log(f"解析到 {len(spectrum)} 点频谱数据")
+            return spectrum
+
+        except Exception as e:
+            log(f"解析 RMCP FSCAN 响应失败: {e}")
+            return None
+
+    def _handle_stopmeas(self, client):
+        """处理 B_StopMeas 请求 - 停止当前测量"""
+        log("_handle_stopmeas 开始")
+
+        # 发送 SOAP 响应
+        taskid = f'EA-{int(time.time())}'
+        response = build_soap_response(True, taskid=taskid)
+        client.sendall(response)
+        client.close()
+
+        # 转发到 rmcp_proxy
+        log("尝试转发 B_StopMeas 到 rmcp_proxy...")
+        try:
+            xml_content = build_stopmeas_xml()
+            result = send_to_rmcp_proxy(xml_content, timeout=3.0)
+            if result:
+                log("B_StopMeas 设备响应成功")
+            else:
+                log("B_StopMeas 设备无响应(使用模拟)")
+        except Exception as e:
+            log(f"B_StopMeas 转发失败: {e}")
+
+    def _handle_query_device(self, client):
+        """处理 B_QueryDeviceInfo 请求 - 查询设备信息"""
+        log("_handle_query_device 开始")
+
+        # 发送 SOAP 响应
+        taskid = f'EA-{int(time.time())}'
+        response = build_soap_response(True, taskid=taskid)
+        client.sendall(response)
+        client.close()
+
+        # 转发到 rmcp_proxy
+        log("尝试转发 B_QueryDeviceInfo 到 rmcp_proxy...")
+        try:
+            xml_content = build_query_device_xml()
+            result = send_to_rmcp_proxy(xml_content, timeout=3.0)
+            if result:
+                log("B_QueryDeviceInfo 设备响应成功")
+            else:
+                log("B_QueryDeviceInfo 设备无响应(使用模拟)")
+        except Exception as e:
+            log(f"B_QueryDeviceInfo 转发失败: {e}")
+
+    def _get_mock_spectrum(self) -> list:
+        """获取模拟频谱数据"""
+        spectrum = []
+        base_level = -70
+        for i in range(512):
+            noise = random.gauss(0, 5)
+            if 100 < i < 120 or 200 < i < 210 or 350 < i < 370:
+                signal = random.uniform(10, 20)
+            else:
+                signal = 0
+            value = base_level + noise + signal
+            spectrum.append(int(value))
+        return spectrum
+
+    def stop(self):
+        """停止服务"""
+        log("停止服务...")
+        self.running = False
+        self.streamsrc_server.stop()
+
+
+def main():
+    """主函数"""
+    service = EmulatedAtomService()
+    service.start()
+
+
+if __name__ == '__main__':
+    main()

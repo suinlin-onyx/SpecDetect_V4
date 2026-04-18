@@ -18,9 +18,10 @@ import json
 import sys
 from datetime import datetime
 from config import (
-    PROXY_HOST, PROXY_PORT, DEVICE_HOST, DEVICE_PORT,
+    PROXY_HOST, PROXY_PORT, PROXY_PORT_2, DEVICE_HOST, DEVICE_PORT,
     LOG_DIR, LOG_LEVEL, RMCP_FRAME_HEADER_SIZE,
-    MSG_TYPE_REQUEST, MSG_TYPE_RESPONSE, MSG_TYPE_DATA_1, MSG_TYPE_DATA_2
+    MSG_TYPE_REQUEST, MSG_TYPE_RESPONSE, MSG_TYPE_DATA_1, MSG_TYPE_DATA_2,
+    ENABLE_JSON_OUTPUT, ENABLE_RAW_OUTPUT, ENABLE_CONNECTIONS_CSV
 )
 
 
@@ -255,16 +256,22 @@ class RMCPFrame:
 class CaptureLogger:
     """流量记录器"""
 
-    def __init__(self, log_dir):
+    def __init__(self, log_dir, port=0):
         self.log_dir = log_dir
+        self.port = port
         os.makedirs(log_dir, exist_ok=True)
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.session_id = timestamp
-        self.raw_file = os.path.join(log_dir, f'capture_{timestamp}.raw')
-        self.log_file = os.path.join(log_dir, f'capture_{timestamp}.log')
-        self.json_file = os.path.join(log_dir, f'capture_{timestamp}.json')
-        self.conn_file = os.path.join(log_dir, f'connections_{timestamp}.csv')
+        port_str = f"_{port}" if port else ""
+        self.raw_file = os.path.join(log_dir, f'capture{port_str}_{timestamp}.raw')
+        self.log_file = os.path.join(log_dir, f'capture{port_str}_{timestamp}.log')
+        self.json_file = os.path.join(log_dir, f'capture{port_str}_{timestamp}.json')
+        self.conn_file = os.path.join(log_dir, f'connections{port_str}_{timestamp}.csv')
+
+        # 原始 FSCAN 数据日志 (未转换的数据)
+        self.raw_fscan_file = os.path.join(log_dir, f'raw_fscan{port_str}_{timestamp}.log')
+        self._raw_fscan_fp = None
 
         self.frames = []
         self.connections = []
@@ -279,8 +286,12 @@ class CaptureLogger:
             f.write("=" * 80 + "\n\n")
 
         # 初始化连接日志 CSV
-        with open(self.conn_file, 'w', encoding='utf-8') as f:
-            f.write("timestamp,event,client_ip,client_port,server_ip,server_port,duration_ms,bytes_sent,bytes_recv\n")
+        if ENABLE_CONNECTIONS_CSV:
+            with open(self.conn_file, 'w', encoding='utf-8') as f:
+                f.write("timestamp,event,client_ip,client_port,server_ip,server_port,duration_ms,bytes_sent,bytes_recv\n")
+
+        # 初始化原始 FSCAN 日志文件
+        self._raw_fscan_fp = open(self.raw_fscan_file, 'wb')
 
     def log_connection(self, event, client_addr, server_addr, duration_ms=0, bytes_sent=0, bytes_recv=0):
         """记录连接事件"""
@@ -298,16 +309,25 @@ class CaptureLogger:
         }
         with self.lock:
             self.connections.append(conn_info)
-            # 实时保存连接 CSV
-            with open(self.conn_file, 'a', encoding='utf-8') as f:
-                f.write(f"{timestamp},{event},{conn_info['client_ip']},{conn_info['client_port']},"
-                       f"{conn_info['server_ip']},{conn_info['server_port']},"
-                       f"{duration_ms},{bytes_sent},{bytes_recv}\n")
+            # 实时保存连接 CSV (仅当启用时)
+            if ENABLE_CONNECTIONS_CSV:
+                with open(self.conn_file, 'a', encoding='utf-8') as f:
+                    f.write(f"{timestamp},{event},{conn_info['client_ip']},{conn_info['client_port']},"
+                           f"{conn_info['server_ip']},{conn_info['server_port']},"
+                           f"{duration_ms},{bytes_sent},{bytes_recv}\n")
         return conn_info
 
-    def log_frame(self, direction, data, addr):
-        """记录帧"""
+    def log_frame(self, direction, data, addr, listen_port=0):
+        """记录帧
+
+        Args:
+            direction: 方向 'C->S' 或 'S->C'
+            data: 帧数据
+            addr: 源地址
+            listen_port: 监听端口 (9996 or 9997)
+        """
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        port_str = f":{listen_port}" if listen_port else ""
 
         frame_info = {
             'timestamp': timestamp,
@@ -315,7 +335,8 @@ class CaptureLogger:
             'src': addr[0],
             'src_port': addr[1],
             'size': len(data),
-            'hex': data.hex()
+            'hex': data.hex(),
+            'listen_port': listen_port
         }
 
         header = RMCPFrame.parse_header(data)
@@ -359,17 +380,22 @@ class CaptureLogger:
         with self.lock:
             self.frames.append(frame_info)
 
-        self._print_to_console(timestamp, direction, header, len(data), addr, frame_info)
+        self._print_to_console(timestamp, direction, header, len(data), addr, frame_info, port_str)
 
         # 写入原始文件
-        with open(self.raw_file, 'ab') as f:
-            f.write(data)
+        if ENABLE_RAW_OUTPUT:
+            with open(self.raw_file, 'ab') as f:
+                f.write(data)
 
         # 实时保存
-        self._save_json_line()
+        if ENABLE_JSON_OUTPUT:
+            self._save_json_line()
         self._save_log_line(frame_info)
 
-    def _print_to_console(self, timestamp, direction, header, size, addr, frame_info=None):
+        # 记录原始 FSCAN 数据 (独立日志,不影响其他功能)
+        self.log_raw_fscan(direction, data, addr)
+
+    def _print_to_console(self, timestamp, direction, header, size, addr, frame_info=None, port_str=""):
         """打印到控制台"""
         if header:
             msg_type = RMCPFrame.get_msg_type_name(header['nMsgType'])
@@ -382,11 +408,11 @@ class CaptureLogger:
                     extra = f" | {fs['level_count']} points"
                     if 'dbm_min' in fs:
                         extra += f" | dBm: {fs['dbm_min']:.1f}~{fs['dbm_max']:.1f}"
-            print(f"[{timestamp}] {direction:4s} {msg_type:12s} "
+            print(f"[{timestamp}]{port_str} {direction:4s} {msg_type:12s} "
                   f"len={size:5d} from={addr[0]}:{addr[1]}{extra}")
         else:
             # 非RMCP帧，显示为 RAW_DATA
-            print(f"[{timestamp}] {direction:4s} RAW_DATA      "
+            print(f"[{timestamp}]{port_str} {direction:4s} RAW_DATA      "
                   f"len={size:5d} from={addr[0]}:{addr[1]}")
         sys.stdout.flush()
 
@@ -401,8 +427,10 @@ class CaptureLogger:
     def _save_log_line(self, frame_info):
         """实时保存文本日志"""
         try:
+            listen_port = frame_info.get('listen_port', 0)
+            port_str = f":{listen_port}" if listen_port else ""
             with open(self.log_file, 'a', encoding='utf-8') as f:
-                f.write(f"Time: {frame_info['timestamp']}\n")
+                f.write(f"Time: {frame_info['timestamp']}{port_str}\n")
                 f.write(f"Direction: {frame_info['direction']}\n")
                 f.write(f"Source: {frame_info['src']}:{frame_info['src_port']}\n")
                 f.write(f"Size: {frame_info['size']} bytes\n")
@@ -454,8 +482,8 @@ class CaptureLogger:
                     if 'levels' in fs and len(fs['levels']) > 0:
                         if 'dbm_min' in fs:
                             # 显示 dBm 值 (raw / 10)
-                            dbm_sample = [f"{v / 10.0:.1f}" for v in fs['levels'][:10]]
-                            f.write(f"  dBm样本: [{', '.join(dbm_sample)}, ...]\n")
+                            dbm_sample = [f"{v / 10.0:.1f}" for v in fs['levels'][:100]]
+                            f.write(f"  dBm样本: [{', '.join(dbm_sample)}]\n")
                         else:
                             levels_str = ', '.join(str(l) for l in fs['levels'][:16])
                             if len(fs['levels']) > 16:
@@ -466,14 +494,87 @@ class CaptureLogger:
         except:
             pass
 
+    def close(self):
+        """关闭日志文件"""
+        if self._raw_fscan_fp:
+            try:
+                self._raw_fscan_fp.close()
+            except:
+                pass
+            self._raw_fscan_fp = None
+
+    def log_raw_fscan(self, direction, data, addr):
+        """
+        记录原始 FSCAN 数据到专用文件 (不影响其他日志功能)
+
+        仅记录设备返回的 FSCAN 数据帧，保存完整的原始二进制数据
+        格式: 时间戳|方向|源地址|数据长度|原始十六进制数据
+        """
+        if not self._raw_fscan_fp:
+            return
+
+        # 只记录设备 -> 客户端的 FSCAN 数据
+        if direction != 'S->C':
+            return
+
+        # 解析帧头判断是否为 FSCAN 数据
+        if len(data) < RMCP_FRAME_HEADER_SIZE + 10:
+            return
+
+        header = RMCPFrame.parse_header(data)
+        if not header:
+            return
+
+        # 只处理 nMsgType=0 的数据帧
+        if header['nMsgType'] != 0:
+            return
+
+        # 检查是否为 FSCAN 数据 (通过尝试解析)
+        payload = data[RMCP_FRAME_HEADER_SIZE:]
+        if len(payload) < 11:
+            return
+
+        # 检查 nBdType (通常为 0x0F = 15 for FSCAN)
+        nBdType = payload[0]
+        if nBdType != 15:  # FSCAN type
+            return
+
+        # 解析 levels 数据
+        levels = []
+        spectrum_offset = 11
+        if len(payload) > spectrum_offset:
+            spectrum_bytes = payload[spectrum_offset:]
+            num_levels = len(spectrum_bytes) // 2
+            if num_levels > 0:
+                levels = struct.unpack(f'<{num_levels}h', spectrum_bytes[:num_levels*2])
+
+        # 写入原始数据 + levels 单行格式
+        try:
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+            self._raw_fscan_fp.write(f"={timestamp}=\n".encode('utf-8'))
+            self._raw_fscan_fp.write(f"direction={direction}\n".encode('utf-8'))
+            self._raw_fscan_fp.write(f"src={addr[0]}:{addr[1]}\n".encode('utf-8'))
+            self._raw_fscan_fp.write(f"size={len(data)} bytes\n".encode('utf-8'))
+            self._raw_fscan_fp.write(f"header_hex={data[:RMCP_FRAME_HEADER_SIZE].hex()}\n".encode('utf-8'))
+            self._raw_fscan_fp.write(f"payload_hex={payload.hex()}\n".encode('utf-8'))
+            # 输出 levels 单行，值除10
+            if levels:
+                db_values = [round(v / 10, 1) for v in levels]
+                self._raw_fscan_fp.write(f"dbm={db_values}\n".encode('utf-8'))
+            self._raw_fscan_fp.write(f"\n".encode('utf-8'))
+            self._raw_fscan_fp.flush()
+        except:
+            pass
+
 
 class ProxyConnection:
     """代理连接处理"""
 
-    def __init__(self, client_socket, client_addr, logger):
+    def __init__(self, client_socket, client_addr, logger, listen_port):
         self.client_socket = client_socket
         self.client_addr = client_addr
         self.logger = logger
+        self.listen_port = listen_port  # 监听端口 (9996 or 9997)
         self.device_socket = None
         self.running = True
         self.close_lock = threading.Lock()
@@ -487,10 +588,11 @@ class ProxyConnection:
         connection_start = self.logger.log_connection(
             'CONNECT', self.client_addr, (DEVICE_HOST, DEVICE_PORT)
         )
-        print(f"[PROXY] New connection from {self.client_addr}")
+        print(f"[PROXY] New connection from {self.client_addr} (listen_port={self.listen_port})")
 
         try:
             self.device_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            print(f"[PROXY] Connecting to device {DEVICE_HOST}:{DEVICE_PORT}...")
             self.device_socket.connect((DEVICE_HOST, DEVICE_PORT))
             self.logger.log_connection(
                 'DEVICE_CONNECT', (DEVICE_HOST, DEVICE_PORT), (DEVICE_HOST, DEVICE_PORT)
@@ -529,15 +631,22 @@ class ProxyConnection:
                     if not data:
                         print("[PROXY] Client disconnected")
                         self.logger.log_connection('CLIENT_DISCONNECT', self.client_addr, (DEVICE_HOST, DEVICE_PORT))
+                        self.running = False
+                        self.close()  # 立即关闭配对的 device 连接
                         break
                     self.bytes_sent += len(data)
                     if self.device_socket:
                         try:
+                            # Debug: print hex of data being forwarded
+                            print(f"[DEBUG] Forwarding to device: {len(data)} bytes, hex={data[:50].hex()}...")
                             self.device_socket.sendall(data)
-                        except:
+                        except Exception as e:
+                            print(f"[PROXY] Send to device failed: {e}")
+                            self.running = False
+                            self.close()  # 立即关闭
                             break
                     try:
-                        self.logger.log_frame('C->S', data, self.client_addr)
+                        self.logger.log_frame('C->S', data, self.client_addr, self.listen_port)
                     except Exception as e:
                         print(f"[ERROR] Logger error: {e}")
                 except socket.timeout:
@@ -545,9 +654,13 @@ class ProxyConnection:
                 except (ConnectionResetError, BrokenPipeError):
                     print("[PROXY] Client disconnected")
                     self.logger.log_connection('CLIENT_DISCONNECT', self.client_addr, (DEVICE_HOST, DEVICE_PORT))
+                    self.running = False
+                    self.close()  # 立即关闭配对的 device 连接
                     break
                 except Exception as e:
                     print(f"[PROXY] Client recv error: {e}")
+                    self.running = False
+                    self.close()  # 立即关闭配对的 device 连接
                     break
         except:
             import traceback
@@ -566,14 +679,19 @@ class ProxyConnection:
                     if not data:
                         print("[PROXY] Device disconnected")
                         self.logger.log_connection('DEVICE_DISCONNECT', self.client_addr, (DEVICE_HOST, DEVICE_PORT))
+                        self.running = False
+                        self.close()  # 立即关闭配对的 client 连接
                         break
                     self.bytes_recv += len(data)
                     try:
                         self.client_socket.sendall(data)
-                    except:
+                    except Exception as e:
+                        print(f"[PROXY] Send to client failed: {e}")
+                        self.running = False
+                        self.close()  # 立即关闭
                         break
                     try:
-                        self.logger.log_frame('S->C', data, (DEVICE_HOST, DEVICE_PORT))
+                        self.logger.log_frame('S->C', data, (DEVICE_HOST, DEVICE_PORT), self.listen_port)
                     except Exception as e:
                         print(f"[ERROR] Logger error: {e}")
                 except socket.timeout:
@@ -581,9 +699,13 @@ class ProxyConnection:
                 except (ConnectionResetError, BrokenPipeError):
                     print("[PROXY] Device disconnected")
                     self.logger.log_connection('DEVICE_DISCONNECT', self.client_addr, (DEVICE_HOST, DEVICE_PORT))
+                    self.running = False
+                    self.close()  # 立即关闭配对的 client 连接
                     break
                 except Exception as e:
                     print(f"[PROXY] Device recv error: {e}")
+                    self.running = False
+                    self.close()  # 立即关闭配对的 client 连接
                     break
         except:
             import traceback
@@ -641,36 +763,67 @@ def start_proxy():
     print("=" * 60)
     print("RMCP TCP Proxy - Traffic Capture Tool")
     print("=" * 60)
-    print(f"Proxy listening: {PROXY_HOST}:{PROXY_PORT}")
+
+    # 获取所有需要监听的端口
+    ports = [PROXY_PORT]
+    if PROXY_PORT_2:
+        ports.append(PROXY_PORT_2)
+
+    print(f"Proxy listening: {PROXY_HOST}:{', '.join(str(p) for p in ports)}")
     print(f"Forwarding to: {DEVICE_HOST}:{DEVICE_PORT}")
     print(f"Log directory: {LOG_DIR}")
     print("=" * 60)
     print("\nWaiting for connections...\n")
 
-    logger = CaptureLogger(LOG_DIR)
+    # 为每个端口创建独立的 logger 和 server socket
+    port_loggers = {}
+    servers = []
+    for port in ports:
+        port_loggers[port] = CaptureLogger(LOG_DIR, port)
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server.bind((PROXY_HOST, port))
+        server.listen(5)
+        servers.append(server)
+        print(f"[PROXY] Listening on {PROXY_HOST}:{port}")
 
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind((PROXY_HOST, PROXY_PORT))
-    server.listen(5)
-    server.settimeout(1.0)  # 设置超时以便响应 Ctrl+C
-
-    try:
+    def accept_connections(server, port):
+        """独立线程：接受单个端口的连接"""
+        logger = port_loggers[port]
         while True:
             try:
                 client_socket, client_addr = server.accept()
-                print(f"\n[PROXY] New connection from {client_addr}")
-                handler = ProxyConnection(client_socket, client_addr, logger)
+                print(f"\n[PROXY] New connection from {client_addr} (port {port})")
+                handler = ProxyConnection(client_socket, client_addr, logger, port)
                 thread = threading.Thread(target=handler.run)
                 thread.daemon = True
                 thread.start()
-            except TimeoutError:
-                continue  # 超时后继续等待
+            except Exception as e:
+                if server.fileno() >= 0:  # socket still valid
+                    print(f"[PROXY] Accept error on port {server.getsockname()[1]}: {e}")
+                break
+
+    # 为每个端口创建独立的 accept 线程
+    accept_threads = []
+    for server, port in zip(servers, ports):
+        t = threading.Thread(target=accept_connections, args=(server, port))
+        t.daemon = True
+        t.start()
+        accept_threads.append(t)
+
+    try:
+        while True:
+            time.sleep(1)  # 主线程保持运行
     except KeyboardInterrupt:
         print("\n[PROXY] Shutting down...")
     finally:
-        server.close()
+        for server in servers:
+            server.close()
+        for logger in port_loggers.values():
+            logger.close()
+        logger.close()
         print(f"[PROXY] Logs saved to {logger.log_file}")
+        print(f"[PROXY] Raw FSCAN saved to {logger.raw_fscan_file}")
 
 
 def main():
