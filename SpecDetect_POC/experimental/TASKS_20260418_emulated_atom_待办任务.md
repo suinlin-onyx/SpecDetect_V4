@@ -12,6 +12,9 @@
 |---|------|------|------|
 | P0#1 | 每帧新建连接，端口9998耗尽 | WinError 10048，后续请求全部失败 | ✅ 已修复 |
 | P0#2 | RMCP帧无法直接转发 | 设备返回RMCP格式，客户端期望streamsrc格式，数据无法使用 | ✅ 已修复 |
+| P0#3 | 发送 Registration ACK 帧 | Real Atom 不发送ACK，但emulated_atom发送了，test tool 显示 PL:41 | ✅ 已修复 |
+| P0#4 | Band 帧的 start_index 编码错误 | Band1/Band2 使用相同 start_index=0，test tool 无法区分频段 | ✅ 已修复 |
+| P0#5 | 所有 Band 使用相同的 private_metadata 和 indicator | test tool 显示所有 Band 相同频率范围 (137.0-149.775MHz) | ✅ 已修复 |
 
 ### 🟡 P1 - 严重缺陷（影响功能正确性）
 
@@ -19,6 +22,7 @@
 |---|------|------|------|
 | P1#3 | `push_running` 无锁保护 | bool标志线程间不可靠，线程可能无法正常退出 | ✅ 已修复 |
 | P1#4 | `sendall` 在锁内执行 | 阻塞其他线程，高并发时卡死 | ✅ 已修复 |
+| P1#5 | BandCollector 未实现 FIFO 同步 | 设备发送 Band 顺序不固定，导致频段错乱 | ✅ 已修复 |
 
 ### 🟢 P2 - 优化建议（提升稳定性）
 
@@ -175,6 +179,10 @@ while session.push_running:
 | 锁与 IO 分离 | P1#4 其他线程不被阻塞 |
 | 连接复用 | P0#1 端口不耗尽 |
 | RMCP→streamsrc 转换 | P0#2 客户端能正确解析 |
+| 跳过 Registration ACK | P0#3 与 Real Atom 行为一致 |
+| BandCollector Queue FIFO | P1#5 频段顺序同步 |
+| start_index 参数编码 | P0#4 Band1/Band2 区分 |
+| Band 特定元数据和 indicator | P0#5 每个 Band 正确频率范围 |
 
 ### 方案1: Event 替代 bool 标志
 
@@ -311,12 +319,37 @@ recv RMCP帧 (18字节头 + payload)
 **方案**: 锁只保护共享状态，sendall移至锁外
 **验证**: 高并发下无阻塞
 
+### Task #11: P0#3 - 跳过发送 Registration ACK
+**依赖**: 无
+**问题**: Real Atom 不发送 Registration ACK，但 emulated_atom 发送了
+**方案**: `_send_registration_ack()` 改为空实现，不发送 ACK
+**验证**: test tool 输出无 PL:41 帧
+
+### Task #12: P1#5 - BandCollector Queue FIFO 同步
+**依赖**: Task #7
+**问题**: 设备发送 Band 顺序不固定，可能先发 Band2 再发 Band1
+**方案**: 添加 BandCollector 类，使用 Queue 实现严格 FIFO 同步
+**验证**: 乱序 [Band1,Band3,Band2] -> [Band1,Band2,Band3] 正确
+
+### Task #13: P0#4 - 529 帧的 start_index 编码
+**依赖**: Task #12
+**问题**: Band1 和 Band2 使用相同 start_index=0，test_tool 无法区分
+**方案**: build_streamsrc_frame 添加 start_index 参数，Band1=0, Band2=512
+**验证**: test tool 能区分 Band1 和 Band2 的 529 帧
+
+### Task #14: P0#5 - Band 特定 private_metadata 和 indicator
+**依赖**: Task #13
+**问题**: 所有 Band 使用相同元数据，test tool 显示相同频率范围
+**方案**: 从 Real Atom pcap 提取每个 Band 的元数据和 indicator
+**验证**: test tool 显示三个正确频段频率范围
+
 ---
 
 ## 六、依赖关系
 
 ```
 Task#7(P0#2) → Task#9(P0#1) → Task#8(P1#3) → Task#10(P1#4)
+              → Task#12(P1#5) → Task#13(P0#4) → Task#14(P0#5)
 ```
 
 **关键路径**: P0#2 和 P0#1 是递进关系 —— 修好RMCP解析后，还需解决端口冲突才能正常工作。
@@ -377,6 +410,58 @@ Task#7(P0#2) → Task#9(P0#1) → Task#8(P1#3) → Task#10(P1#4)
   3. 其他线程调用 close_all 时不会被阻塞
   ```
 - **效果**: 高并发下无阻塞，线程间互不影响
+
+### 5. 跳过发送 Registration ACK (P0#3)
+- **文件**: `emulated_atom.py`
+- **问题**: emulated_atom 在 streamsrc 注册后发送 Registration ACK，但 Real Atom 不发送
+- **现象**: test tool 显示 PL:41 Registration ACK 帧 (65字节)
+- **对比分析**:
+  - Real Atom (8282) test tool 输出: 无 ACK 帧，直接是 FSCAN 数据
+  - emulated_atom (8283) test tool 输出: 出现 Registration ACK (PL:41)
+- **修改**: `_send_registration_ack()` 改为空实现，log提示跳过
+- **逻辑**:
+  ```
+  def _send_registration_ack(self, session: StreamSession, reg_data: bytes = None):
+      # Real Atom 不发送 Registration ACK，test tool 不会显示它
+      # 因此 emulated_atom 也不发送 ACK，与 Real Atom 行为一致
+      log(f"跳过发送 Registration ACK (与 Real Atom 一致)", "STREAM")
+  ```
+- **效果**: test tool 输出与 Real Atom 完全一致，无 PL:41 帧
+- **提交**: ad7350a
+
+### 6. BandCollector Queue FIFO 同步机制 (commit 42597c7)
+- **文件**: `emulated_atom.py`
+- **问题**: 设备发送 Band 顺序不固定，可能先发 Band2 再发 Band1
+- **方案**: 添加 BandCollector 类，使用 Queue 实现严格 FIFO 同步
+- **逻辑**:
+  ```
+  - 按 counters[2] (start_index) 识别 Band: 0=Band1, 512=Band2, 1024=Band3
+  - put() 自动调用 process_input() 处理输入
+  - get() 预处理避免长时间阻塞
+  - push_loop 循环读取直到收到完整三频段组
+  ```
+- **效果**: 频段重排验证: 乱序 [Band1,Band3,Band2] -> [Band1,Band2,Band3] 正确
+
+### 7. 529 帧的 start_index 编码 (commit 7ee6718)
+- **文件**: `emulated_atom.py`
+- **问题**: Band1 和 Band2 都使用相同的 start_index=0，导致 test_tool 无法区分
+- **方案**: 给 build_streamsrc_frame 添加 start_index 参数，在 frame[50:52] 设置正确值
+- **修复**:
+  - Band1: start_index=0
+  - Band2: start_index=512
+- **效果**: test tool 能正确区分 529 帧的 Band1 和 Band2
+
+### 8. 每个Band正确的private_metadata和indicator (commit 48515f3)
+- **文件**: `emulated_atom.py`
+- **问题**: 测试工具显示所有 Band 频率范围相同 (137.0-149.775MHz)
+- **根因**: 所有 Band 使用相同的 private_metadata 和 indicator
+- **方案**: 从 Real Atom pcap 提取每个 Band 的正确元数据
+- **修复**:
+  - Band1: indicator=0x0026
+  - Band2: indicator=0x0126
+  - Band3: indicator=0x0168
+  - 每个 Band 使用从 Real Atom 提取的私有元数据
+- **效果**: test tool 显示正确的三个频段频率范围
 
 ---
 
