@@ -319,7 +319,8 @@ def build_streamsrc_frame(spectrum_data: list,
                           dt: int = DT_FSCAN,
                           stc: int = None,
                           ts: int = None,
-                          metadata: list = None) -> bytes:
+                          metadata: list = None,
+                          start_index: int = 0) -> bytes:
     """
     构建 streamsrc 1086 字节 FSCAN-529 数据帧
 
@@ -337,6 +338,7 @@ def build_streamsrc_frame(spectrum_data: list,
         dt: 数据类型 (默认 12=FSCAN)
         stc: 同步通道号 (默认自动生成)
         ts: FILETIME 时间戳 (默认自动生成)
+        start_index: 起始频率序号 (Band1=0, Band2=512)
         metadata: 元数据列表 (默认 [16801, 0, 0, 20480, 18115, 512, 0])
 
     Returns:
@@ -407,6 +409,10 @@ def build_streamsrc_frame(spectrum_data: list,
         0x00
     ])
     frame[29:62] = private_metadata
+
+    # 设置 start_index (frame[50:52] = little-endian uint16)
+    # Band1: start_index=0, Band2: start_index=512
+    struct.pack_into('<H', frame, 50, start_index)
 
     # Offset 62+: Spectrum (交替字节模式 [dBm][0xFF][dBm][0xFF]...)
     # dBm 转换为字节: value = 256 + dBm (当 dBm < 0)
@@ -921,14 +927,14 @@ class StreamSrcServer:
                         # band3: 417点, 起始序号 1024, 162.6-173.0MHz
                         band_idx = frame_counter % 3
                         if band_idx == 0:
-                            # band1: 512点 (索引 0-511)
+                            # band1: 512点 (索引 0-511), start_index=0
                             band_spectrum = spectrum[0:512] if len(spectrum) >= 512 else spectrum
-                            streamsrc_frame = build_streamsrc_frame(band_spectrum, stc=stc)
+                            streamsrc_frame = build_streamsrc_frame(band_spectrum, stc=stc, start_index=0)
                             log(f"推送 band1: {len(band_spectrum)} 点", "STREAM")
                         elif band_idx == 1:
-                            # band2: 512点 (索引 512-1023)
+                            # band2: 512点 (索引 512-1023), start_index=512
                             band_spectrum = spectrum[512:1024] if len(spectrum) >= 1024 else spectrum[0:512]
-                            streamsrc_frame = build_streamsrc_frame(band_spectrum, stc=stc)
+                            streamsrc_frame = build_streamsrc_frame(band_spectrum, stc=stc, start_index=512)
                             log(f"推送 band2: {len(band_spectrum)} 点", "STREAM")
                         else:
                             # band3: 417点 (索引 1024-1440)
