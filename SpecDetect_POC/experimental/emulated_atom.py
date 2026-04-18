@@ -441,7 +441,9 @@ def build_streamsrc_frame_simple(spectrum_data: list, n_bd_type: int = 15) -> by
 
 def build_streamsrc_frame_434(spectrum_data: list,
                               stc: int = None,
-                              ts: int = None) -> bytes:
+                              ts: int = None,
+                              n_arrays: int = 417,
+                              start_index: int = 1024) -> bytes:
     """
     构建 streamsrc 896 字节 FSCAN-434 数据帧
 
@@ -454,11 +456,13 @@ def build_streamsrc_frame_434(spectrum_data: list,
         spectrum_data: 频谱数据点 (list of dBm values, 取前 417 点)
         stc: 同步通道号 (默认自动生成)
         ts: FILETIME 时间戳 (默认自动生成)
+        n_arrays: 数据点数 (默认 417)
+        start_index: 起始序号 (默认 1024, 对应band3)
 
     Returns:
         streamsrc 896 字节数据帧 (bytes)
     """
-    spectrum_dbm = [float(level) for level in spectrum_data[:417]]
+    spectrum_dbm = [float(level) for level in spectrum_data[:n_arrays]]
 
     if stc is None:
         stc = _get_current_stc()
@@ -471,14 +475,29 @@ def build_streamsrc_frame_434(spectrum_data: list,
     frame_counter = build_streamsrc_frame_434._counter
     build_streamsrc_frame_434._counter += 1
 
+    # 根据起始序号确定频段参数
+    # start_index: 0=band1, 512=band2, 1024=band3
+    if start_index == 1024:
+        # Band3: 162.6-173.0MHz
+        start_freq = 162600000.0
+        stop_freq = 173000000.0
+    elif start_index == 512:
+        # Band2: 149.8-162.575MHz
+        start_freq = 149800000.0
+        stop_freq = 162575000.0
+    else:
+        # Band1: 137.0-149.775MHz
+        start_freq = 137000000.0
+        stop_freq = 149775000.0
+
     metadata = [
         16804 + frame_counter,  # [0]: 帧计数
-        frame_counter * 1024,   # [1]: 0, 1024, 2048...
-        0,                     # [2]: 0
-        20480,                 # [3]: 固定
-        18115,                 # [4]: 固定
-        417,                   # [5]: 417 点
-        0                      # [6]: 0
+        start_index,            # [1]: 起始序号
+        0,                      # [2]: 0
+        20480,                  # [3]: 固定
+        18115,                  # [4]: 固定
+        n_arrays,               # [5]: 数据点数
+        0                       # [6]: 0
     ]
 
     # 构建 896 字节帧
@@ -902,7 +921,7 @@ class StreamSrcServer:
                         else:
                             # band3: 417点 (索引 1024-1440)
                             band_spectrum = spectrum[1024:1441] if len(spectrum) >= 1441 else spectrum[0:417]
-                            streamsrc_frame = build_streamsrc_frame_434(band_spectrum, stc=stc)
+                            streamsrc_frame = build_streamsrc_frame_434(band_spectrum, stc=stc, n_arrays=417, start_index=1024)
                             log(f"推送 band3: {len(band_spectrum)} 点", "STREAM")
 
                         frame_counter += 1
@@ -1847,8 +1866,8 @@ class EmulatedAtomService:
 
                                 if start_index == 1024 or n_arrays == 417:
                                     # band3: 417点 → FSCAN-434
-                                    streamsrc_frame = build_streamsrc_frame_434(spectrum)
-                                    log(f"推送 band3 (1024): {len(spectrum)} 点", "STREAM")
+                                    streamsrc_frame = build_streamsrc_frame_434(spectrum, n_arrays=n_arrays, start_index=start_index)
+                                    log(f"推送 band3 ({start_index}): {len(spectrum)} 点", "STREAM")
                                 else:
                                     # band1/band2: 512点 → FSCAN-529
                                     streamsrc_frame = build_streamsrc_frame(spectrum)
