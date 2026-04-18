@@ -964,6 +964,30 @@ class StreamSrcServer:
             with open(session.debug_file, 'ab') as f:
                 f.write(frame)
 
+        # 调试：保存帧头信息用于分析 (所有帧，无论是否有debug_file)
+        import struct
+        import time
+        debug_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'push_debug')
+        os.makedirs(debug_dir, exist_ok=True)
+
+        leader = struct.unpack('<I', frame[0:4])[0]
+        ver = struct.unpack('>H', frame[4:6])[0]
+        indicator = struct.unpack('>H', frame[18:20])[0]
+        dt = frame[24]
+        dl = struct.unpack('<I', frame[25:29])[0] if len(frame) >= 29 else 0
+
+        # 保存帧信息到日志文件
+        debug_info_file = os.path.join(debug_dir, f'push_debug_{int(time.time()*1000)}.txt')
+        with open(debug_info_file, 'w', encoding='utf-8') as f:
+            f.write(f"时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}\n")
+            f.write(f"帧长: {len(frame)}\n")
+            f.write(f"LEADER: {leader} (0x{leader:08X})\n")
+            f.write(f"VER: {ver}\n")
+            f.write(f"Indicator: 0x{indicator:04X}\n")
+            f.write(f"DT: {dt} (0x{dt:02X})\n")
+            f.write(f"DL: {dl}\n")
+            f.write(f"帧头 HEX: {frame[:62].hex()}\n")
+
         with self.lock:
             if session.streamsrc_client:
                 try:
@@ -971,13 +995,13 @@ class StreamSrcServer:
                     session.update_data_time()
                     # 调试日志：显示发送的帧信息
                     if len(frame) == 1086:
-                        import struct
-                        indicator = struct.unpack('>H', frame[18:20])[0]
                         meta0 = struct.unpack('<h', frame[48:50])[0]
                         meta5 = struct.unpack('<h', frame[58:60])[0]
                         log(f"发送 FSCAN-529: indicator=0x{indicator:04x}, meta[0]={meta0}, meta[5]={meta5}", "STREAM")
                     elif len(frame) == 896:
                         log(f"发送 FSCAN-434: {len(frame)} bytes", "STREAM")
+                    else:
+                        log(f"发送帧: {len(frame)} bytes, DT={dt}, indicator=0x{indicator:04x}", "STREAM")
                 except Exception as e:
                     log(f"推送帧失败: {e}", "STREAM")
 
