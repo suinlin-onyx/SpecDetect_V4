@@ -379,21 +379,24 @@ def build_streamsrc_frame(spectrum_data: list,
     # Offset 18-19: Indicator (2 bytes, big-endian) = 0x0026 for FSCAN-529
     struct.pack_into('>H', frame, 18, 0x0026)
 
-    # Offset 20-23: unknown field (值为 0x04000000)
+    # Offset 20-23: FSCAN-529 type indicator = 0x04000000
     frame[20:24] = bytes([0x04, 0x00, 0x00, 0x00])
 
-    # Offset 20-23: unknown field (值为 0x04000000)
-    frame[20:24] = bytes([0x04, 0x00, 0x00, 0x00])
+    # Offset 24: DT (1 byte) = 0x0C (FSCAN)
+    frame[24] = 0x0C
 
-    # Offset 24-61: Private metadata (38 bytes) - 按真实设备格式
+    # Offset 25-28: DL (4 bytes, little-endian) = payload length (频谱1024 + metadata 33 = 1057)
+    struct.pack_into('<I', frame, 25, 1057)
+
+    # Offset 29-61: Private metadata (33 bytes) - 按真实设备格式
     private_metadata = bytes([
-        0x0c, 0x21, 0x04, 0x00, 0x00, 0x01, 0xa1, 0x05,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xe8, 0x54,
-        0xa0, 0x41, 0x00, 0x00, 0x00, 0x30, 0xc5, 0xda,
-        0xa1, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50,
-        0xc3, 0x46, 0x00, 0x02, 0x00, 0x00
+        0x01, 0xa1, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x80, 0xe8, 0x54, 0xa0, 0x41, 0x00, 0x00, 0x00,
+        0x30, 0xc5, 0xda, 0xa1, 0x41, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x50, 0xc3, 0x46, 0x00, 0x02, 0x00,
+        0x00
     ])
-    frame[24:62] = private_metadata
+    frame[29:62] = private_metadata
 
     # Offset 62+: Spectrum (交替字节模式 [dBm][0xFF][dBm][0xFF]...)
     # dBm 转换为字节: value = 256 + dBm (当 dBm < 0)
@@ -489,19 +492,24 @@ def build_streamsrc_frame_434(spectrum_data: list,
     # Offset 18-19: Indicator (2 bytes, big-endian) = 0x0068 for FSCAN-434
     struct.pack_into('>H', frame, 18, 0x0068)
 
-    # Offset 20-23: unknown field (FSCAN-434 specific value)
+    # Offset 20-23: FSCAN-434 type indicator = 0x03000000
     frame[20:24] = bytes([0x03, 0x00, 0x00, 0x00])
 
-    # Offset 24-61: Private metadata (38 bytes) - FSCAN-434 特有
-    # FSCAN-434 使用不同的 metadata 结构
+    # Offset 24: DT (1 byte) = 0x0C (FSCAN)
+    frame[24] = 0x0C
+
+    # Offset 25-28: DL (4 bytes, little-endian) = payload length (频谱834 + metadata 33 = 867)
+    struct.pack_into('<I', frame, 25, 867)
+
+    # Offset 29-61: Private metadata (33 bytes) - FSCAN-434 特有
     private_metadata_434 = bytes([
-        0x10, 0x21, 0x04, 0x00, 0x00, 0x01, 0xa1, 0x05,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xe8, 0x54,
-        0xa0, 0x41, 0x00, 0x00, 0x00, 0x30, 0xc5, 0xda,
-        0xa1, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50,
-        0xc3, 0x46, 0x00, 0x01, 0x00, 0x00
+        0x01, 0xa1, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x80, 0xe8, 0x54, 0xa0, 0x41, 0x00, 0x00, 0x00,
+        0x30, 0xc5, 0xda, 0xa1, 0x41, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x50, 0xc3, 0x46, 0x00, 0x01, 0x00,
+        0x00
     ])
-    frame[24:62] = private_metadata_434
+    frame[29:62] = private_metadata_434
 
     # Offset 62+: Spectrum (交替字节模式 [dBm][0xFF][dBm][0xFF]...)
     spectrum_offset = 62
@@ -539,19 +547,27 @@ class StreamSession:
             self.rmcp_client = rmcp_client
 
     def close_all(self):
-        """关闭所有连接（成对关闭）"""
+        """关闭所有连接（幂等操作）"""
         with self.lock:
+            if self.streamsrc_client is None and self.rmcp_client is None:
+                log(f"[Session {self.taskid}] 连接已关闭，跳过")
+                return
             log(f"[Session {self.taskid}] 关闭所有连接")
             # 停止推送线程
             self.push_running = False
+            # 关闭 streamsrc 客户端
             if self.streamsrc_client:
                 try:
                     self.streamsrc_client.close()
-                except:
-                    pass
+                except Exception as e:
+                    log(f"[Session {self.taskid}] 关闭 streamsrc 失败: {e}")
                 self.streamsrc_client = None
+            # 关闭 RMCP 客户端
             if self.rmcp_client:
-                self.rmcp_client.disconnect()
+                try:
+                    self.rmcp_client.disconnect()
+                except Exception as e:
+                    log(f"[Session {self.taskid}] 关闭 rmcp_client 失败: {e}")
                 self.rmcp_client = None
 
     def update_data_time(self):
@@ -697,13 +713,16 @@ class StreamSrcServer:
                 if client in self.clients:
                     self.clients.remove(client)
                     log(f"[StreamServer] 移除死客户端，剩余: {len(self.clients)}")
-            # 成对关闭 RMCP
-            session = self.session_manager.remove_session(client)
+                else:
+                    log(f"[StreamServer] 客户端不在 clients 列表中，可能已移除")
+            # 成对关闭 RMCP - 先从 session_manager 移除，避免重复关闭
+            session = self.session_manager.get_session_by_socket(client)
             if session:
+                self.session_manager.remove_session(client)  # 确保只移除一次
                 log(f"[StreamServer] 找到对应 session={session.taskid}，调用关闭")
                 self._close_session_with_stop(session)
             else:
-                log(f"[StreamServer] 未找到对应 session，clients={list(self.session_manager.sessions.keys())}")
+                log(f"[StreamServer] 未找到对应 session")
 
     def _try_match_pending_session(self, client_socket: socket.socket):
         """尝试将新客户端关联到等待中的会话
@@ -1934,6 +1953,16 @@ class EmulatedAtomService:
             self.session_manager.sessions.clear()
             self.session_manager.taskid_to_session.clear()
 
+        # 同步清理 streamsrc_server.clients
+        with self.streamsrc_server.lock:
+            for c in list(self.streamsrc_server.clients):
+                try:
+                    c.close()
+                except:
+                    pass
+            self.streamsrc_server.clients.clear()
+        log(f"[StreamServer] 清理 clients 完成")
+
         # 关闭所有待关联会话
         for taskid in list(self.pending_sessions.keys()):
             session = self.pending_sessions.pop(taskid, None)
@@ -1943,8 +1972,14 @@ class EmulatedAtomService:
         # 发送 SOAP 响应
         taskid = generate_taskid()
         response = build_soap_response(True, taskid=taskid)
-        client.sendall(response)
-        client.close()
+        try:
+            client.sendall(response)
+        except:
+            pass
+        try:
+            client.close()
+        except:
+            pass
 
         # 转发到 rmcp_proxy
         log("尝试转发 B_StopMeas 到 rmcp_proxy...")
