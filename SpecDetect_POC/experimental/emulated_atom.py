@@ -388,8 +388,17 @@ def build_streamsrc_frame(spectrum_data: list,
     else:
         struct.pack_into('<Q', frame, 10, ts)
 
-    # Offset 18-19: Indicator (2 bytes, big-endian) = 0x0026 for FSCAN-529
-    struct.pack_into('>H', frame, 18, 0x0026)
+    # Offset 18-19: Indicator (2 bytes, big-endian)
+    # 根据start_index设置不同的indicator，与Real Atom一致
+    if start_index == 0:
+        # Band1: 0x0026
+        struct.pack_into('>H', frame, 18, 0x0026)
+    elif start_index == 512:
+        # Band2: 0x0126
+        struct.pack_into('>H', frame, 18, 0x0126)
+    else:
+        # Band3 (FSCAN-434): 0x0168
+        struct.pack_into('>H', frame, 18, 0x0168)
 
     # Offset 20-23: FSCAN-529 type indicator = 0x04000000
     frame[20:24] = bytes([0x04, 0x00, 0x00, 0x00])
@@ -401,13 +410,35 @@ def build_streamsrc_frame(spectrum_data: list,
     struct.pack_into('<I', frame, 25, 1057)
 
     # Offset 29-61: Private metadata (33 bytes) - 按真实设备格式
-    private_metadata = bytes([
-        0x01, 0xa1, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x80, 0xe8, 0x54, 0xa0, 0x41, 0x00, 0x00, 0x00,
-        0x30, 0xc5, 0xda, 0xa1, 0x41, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x50, 0xc3, 0x46, 0x00, 0x02, 0x00,
-        0x00
-    ])
+    # 注意: 不同Band使用不同的private_metadata，编码了频率范围信息
+    # 来源: Real Atom pcap capture_1449_20260416_190539 中提取的实际数据
+    if start_index == 0:
+        # Band1: 137.0 - 149.775 MHz
+        private_metadata = bytes([
+            0x01, 0xa1, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x80, 0xe8, 0x54, 0xa0, 0x41, 0x00, 0x00, 0x00,
+            0x30, 0xc5, 0xda, 0xa1, 0x41, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x50, 0xc3, 0x46, 0x00, 0x02, 0x00,
+            0x00
+        ])
+    elif start_index == 512:
+        # Band2: 149.8 - 162.575 MHz
+        private_metadata = bytes([
+            0x01, 0xa1, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x80, 0x88, 0xdb, 0xa1, 0x41, 0x00, 0x00, 0x00,
+            0x30, 0x65, 0x61, 0xa3, 0x41, 0x00, 0x02, 0x00,
+            0x00, 0x00, 0x50, 0xc3, 0x46, 0x00, 0x02, 0x00,
+            0x00
+        ])
+    else:
+        # Band3: 162.6 - 173.0 MHz
+        private_metadata = bytes([
+            0x01, 0xa1, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x80, 0x28, 0x62, 0xa3, 0x41, 0x00, 0x00, 0x00,
+            0x80, 0x8a, 0x9f, 0xa4, 0x41, 0x00, 0x04, 0x00,
+            0x00, 0x00, 0x50, 0xc3, 0x46, 0xa1, 0x01, 0x00,
+            0x00
+        ])
     frame[29:62] = private_metadata
 
     # 设置 start_index (frame[50:52] = little-endian uint16)
@@ -524,8 +555,8 @@ def build_streamsrc_frame_434(spectrum_data: list,
     else:
         struct.pack_into('<Q', frame, 10, ts)
 
-    # Offset 18-19: Indicator (2 bytes, big-endian) = 0x0068 for FSCAN-434
-    struct.pack_into('>H', frame, 18, 0x0068)
+    # Offset 18-19: Indicator (2 bytes, big-endian) = 0x0168 for FSCAN-434 Band3
+    struct.pack_into('>H', frame, 18, 0x0168)
 
     # Offset 20-23: FSCAN-434 type indicator = 0x03000000
     frame[20:24] = bytes([0x03, 0x00, 0x00, 0x00])
@@ -536,18 +567,15 @@ def build_streamsrc_frame_434(spectrum_data: list,
     # Offset 25-28: DL (4 bytes, little-endian) = payload length (频谱834 + metadata 33 = 867)
     struct.pack_into('<I', frame, 25, 867)
 
-    # Offset 29-61: Private metadata (33 bytes) - FSCAN-434 特有
-    # 真实设备编码规则 (从 pcap 验证):
-    # - frame[29] (pm[0]) = 频段序号 (应该是 0x01)
-    # - frame[50:52] (pm[21:23]) = 起始频率序号 (0x0004 = 1024 little-endian: low=0x00, high=0x04)
-    # - frame[58:60] (pm[29:31]) = 帧信道数量 (0x01A1 = 417 little-endian: low=0xa1, high=0x01)
-    # 注意: 之前错误地认为 start_index 在 frame[60:62]，实际在 frame[50:52]
+    # Offset 29-61: Private metadata (33 bytes) - FSCAN-434 Band3 专用
+    # 从 Real Atom pcap 中提取的实际数据
+    # Band3: 162.6 - 173.0 MHz
     private_metadata_434 = bytes([
         0x01, 0xa1, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00,  # 0-7
-        0x80, 0xe8, 0x54, 0xa0, 0x41, 0x00, 0x00, 0x00,  # 8-15
-        0x30, 0xc5, 0xda, 0xa1, 0x41, 0x00, 0x04, 0x00,  # 16-23 (pm[22]=0x04 -> frame[51]=0x04)
+        0x80, 0x28, 0x62, 0xa3, 0x41, 0x00, 0x00, 0x00,  # 8-15
+        0x80, 0x8a, 0x9f, 0xa4, 0x41, 0x00, 0x04, 0x00,  # 16-23
         0x00, 0x00, 0x50, 0xc3, 0x46, 0xa1, 0x01, 0x00,  # 24-31
-        0x00                                           # 32 (should be 0x00, not 0x04)
+        0x00                                           # 32
     ])
     frame[29:62] = private_metadata_434
 
