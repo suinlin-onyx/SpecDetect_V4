@@ -4,8 +4,8 @@
 Emulated Atom Service - 简化版
 
 替代 Real Atom 的能力:
-1. 接收 SOAP 请求，转发到 rmcp_proxy
-2. 接收 rmcp_proxy 回传的数据
+1. 接收 SOAP 请求，转发到目标设备
+2. 接收目标设备回传的数据
 3. 整理并转发给调用侧:
    - SOAP 回调 (HTTP响应)
    - streamsrc 回传 (TCP 18013端口)
@@ -13,7 +13,7 @@ Emulated Atom Service - 简化版
 端口映射:
 - SOAP: 8283
 - streamsrc: 18013
-- rmcp_proxy: 9997 (emulated_atom 专用)
+- 目标设备: 1449 (真实设备)
 
 注意: 此版本使用模拟数据进行测试，因为 Real Device 可能不支持我们的命令格式
 """
@@ -38,11 +38,11 @@ if sys.platform == 'win32':
 # 配置
 SOAP_PORT = 8283
 STREAMSRC_PORT = 18013
-#RMCP_PROXY_HOST = '127.0.0.1'
-#RMCP_PROXY_PORT = 9997  # 使用 9997 端口（emulated_atom 专用测试通道）
-# RMCP_PROXY_PORT = 9996  # 使用 9996 端口（与真实 Atom 相同）
-RMCP_PROXY_HOST = '100.72.95.36'  # 设备IP
-RMCP_PROXY_PORT = 1449             # 设备端口
+#TARGET_HOST = '127.0.0.1'
+#TARGET_PORT = 9997  # 使用 9997 端口（emulated_atom 专用测试通道）
+# TARGET_PORT = 9996  # 使用 9996 端口（与真实 Atom 相同）
+TARGET_HOST = '100.72.95.36'  # 目标设备IP
+TARGET_PORT = 1449             # 目标设备端口
 
 # 设备信息缓存目录
 DEVINFO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'devinfo')
@@ -217,7 +217,7 @@ class RMCPFrameLogger:
             if fscan_info.get('dbm_min') is not None:
                 extra = f" | {fscan_info['level_count']} points | dBm: {fscan_info['dbm_min']:.1f}~{fscan_info['dbm_max']:.1f}"
 
-        # 终端输出 - rmcp_proxy 风格
+        # 终端输出 - 目标设备风格
         console_line = f"[{timestamp}]:{self.port} {direction:4s} {msg_type_name:12s} len={len(data):5d} from={addr[0]}:{addr[1]}{extra}"
         print(console_line, flush=True)
 
@@ -565,6 +565,94 @@ def build_streamsrc_frame_434(spectrum_data: list,
     return bytes(frame)
 
 
+class BandCollector:
+    """三频段收集器 - 使用 Queue 实现严格 FIFO 同步
+
+    设备持续发送频段数据（可能乱序），此收集器确保：
+    1. 按收到顺序处理每帧数据
+    2. 只有凑齐完整三频段才输出（顺序: Band1 → Band2 → Band3）
+    3. 线程安全，支持多生产者/单消费者
+    """
+
+    def __init__(self, timeout=2.0):
+        import queue
+        self._input_queue = queue.Queue(maxsize=200)  # 输入队列
+        self._output_queue = queue.Queue(maxsize=10)  # 输出队列（完整三频段组）
+        self._band_buffer = {}  # 当前缓冲: {start_index: band_data}
+        self._timeout = timeout  # 超时时间（秒）
+        self._logger_thread = None
+        self._running = False
+
+    def put(self, band_info):
+        """放入一个频段数据（通常在接收线程中调用）"""
+        self._input_queue.put(band_info)
+        self.process_input()  # 自动处理，尝试组成完整三频段
+
+    def get(self):
+        """获取完整三频段组（阻塞等待）
+
+        Returns:
+            list: [Band1, Band2, Band3] 按顺序排列的频段列表
+            None: 超时返回 None
+        """
+        # 先处理已有输入，避免长时间阻塞
+        self.process_input()
+        try:
+            return self._output_queue.get(timeout=self._timeout)
+        except:
+            return None
+
+    def process_input(self):
+        """处理输入队列，尝试组成完整三频段（在消费者线程中调用）"""
+        try:
+            # 非阻塞尝试从输入队列获取数据
+            while True:
+                try:
+                    band = self._input_queue.get_nowait()
+                    start_idx = band['counters'][2]
+                    self._band_buffer[start_idx] = band
+                except:
+                    break
+
+            # 检查是否完整
+            if 0 in self._band_buffer and 512 in self._band_buffer and 1024 in self._band_buffer:
+                complete = [
+                    self._band_buffer[0],
+                    self._band_buffer[512],
+                    self._band_buffer[1024]
+                ]
+                self._output_queue.put(complete)
+                self._band_buffer.clear()
+
+        except Exception as e:
+            log(f"BandCollector process_input 错误: {e}")
+
+    def clear(self):
+        """清空缓冲"""
+        while not self._input_queue.empty():
+            try:
+                self._input_queue.get_nowait()
+            except:
+                break
+        self._band_buffer.clear()
+        while not self._output_queue.empty():
+            try:
+                self._output_queue.get_nowait()
+            except:
+                break
+
+    def get_status(self):
+        """获取状态信息"""
+        return {
+            'input_size': self._input_queue.qsize(),
+            'output_size': self._output_queue.qsize(),
+            'buffer_keys': list(self._band_buffer.keys()),
+            'has_band1': 0 in self._band_buffer,
+            'has_band2': 512 in self._band_buffer,
+            'has_band3': 1024 in self._band_buffer,
+        }
+
+
 # ==================== streamsrc 服务器 ====================
 
 class StreamSession:
@@ -572,30 +660,41 @@ class StreamSession:
 
     def __init__(self, streamsrc_client: socket.socket, taskid: str, fscan_params: dict = None):
         self.streamsrc_client = streamsrc_client
-        self.rmcp_client: Optional[RMCPClient] = None
+        self.target_client: Optional[TargetDeviceClient] = None
         self.taskid = taskid
         self.lock = threading.Lock()
         self.data_received = False  # 是否收到过数据
         self.last_data_time = time.time()
         self.fscan_params = fscan_params or {}  # 存储 fscan 参数用于持续推送
         self.push_thread = None  # 推送线程
-        self.push_running = False  # 推送运行标志
+        self.push_running = False  # 推送运行标志 (保留用于兼容性，实际用_stop_event控制)
+        self._stop_event = threading.Event()  # 线程停止事件
         self.debug_file = None  # 调试文件（一次fscan请求的所有帧保存在同一文件）
+        self._fscan_bands_cache = None  # 缓存的 FSCAN bands 数据
+        self._fscan_bands_time = 0  # 缓存时间戳
+        self._closing = False  # 标记 session 正在关闭，不要在 _get_fscan_bands 中使用 target_client
+        self._band_buffer = []  # 频段缓冲，用于收集未完成的频段
+        self._band_buffer_time = 0  # 缓冲开始时间，用于判断超时
+        self._fscan_request_sent = False  # 标记是否已发送 FSCAN RMCP 请求
+        self._band_collector = None  # 三频段收集器（Queue实现）
 
-    def attach_rmcp(self, rmcp_client: 'RMCPClient'):
+    def attach_target(self, target_client: 'TargetDeviceClient'):
         """关联 RMCP 客户端"""
         with self.lock:
-            self.rmcp_client = rmcp_client
+            self.target_client = target_client
 
     def close_all(self):
         """关闭所有连接（幂等操作）"""
         with self.lock:
-            if self.streamsrc_client is None and self.rmcp_client is None:
+            if self.streamsrc_client is None and self.target_client is None:
                 log(f"连接已关闭，跳过", "SESSION")
                 return
             log(f"关闭所有连接", "SESSION")
-            # 停止推送线程
+            # 停止推送线程 - 使用Event确保线程能正确收到停止信号
             self.push_running = False
+            self._stop_event.set()
+            # 标记正在关闭，这样 _get_fscan_bands 会检测到并提前返回
+            self._closing = True
             # 关闭 streamsrc 客户端
             if self.streamsrc_client:
                 try:
@@ -603,13 +702,13 @@ class StreamSession:
                 except Exception as e:
                     log(f"关闭 streamsrc 失败: {e}", "SESSION")
                 self.streamsrc_client = None
-            # 关闭 RMCP 客户端
-            if self.rmcp_client:
+            # 关闭 RMCP 客户端（延迟关闭，让 _get_fscan_bands 有机会检测到 _closing 并自行关闭）
+            if self.target_client:
                 try:
-                    self.rmcp_client.disconnect()
+                    self.target_client.disconnect()
                 except Exception as e:
-                    log(f"关闭 rmcp_client 失败: {e}", "SESSION")
-                self.rmcp_client = None
+                    log(f"关闭 target_client 失败: {e}", "SESSION")
+                self.target_client = None
 
     def update_data_time(self):
         """更新最后收数据时间"""
@@ -848,7 +947,7 @@ class StreamSrcServer:
             # 发送 Registration ACK (回显收到的 Registration frame)
             self._send_registration_ack(client_socket, reg_data)
 
-            log(f"关联 streamsrc 到 session: taskid={session.taskid}, rmcp={session.rmcp_client is not None}", "STREAM")
+            log(f"关联 streamsrc 到 session: taskid={session.taskid}, rmcp={session.target_client is not None}", "STREAM")
 
             # 启动持续推送线程
             if session.fscan_params:
@@ -878,7 +977,10 @@ class StreamSrcServer:
         def push_loop():
             log(f"启动 FSCAN 推送线程: taskid={session.taskid}", "STREAM")
             session.push_running = True
-            frame_counter = 0
+            session._stop_event.clear()  # 确保Event初始为未设置状态
+
+            # 创建三频段收集器
+            session._band_collector = BandCollector(timeout=2.0)
 
             # 调试：创建单一文件保存所有帧
             import os
@@ -886,106 +988,132 @@ class StreamSrcServer:
             os.makedirs(debug_dir, exist_ok=True)
             session.debug_file = os.path.join(debug_dir, f'sent_fscan_{int(time.time()*1000)}.bin')
 
-            # 三频段数据缓存 (从 rmcp_proxy 流式接收)
-            fscan_bands = []  # 每元素: (spectrum, counters)
-            bands_received_event = threading.Event()
-
-            def rmcp_stream_thread():
-                """后台接收 RMCP 流式数据"""
-                spectrum = self.atom_service._get_fscan_from_rmcp_proxy(
-                    session.fscan_params['start_freq'],
-                    session.fscan_params['end_freq'],
-                    session.fscan_params['step'],
-                    session.fscan_params['taskid']
-                )
-                # 返回空列表表示数据已通过流式推送
-                if spectrum is not None and len(spectrum) == 0:
-                    log("RMCP 流式接收完成", "STREAM")
-                bands_received_event.set()
-
-            # 启动后台 RMCP 接收线程
-            rmcp_thread = threading.Thread(target=rmcp_stream_thread, daemon=True)
-            rmcp_thread.start()
-
-            while session.push_running:
+            while not session._stop_event.is_set():
                 try:
-                    # 获取频谱数据
-                    spectrum = self.atom_service._get_fscan_spectrum(
-                        session.fscan_params['start_freq'],
-                        session.fscan_params['end_freq'],
-                        session.fscan_params['step'],
-                        session.fscan_params['taskid']
-                    )
-
-                    if spectrum:
-                        # 使用 FSCAN 请求时建立的 STC
-                        stc = session.fscan_params.get('stc')
-
-                        # 三频段循环: 529→529→434 (对应 band1, band2, band3)
-                        # band1: 512点, 起始序号 0, 137.0-149.775MHz
-                        # band2: 512点, 起始序号 512, 149.8-162.575MHz
-                        # band3: 417点, 起始序号 1024, 162.6-173.0MHz
-                        band_idx = frame_counter % 3
-                        if band_idx == 0:
-                            # band1: 512点 (索引 0-511), start_index=0
-                            band_spectrum = spectrum[0:512] if len(spectrum) >= 512 else spectrum
-                            streamsrc_frame = build_streamsrc_frame(band_spectrum, stc=stc, start_index=0)
-                            log(f"推送 band1: {len(band_spectrum)} 点", "STREAM")
-                        elif band_idx == 1:
-                            # band2: 512点 (索引 512-1023), start_index=512
-                            band_spectrum = spectrum[512:1024] if len(spectrum) >= 1024 else spectrum[0:512]
-                            streamsrc_frame = build_streamsrc_frame(band_spectrum, stc=stc, start_index=512)
-                            log(f"推送 band2: {len(band_spectrum)} 点", "STREAM")
+                    # 首次调用时，发送 RMCP REQUEST 并建立连接
+                    if not session._fscan_request_sent:
+                        success = self.atom_service._send_fscan_request(
+                            session.fscan_params['start_freq'],
+                            session.fscan_params['end_freq'],
+                            session.fscan_params['step'],
+                            session.fscan_params['taskid']
+                        )
+                        if success:
+                            session._fscan_request_sent = True
+                            log(f"已发送 FSCAN RMCP REQUEST", "STREAM")
                         else:
-                            # band3: 417点 (索引 1024-1440)
-                            band_spectrum = spectrum[1024:1441] if len(spectrum) >= 1441 else spectrum[0:417]
-                            streamsrc_frame = build_streamsrc_frame_434(band_spectrum, stc=stc, n_arrays=417, start_index=1024)
-                            log(f"推送 band3: {len(band_spectrum)} 点", "STREAM")
+                            log(f"发送 FSCAN RMCP REQUEST 失败，使用模拟数据", "STREAM")
+                            session._fscan_request_sent = True  # 标记避免重复尝试
 
-                        frame_counter += 1
+                    # 循环读取设备数据直到收到完整三频段
+                    all_bands = None
+                    read_attempts = 0
+                    while not session._stop_event.is_set():
+                        # 读取设备数据并放入收集器
+                        self.atom_service._read_fscan_bands(
+                            session.fscan_params['start_freq'],
+                            session.fscan_params['end_freq'],
+                            session.fscan_params['step'],
+                            session.fscan_params['taskid'],
+                            session._band_collector
+                        )
+
+                        # 尝试获取完整三频段（非阻塞）
+                        all_bands = session._band_collector.get()
+                        if all_bands:
+                            break  # 收到完整三频段
+
+                        read_attempts += 1
+                        if read_attempts > 100:  # 避免无限循环
+                            log(f"读取三频段超时，已尝试 {read_attempts} 次", "STREAM")
+                            break
+
+                        time.sleep(0.05)  # 短暂等待让数据到达
+
+                    if not all_bands:
+                        # 仍然超时，继续下一次循环
+                        continue
+
+                    # 使用真实的 Band 映射（已按 Band1→Band2→Band3 顺序排列）
+                    stc = session.fscan_params.get('stc')
+
+                    for band in all_bands:
+                        spectrum = band['levels']
+                        counters = band['counters']
+                        start_index = counters[2] if counters else 0
+                        n_arrays = band['n_arrays']
+
+                        # 数据验证：计算 dBm 统计
+                        if spectrum:
+                            dbm_min = min(spectrum)
+                            dbm_max = max(spectrum)
+                            dbm_avg = sum(spectrum) / len(spectrum)
+                        else:
+                            dbm_min = dbm_max = dbm_avg = 0
+
+                        # 根据 start_index 确定 Band 类型
+                        if start_index == 0 and n_arrays == 512:
+                            streamsrc_frame = build_streamsrc_frame(spectrum, stc=stc, start_index=0)
+                            log(f"推送 Band1: {len(spectrum)} 点, dBm范围: {dbm_min:.1f}~{dbm_max:.1f}", "STREAM")
+                        elif start_index == 512 and n_arrays == 512:
+                            streamsrc_frame = build_streamsrc_frame(spectrum, stc=stc, start_index=512)
+                            log(f"推送 Band2: {len(spectrum)} 点, dBm范围: {dbm_min:.1f}~{dbm_max:.1f}", "STREAM")
+                        elif start_index == 1024:
+                            streamsrc_frame = build_streamsrc_frame_434(spectrum, stc=stc, n_arrays=n_arrays, start_index=1024)
+                            log(f"推送 Band3: {len(spectrum)} 点, dBm范围: {dbm_min:.1f}~{dbm_max:.1f}", "STREAM")
+                        else:
+                            log(f"跳过未知 Band: start_index={start_index}, n_arrays={n_arrays}", "STREAM")
+                            continue
 
                         # 推送帧
                         self.push_frame_to_session(session, streamsrc_frame)
-
-                    # 控制推送频率（每秒5帧）
-                    time.sleep(0.2)
 
                 except Exception as e:
                     log(f"FSCAN 推送错误: {e}", "STREAM")
                     break
 
-            # 关闭调试文件
+            # 清理
+            session.push_running = False
+            session._stop_event.clear()
             if session.debug_file:
                 session.debug_file = None
+            if session._band_collector:
+                session._band_collector.clear()
+                session._band_collector = None
             log(f"FSCAN 推送线程结束: taskid={session.taskid}", "STREAM")
 
         session.push_thread = threading.Thread(target=push_loop, daemon=True)
         session.push_thread.start()
 
     def push_frame_to_session(self, session: StreamSession, frame: bytes):
-        """推送帧到指定会话的 streamsrc 客户端"""
-        # 调试：保存发送的帧到文件（一次fscan请求的所有帧保存在同一文件）
+        """推送帧到指定会话的 streamsrc 客户端
+
+        优化：锁与IO分离 - 锁只保护共享状态，sendall在锁外执行
+        """
+        # 调试：保存发送的帧到文件（同一线程写入，无需锁）
         import os
         if session.debug_file:
             with open(session.debug_file, 'ab') as f:
                 f.write(frame)
 
-        with self.lock:
-            if session.streamsrc_client:
-                try:
-                    session.streamsrc_client.sendall(frame)
-                    session.update_data_time()
-                    # 调试日志：显示发送的帧信息
-                    if len(frame) == 1086:
-                        import struct
-                        indicator = struct.unpack('>H', frame[18:20])[0]
-                        meta0 = struct.unpack('<h', frame[48:50])[0]
-                        meta5 = struct.unpack('<h', frame[58:60])[0]
-                        log(f"发送 FSCAN-529: indicator=0x{indicator:04x}, meta[0]={meta0}, meta[5]={meta5}", "STREAM")
-                    elif len(frame) == 896:
-                        log(f"发送 FSCAN-434: {len(frame)} bytes", "STREAM")
-                except Exception as e:
-                    log(f"推送帧失败: {e}", "STREAM")
+        # 网络发送（sendall本身线程安全，锁外执行）
+        # 这样其他线程调用close_all时不会被阻塞
+        client = session.streamsrc_client
+        if client:
+            try:
+                client.sendall(frame)
+                session.update_data_time()
+                # 调试日志：显示发送的帧信息
+                if len(frame) == 1086:
+                    import struct
+                    indicator = struct.unpack('>H', frame[18:20])[0]
+                    meta0 = struct.unpack('<h', frame[48:50])[0]
+                    meta5 = struct.unpack('<h', frame[58:60])[0]
+                    log(f"发送 FSCAN-529: indicator=0x{indicator:04x}, meta[0]={meta0}, meta[5]={meta5}", "STREAM")
+                elif len(frame) == 896:
+                    log(f"发送 FSCAN-434: {len(frame)} bytes", "STREAM")
+            except Exception as e:
+                log(f"推送帧失败: {e}", "STREAM")
 
     def _send_registration_ack(self, client_socket: socket.socket, reg_data: bytes = None):
         """发送 Registration ACK (65 bytes)
@@ -1078,7 +1206,7 @@ class StreamSrcServer:
         # 发送 B_StopMeas 到设备
         try:
             xml_content = build_stopmeas_xml()
-            result = send_to_rmcp_proxy(xml_content, timeout=3.0)
+            result = send_to_target(xml_content, timeout=3.0)
             if result:
                 log(f"B_StopMeas 响应成功", "SESSION")
             else:
@@ -1364,9 +1492,9 @@ def build_query_device_xml() -> str:
     return soap_xml
 
 
-def send_to_rmcp_proxy(xml_content: str, timeout: float = 5.0) -> Optional[bytes]:
+def send_to_target(xml_content: str, timeout: float = 5.0) -> Optional[bytes]:
     """
-    发送 XML 到 rmcp_proxy 并接收响应
+    发送 XML 到目标设备并接收响应
 
     Args:
         xml_content: SOAP XML 字符串
@@ -1381,8 +1509,8 @@ def send_to_rmcp_proxy(xml_content: str, timeout: float = 5.0) -> Optional[bytes
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
-        sock.connect((RMCP_PROXY_HOST, RMCP_PROXY_PORT))
-        log(f"已连接到 rmcp_proxy {RMCP_PROXY_HOST}:{RMCP_PROXY_PORT}")
+        sock.connect((TARGET_HOST, TARGET_PORT))
+        log(f"已连接到目标设备 {TARGET_HOST}:{TARGET_PORT}")
 
         sock.sendall(rmcp_frame)
         log("已发送 RMCP REQUEST")
@@ -1415,32 +1543,26 @@ def send_to_rmcp_proxy(xml_content: str, timeout: float = 5.0) -> Optional[bytes
 
 # ==================== RMCP 客户端 ====================
 
-# 测试用固定本地端口
-TEST_LOCAL_PORT = 9998  # 固定本地端口用于调试
 
+class TargetDeviceClient:
+    """目标设备客户端 - 连接到目标设备"""
 
-class RMCPClient:
-    """RMCP 客户端 - 连接到 rmcp_proxy"""
-
-    def __init__(self, host: str, port: int, use_fixed_local_port=False):
+    def __init__(self, host: str, port: int):
         self.host = host
         self.port = port
         self.sock = None
-        self.use_fixed_local_port = use_fixed_local_port
 
     def connect(self) -> bool:
-        """连接到 rmcp_proxy"""
+        """连接到目标设备"""
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            if self.use_fixed_local_port:
-                self.sock.bind(('0.0.0.0', TEST_LOCAL_PORT))
             self.sock.settimeout(10.0)
             self.sock.connect((self.host, self.port))
             local = self.sock.getsockname()
-            log(f"已连接到 rmcp_proxy {self.host}:{self.port} (本地: {local[0]}:{local[1]})", "RMCP")
+            log(f"已连接到目标设备 {self.host}:{self.port} (本地: {local[0]}:{local[1]})", "RMCP")
             return True
         except Exception as e:
-            log(f"连接 rmcp_proxy 失败: {e}")
+            log(f"连接目标设备失败: {e}")
             return False
 
     def disconnect(self):
@@ -1451,6 +1573,23 @@ class RMCPClient:
             except:
                 pass
             self.sock = None
+
+    def is_connected(self) -> bool:
+        """检查连接是否有效"""
+        if self.sock is None:
+            return False
+        try:
+            # 非阻塞检查 socket 状态
+            self.sock.setblocking(False)
+            data = self.sock.recv(1, socket.MSG_PEEK)
+            self.sock.setblocking(True)
+            return True  # 能读到数据说明还连着
+        except BlockingIOError:
+            self.sock.setblocking(True)
+            return True  # 没数据但也没错误，说明还连着
+        except Exception:
+            self.sock.setblocking(True)
+            return False
 
     def send_and_receive(self, data: bytes) -> Optional[bytes]:
         """发送数据并接收响应"""
@@ -1499,7 +1638,7 @@ class EmulatedAtomService:
         # RMCP 帧日志记录器
         rmcp_log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'rmcp_capture')
         os.makedirs(rmcp_log_dir, exist_ok=True)
-        self.rmcp_logger = RMCPFrameLogger(rmcp_log_dir, RMCP_PROXY_PORT)
+        self.rmcp_logger = RMCPFrameLogger(rmcp_log_dir, TARGET_PORT)
 
     def start(self):
         """启动服务"""
@@ -1507,7 +1646,7 @@ class EmulatedAtomService:
         log("Emulated Atom Service 启动 (简化版)")
         log(f"  SOAP 端口: {SOAP_PORT}")
         log(f"  streamsrc 端口: {STREAMSRC_PORT}")
-        log(f"  rmcp_proxy: {RMCP_PROXY_HOST}:{RMCP_PROXY_PORT}")
+        log(f"  目标设备: {TARGET_HOST}:{TARGET_PORT}")
         log(f"  RMCP 日志: {self.rmcp_logger.log_file}")
         log(f"  模拟数据: {USE_MOCK_DATA}")
         log("=" * 60)
@@ -1669,7 +1808,11 @@ class EmulatedAtomService:
                     log(f"清理超时会话: taskid={taskid}", "SESSION")
 
     def _get_fscan_spectrum(self, start_freq: int, end_freq: int, step: int, taskid: str = None) -> Optional[list]:
-        """获取 FSCAN 频谱数据"""
+        """获取 FSCAN 频谱数据（合并三频段）
+
+        Returns:
+            合并后的频谱数据 (1441 点) 或 None (模拟模式)
+        """
         if USE_MOCK_DATA:
             # 使用模拟数据
             log("使用模拟频谱数据")
@@ -1688,28 +1831,168 @@ class EmulatedAtomService:
                 spectrum.append(int(value))
             return spectrum
 
-        # 尝试从 rmcp_proxy 获取真实数据
-        log("尝试从 rmcp_proxy 获取数据...")
+        # 尝试从真实设备获取数据
+        log(f"尝试连接 {TARGET_HOST}:{TARGET_PORT} ...")
         try:
-            # 方法1: 从 capture 日志读取最新 FSCAN 数据
-            spectrum = self._get_fscan_from_capture()
+            # 直接连接真实设备获取 FSCAN 数据
+            spectrum = self._get_fscan_from_device(start_freq, end_freq, step, taskid)
             if spectrum:
                 return spectrum
 
-            # 方法2: 直接连接 rmcp_proxy (备用)
-            spectrum = self._get_fscan_from_rmcp_proxy(start_freq, end_freq, step, taskid)
-            if spectrum:
-                return spectrum
-
-            log("未能从 rmcp_proxy 获取数据，使用模拟数据")
+            log(f"未能从 {TARGET_HOST}:{TARGET_PORT} 获取数据，使用模拟数据")
             return self._get_mock_spectrum()
 
         except Exception as e:
             log(f"获取真实数据失败: {e}，使用模拟数据")
             return self._get_mock_spectrum()
 
+    def _send_fscan_request(self, start_freq: int, end_freq: int, step: int, taskid: str = None) -> bool:
+        """发送 FSCAN RMCP 请求到设备（仅发送，不接收数据）
+
+        用于在 push_loop 开始时建立连接并发送请求
+
+        Returns:
+            True 如果成功，False 如果失败
+        """
+        if USE_MOCK_DATA:
+            return False
+
+        session = None
+        if taskid:
+            with self.session_manager.lock:
+                session = self.session_manager.taskid_to_session.get(taskid)
+
+        if session and session._closing:
+            log(f"Session 正在关闭，跳过发送请求", "RMCP")
+            return False
+
+        try:
+            # 导入 SOAP 相关模块
+            from data.fscan_real_request import build_fscan_xml, build_rmcp_request_frame
+            soap_xml = build_fscan_xml(start_freq, end_freq, step)
+            cmd = build_rmcp_request_frame(soap_xml)
+            log(f"RMCP REQUEST 帧: {len(cmd)} bytes")
+
+            # 检查 session 是否有可用连接
+            target_client = None
+            if session and session.target_client and session.target_client.is_connected():
+                target_client = session.target_client
+                log(f"复用已有连接: {TARGET_HOST}:{TARGET_PORT}", "RMCP")
+            else:
+                # 创建新连接
+                target_client = TargetDeviceClient(TARGET_HOST, TARGET_PORT)
+                if not target_client.connect():
+                    log(f"连接 {TARGET_HOST}:{TARGET_PORT} 失败")
+                    return False
+                log(f"创建新连接: {TARGET_HOST}:{TARGET_PORT}", "RMCP")
+
+                # 关联到 session
+                if session:
+                    session.attach_target(target_client)
+
+            target_client.sock.sendall(cmd)
+            log("已发送 RMCP REQUEST")
+            return True
+
+        except Exception as e:
+            log(f"发送 FSCAN 请求失败: {e}")
+            return False
+
+    def _read_fscan_bands(self, start_freq: int, end_freq: int, step: int, taskid: str = None, band_collector: 'BandCollector' = None):
+        """从设备读取 FSCAN 数据并放入收集器
+
+        Args:
+            band_collector: BandCollector 实例，用于收集频段数据
+        """
+        if USE_MOCK_DATA:
+            return
+
+        if band_collector is None:
+            log(f"_read_fscan_bands: band_collector 为 None", "RMCP")
+            return
+
+        session = None
+        if taskid:
+            with self.session_manager.lock:
+                session = self.session_manager.taskid_to_session.get(taskid)
+
+        # 检查 session 是否正在关闭
+        if session and session._closing:
+            log(f"Session 正在关闭，跳过读取 FSCAN", "RMCP")
+            return
+
+        try:
+            target_client = None
+            if session and session.target_client and session.target_client.is_connected():
+                target_client = session.target_client
+            else:
+                log(f"无可用设备连接", "RMCP")
+                return
+
+            # 读取数据（非阻塞，短超时）
+            recv_buffer = b''
+            last_data_time = time.time()
+            target_client.sock.settimeout(0.1)  # 100ms 超时，快速返回
+
+            try:
+                while True:
+                    chunk = target_client.sock.recv(8192)
+                    if not chunk:
+                        break
+                    recv_buffer += chunk
+                    last_data_time = time.time()
+            except socket.timeout:
+                pass
+            except Exception as e:
+                log(f"recv 错误: {e}", "RMCP")
+
+            if not recv_buffer:
+                return
+
+            # 解析数据并放入收集器
+            while len(recv_buffer) >= 18:
+                dw_length = struct.unpack('<I', recv_buffer[0:4])[0]
+                n_msg_type = recv_buffer[14]
+
+                if dw_length < 18 or dw_length > 10000:
+                    recv_buffer = recv_buffer[1:]
+                    continue
+
+                total_frame_len = 18 + dw_length
+                if len(recv_buffer) < total_frame_len:
+                    break
+
+                frame_data = recv_buffer[:total_frame_len]
+                recv_buffer = recv_buffer[total_frame_len:]
+
+                if n_msg_type in (0, 29):
+                    payload = frame_data[18:]
+                    result = self._parse_single_fscan_frame(payload)
+                    if result is None or result[0] is None:
+                        continue
+
+                    spectrum, counters = result
+                    if len(spectrum) < 100:
+                        continue
+
+                    band_info = {
+                        'levels': spectrum,
+                        'counters': counters,
+                        'n_arrays': len(spectrum)
+                    }
+                    band_collector.put(band_info)
+                    self.rmcp_logger.log_frame('S->C', frame_data, (TARGET_HOST, TARGET_PORT))
+
+        except Exception as e:
+            log(f"_read_fscan_bands 错误: {e}")
+            import traceback
+            traceback.print_exc()
+
     def _get_fscan_from_capture(self) -> Optional[list]:
-        """从 rmcp_proxy capture 日志获取最新 FSCAN 数据 (三频段合并)
+        """[调试用] 从 capture 日志读取 FSCAN 数据 (三频段合并)
+
+        警告: 此方法仅用于调试目的，正常业务流程不应使用此方法。
+        正常流程应直接连接真实设备获取数据。
 
         设备返回三个 FSCAN 帧对应不同频段:
         - Band 1: 512点, counters=(512, 0, 0, 0), 起始序号 0, 137.0-149.775MHz
@@ -1721,6 +2004,7 @@ class EmulatedAtomService:
         """
         try:
             # 路径: experimental/emulated_atom.py -> 项目根目录/rmcp_proxy/capture/
+            # 注: capture 是 rmcp_proxy 的抓包目录，用于调试读取真实设备数据
             project_root = Path(os.path.dirname(os.path.abspath(__file__))).parent
             capture_dir = project_root / 'rmcp_proxy' / 'capture'
             capture_files = sorted(capture_dir.glob("capture_*.json"), key=lambda p: p.stat().st_mtime)
@@ -1775,9 +2059,12 @@ class EmulatedAtomService:
             log(f"从 capture 获取数据失败: {e}")
             return None
 
-    def _get_fscan_from_rmcp_proxy(self, start_freq: int, end_freq: int, step: int, taskid: str = None) -> Optional[list]:
-        """直接从 rmcp_proxy 获取 FSCAN 数据（流式推送版本）"""
-        log(f"_get_fscan_from_rmcp_proxy 开始: taskid={taskid}", "RMCP")
+    def _get_fscan_from_device(self, start_freq: int, end_freq: int, step: int, taskid: str = None) -> Optional[list]:
+        """直接从真实设备获取 FSCAN 数据（流式推送版本）
+
+        优化：优先复用 session 中已存在的目标设备连接，避免频繁创建/关闭连接
+        """
+        log(f"_get_fscan_from_device 开始: taskid={taskid}", "RMCP")
         session = None
         if taskid:
             with self.session_manager.lock:
@@ -1790,30 +2077,43 @@ class EmulatedAtomService:
             cmd = build_rmcp_request_frame(soap_xml)
             log(f"RMCP REQUEST 帧: {len(cmd)} bytes")
 
-            rmcp_client = RMCPClient(RMCP_PROXY_HOST, RMCP_PROXY_PORT, use_fixed_local_port=True)
-            if not rmcp_client.connect():
-                log("连接 rmcp_proxy 失败")
-                return None
+            # 优先复用 session 中的连接
+            target_client = None
+            reuse_connection = False
+
+            if session and session.target_client:
+                # 检查现有连接是否有效
+                if session.target_client.is_connected():
+                    target_client = session.target_client
+                    reuse_connection = True
+                    log(f"复用已有连接: {TARGET_HOST}:{TARGET_PORT} (本地: {target_client.sock.getsockname()[1]})", "RMCP")
+                else:
+                    # 连接已断开，关闭并设为None
+                    session.target_client.disconnect()
+                    session.target_client = None
+
+            # 如果没有可用连接，创建新连接
+            if target_client is None:
+                target_client = TargetDeviceClient(TARGET_HOST, TARGET_PORT)
+                if not target_client.connect():
+                    log(f"连接 {TARGET_HOST}:{TARGET_PORT} 失败")
+                    return None
 
             # 关联 RMCP 客户端到会话（成对管理）
-            if session:
-                session.attach_rmcp(rmcp_client)
-                log(f"已关联 RMCP 客户端: rmcp_client={session.rmcp_client is not None}", "SESSION")
-            else:
-                log(f"未找到 pending_session，无法关联 RMCP", "SESSION")
+            if session and not reuse_connection:
+                session.attach_target(target_client)
+                log(f"已关联设备客户端: target_client={session.target_client is not None}", "SESSION")
 
-            rmcp_client.sock.sendall(cmd)
+            target_client.sock.sendall(cmd)
             log("已发送 RMCP REQUEST")
 
-            # 流式接收响应 - 设备会发送多个 FSCAN 数据帧
-            # 策略：每收到一个 FSCAN 帧就立即推送到 streamsrc
+            # 收集设备返回的所有 FSCAN 帧
             recv_buffer = b''
-            frame_count = 0
+            all_bands = []  # 每元素: (spectrum, counters)
             last_data_time = time.time()
             start_time = time.time()
-            last_push_time = time.time()  # 用于控制推送频率
 
-            rmcp_client.sock.settimeout(1.0)  # 1秒超时检测
+            target_client.sock.settimeout(1.0)  # 1秒超时检测
 
             while True:
                 # 总超时 90 秒
@@ -1822,12 +2122,12 @@ class EmulatedAtomService:
                     break
 
                 try:
-                    chunk = rmcp_client.sock.recv(8192)
+                    chunk = target_client.sock.recv(8192)
                     if chunk:
                         recv_buffer += chunk
                         last_data_time = time.time()
 
-                        # 尝试从 buffer 中解析并推送 FSCAN 帧
+                        # 尝试从 buffer 中解析 FSCAN 帧
                         while len(recv_buffer) >= 18:
                             # RMCP 帧头: dwLength(I) + tmStamp(Q) + nVersion(H) + nMsgType(B) + nFlags(B) + nCheckSum(H)
                             # offset 0-3: dwLength (little-endian)
@@ -1866,58 +2166,49 @@ class EmulatedAtomService:
                                 if len(spectrum) < 100:
                                     continue
 
-                                frame_count += 1
+                                all_bands.append({
+                                    'levels': spectrum,
+                                    'counters': counters,
+                                    'n_arrays': len(spectrum)
+                                })
 
-                                # 计算 dBm 范围
-                                dbm_min = min(spectrum)
-                                dbm_max = max(spectrum)
-                                dbm_avg = sum(spectrum) / len(spectrum)
-
-                                # 使用 RMCPFrameLogger 记录帧 (rmcp_proxy 风格)
-                                self.rmcp_logger.log_frame('S->C', frame_data, (RMCP_PROXY_HOST, RMCP_PROXY_PORT))
-
-                                # 根据 counters[2] (起始序号) 确定频段:
-                                # - 0: band1 (137.0-149.775MHz) → FSCAN-529
-                                # - 512: band2 (149.8-162.575MHz) → FSCAN-529
-                                # - 1024: band3 (162.6-173.0MHz) → FSCAN-434
-                                start_index = counters[2] if counters else 0
-                                n_arrays = counters[0] if counters else len(spectrum)
-
-                                if start_index == 1024 or n_arrays == 417:
-                                    # band3: 417点 → FSCAN-434
-                                    streamsrc_frame = build_streamsrc_frame_434(spectrum, n_arrays=n_arrays, start_index=start_index)
-                                    log(f"推送 band3 ({start_index}): {len(spectrum)} 点", "STREAM")
-                                else:
-                                    # band1/band2: 512点 → FSCAN-529
-                                    streamsrc_frame = build_streamsrc_frame(spectrum)
-                                    log(f"推送 band{1 if start_index == 0 else 2} ({start_index}): {len(spectrum)} 点", "STREAM")
-
-                                self.streamsrc_server.push_frame(streamsrc_frame)
-
-                                # 控制推送频率（每秒最多5帧）
-                                now = time.time()
-                                if now - last_push_time < 0.2:
-                                    time.sleep(0.2 - (now - last_push_time))
-                                last_push_time = time.time()
+                                # 使用 RMCPFrameLogger 记录帧
+                                self.rmcp_logger.log_frame('S->C', frame_data, (TARGET_HOST, TARGET_PORT))
 
                 except socket.timeout:
                     # 检查是否应该结束
                     if time.time() - last_data_time > 3:
-                        if frame_count > 0:
-                            log(f"设备数据接收完毕: 共推送 {frame_count} 帧")
+                        if len(all_bands) > 0:
+                            log(f"设备数据接收完毕: 共 {len(all_bands)} 帧")
                         else:
                             log("设备数据接收完毕: 未解析到有效帧")
                         break
 
-            rmcp_client.disconnect()
+            # 复用连接时不断开，只在新创建连接时在session结束时断开
+            if not reuse_connection:
+                target_client.disconnect()
 
-            if frame_count > 0:
-                return []  # 返回空列表表示已流式推送，不需返回数据
+            if len(all_bands) == 0:
+                return None
 
-            return None
+            # 按 counters[2] (起始序号) 排序
+            all_bands.sort(key=lambda x: x['counters'][2] if x['counters'] else 0)
+
+            # 合并三个频段
+            combined_spectrum = []
+            for band in all_bands:
+                combined_spectrum.extend(band['levels'])
+
+            log(f"从设备获取 FSCAN: {len(all_bands)} 频段, 共 {len(combined_spectrum)} 点")
+            log(f"Band counters: {[b['counters'] for b in all_bands]}", "PARSE")
+
+            return combined_spectrum
 
         except Exception as e:
             log(f"直接获取失败: {e}")
+            # 新建连接失败时清理
+            if not reuse_connection and target_client:
+                target_client.disconnect()
             import traceback
             traceback.print_exc()
             return None
@@ -2036,7 +2327,7 @@ class EmulatedAtomService:
             return None
 
     def _save_rmcp_raw_log(self, data: bytes):
-        """保存收到的 rmcp_proxy 原始数据到日志文件"""
+        """保存收到的目标设备原始数据到日志文件"""
         try:
             log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'rmcp_callback')
             os.makedirs(log_dir, exist_ok=True)
@@ -2115,11 +2406,11 @@ class EmulatedAtomService:
         except:
             pass
 
-        # 转发到 rmcp_proxy
-        log("尝试转发 B_StopMeas 到 rmcp_proxy...")
+        # 转发到目标设备
+        log("尝试转发 B_StopMeas 到目标设备...")
         try:
             xml_content = build_stopmeas_xml()
-            result = send_to_rmcp_proxy(xml_content, timeout=3.0)
+            result = send_to_target(xml_content, timeout=3.0)
             if result:
                 log("B_StopMeas 设备响应成功")
             else:
