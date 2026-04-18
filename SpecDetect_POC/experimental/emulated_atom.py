@@ -958,17 +958,11 @@ class StreamSrcServer:
 
     def push_frame_to_session(self, session: StreamSession, frame: bytes):
         """推送帧到指定会话的 streamsrc 客户端"""
-        import struct
-
         # 调试：保存发送的帧到文件（一次fscan请求的所有帧保存在同一文件）
+        import os
         if session.debug_file:
             with open(session.debug_file, 'ab') as f:
                 f.write(frame)
-
-        # 解析帧头信息用于调试
-        leader = struct.unpack('<I', frame[0:4])[0]
-        indicator = struct.unpack('>H', frame[18:20])[0]
-        dt = frame[24]
 
         with self.lock:
             if session.streamsrc_client:
@@ -977,13 +971,13 @@ class StreamSrcServer:
                     session.update_data_time()
                     # 调试日志：显示发送的帧信息
                     if len(frame) == 1086:
+                        import struct
+                        indicator = struct.unpack('>H', frame[18:20])[0]
                         meta0 = struct.unpack('<h', frame[48:50])[0]
                         meta5 = struct.unpack('<h', frame[58:60])[0]
                         log(f"发送 FSCAN-529: indicator=0x{indicator:04x}, meta[0]={meta0}, meta[5]={meta5}", "STREAM")
                     elif len(frame) == 896:
                         log(f"发送 FSCAN-434: {len(frame)} bytes", "STREAM")
-                    else:
-                        log(f"发送帧: {len(frame)} bytes, DT={dt}, indicator=0x{indicator:04x}", "STREAM")
                 except Exception as e:
                     log(f"推送帧失败: {e}", "STREAM")
 
