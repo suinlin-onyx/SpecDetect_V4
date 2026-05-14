@@ -14,6 +14,7 @@ from collections import defaultdict
 
 DEFAULT_CONFIG = """{
   "soap_proxy": {
+    "listen_host": "127.0.0.1",
     "listen_port": 8284,
     "target_host": "127.0.0.1",
     "target_port": 8282
@@ -784,14 +785,14 @@ def modify_stream_response(response_data: bytes, new_port: int) -> bytes:
         return response_data
 
 
-def start_stream_proxy(listen_port, target_port, interface_name="STREAM"):
+def start_stream_proxy(listen_host, listen_port, target_port, interface_name="STREAM"):
     """启动 streamsrc 透明代理（单个端口）"""
     try:
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server_socket.bind(('127.0.0.1', listen_port))
+        server_socket.bind((listen_host, listen_port))
         server_socket.listen(5)
-        logging.info(f"[STREAM/{interface_name}] Proxy started: 127.0.0.1:{listen_port} -> 127.0.0.1:{target_port}")
+        logging.info(f"[STREAM/{interface_name}] Proxy started: {listen_host}:{listen_port} -> 127.0.0.1:{target_port}")
 
         # 保存 streamsrc 数据，文件名包含接口名
         log_id = datetime.now().strftime("%H%M%S_%f")
@@ -965,26 +966,27 @@ def start_stream_proxy(listen_port, target_port, interface_name="STREAM"):
 
 def ensure_stream_proxy(proxy_port, target_port, interface_name="STREAM"):
     """确保 streamsrc 代理已启动"""
+    listen_host = _config.get('soap_proxy', {}).get('listen_host', '127.0.0.1')
     with stream_proxy_lock:
         if proxy_port not in stream_proxy_ports:
             stream_proxy_ports[proxy_port] = target_port
-            thread = threading.Thread(target=start_stream_proxy, args=(proxy_port, target_port, interface_name))
+            thread = threading.Thread(target=start_stream_proxy, args=(listen_host, proxy_port, target_port, interface_name))
             thread.daemon = True
             thread.start()
             logging.info(f"[STREAM/{interface_name}] Proxy registered: {proxy_port} -> {target_port}")
 
 
-def start_proxy(listen_port, target_host, target_port, is_stream=False):
+def start_proxy(listen_host, listen_port, target_host, target_port, is_stream=False):
     """启动透明代理"""
     proxy_type = "STREAM" if is_stream else "HTTP"
-    logging.info(f"[{proxy_type}] Listen: 127.0.0.1:{listen_port} -> {target_host}:{target_port}")
+    logging.info(f"[{proxy_type}] Listen: {listen_host}:{listen_port} -> {target_host}:{target_port}")
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind(('127.0.0.1', listen_port))
+    server_socket.bind((listen_host, listen_port))
     server_socket.listen(5)
 
-    logging.info(f"[{proxy_type}] Listening on 127.0.0.1:{listen_port}...")
+    logging.info(f"[{proxy_type}] Listening on {listen_host}:{listen_port}...")
 
     try:
         while True:
@@ -1005,6 +1007,7 @@ def start_proxy(listen_port, target_host, target_port, is_stream=False):
 if __name__ == '__main__':
     # 从配置读取代理设置
     soap_config = _config.get('soap_proxy', {})
+    listen_host = soap_config.get('listen_host', '127.0.0.1')
     listen_port = soap_config.get('listen_port', 8284)
     target_host = soap_config.get('target_host', '127.0.0.1')
     target_port = soap_config.get('target_port', 8282)
@@ -1016,13 +1019,13 @@ if __name__ == '__main__':
     # SOAP 请求转发: 可配置端口
     threading.Thread(
         target=start_proxy,
-        args=(listen_port, target_host, target_port, False),
+        args=(listen_host, listen_port, target_host, target_port, False),
         daemon=True
     ).start()
 
     logging.info(f"=" * 60)
     logging.info(f"Proxy started:")
-    logging.info(f"  {listen_port} (SOAP) -> {target_host}:{target_port}")
+    logging.info(f"  {listen_host}:{listen_port} (SOAP) -> {target_host}:{target_port}")
     logging.info(f"  streamsrc: dynamic (port+1 of B_FScan response)")
     logging.info(f"=" * 60)
 
