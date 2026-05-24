@@ -22,3 +22,4 @@ SpecDetect_Atom/program/
 
 # License files (device-specific, not to be committed)
 **/license.dat
+**/_data.py

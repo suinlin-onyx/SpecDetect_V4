@@ -52,8 +52,26 @@ def _find_license_path(license_path: Optional[str] = None) -> str:
     raise FileNotFoundError("找不到项目根目录的 config/ 文件夹，无法定位许可证文件")
 
 
+def _verify_devices(devices: List[Dict[str, Any]]) -> bool:
+    """核心：用当前硬件指纹与已注册设备列表比对（4 选 2）"""
+    current_fp = hash_fingerprint(collect_fingerprint())
+
+    for device in devices:
+        stored_fp: Dict[str, Optional[str]] = device.get('fingerprint', {})
+        matches = 0
+        for key in MATCH_KEYS:
+            cur_val = current_fp.get(key)
+            sto_val = stored_fp.get(key)
+            if cur_val is not None and sto_val is not None and cur_val == sto_val:
+                matches += 1
+        if matches >= MATCH_REQUIRED:
+            return True
+
+    return False
+
+
 def verify_license(license_path: Optional[str] = None) -> bool:
-    """验证当前设备是否已授权
+    """从 license.dat 文件验证当前设备是否已授权
 
     对每个已注册设备，比对 4 项硬件指纹（主板/硬盘/CPU/MAC）。
     跳过不可用的标识符（None），4 项中 ≥ 2 项匹配即视为授权通过。
@@ -71,6 +89,18 @@ def verify_license(license_path: Optional[str] = None) -> bool:
     except (json.JSONDecodeError, OSError):
         return False
 
+    return verify_license_data(data)
+
+
+def verify_license_data(data: dict) -> bool:
+    """用内存中的许可证数据验证当前设备（用于嵌入式许可证）
+
+    Args:
+        data: 已加载的许可证字典（须包含 signature 和 devices）
+
+    Returns:
+        True 如果至少一个已注册设备匹配 ≥ 2 项
+    """
     if not _verify_signature(data):
         return False
 
@@ -78,20 +108,7 @@ def verify_license(license_path: Optional[str] = None) -> bool:
     if not devices:
         return False
 
-    current_fp = hash_fingerprint(collect_fingerprint())
-
-    for device in devices:
-        stored_fp: Dict[str, Optional[str]] = device.get('fingerprint', {})
-        matches = 0
-        for key in MATCH_KEYS:
-            cur_val = current_fp.get(key)
-            sto_val = stored_fp.get(key)
-            if cur_val is not None and sto_val is not None and cur_val == sto_val:
-                matches += 1
-        if matches >= MATCH_REQUIRED:
-            return True
-
-    return False
+    return _verify_devices(devices)
 
 
 def generate_license(

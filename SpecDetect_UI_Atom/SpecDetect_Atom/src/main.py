@@ -45,7 +45,20 @@ Logger.init(log_dir=log_dir, log_level=log_level)
 
 # 导入服务（在日志初始化之后）
 from atom.service import AtomService
-from license.manager import verify_license
+from license.manager import verify_license, verify_license_data
+
+
+def _verify_license(license_dir: str) -> bool:
+    """许可证验证：frozen 模式优先用嵌入式数据，回退到外部文件"""
+    if getattr(sys, 'frozen', False):
+        try:
+            from license._data import LICENSE_DATA
+            return verify_license_data(LICENSE_DATA)
+        except ImportError:
+            info("嵌入式许可证不存在，回退到外部文件", LogTag.ATOM)
+
+    license_path = os.path.join(license_dir, 'license.dat')
+    return verify_license(license_path)
 
 
 def main():
@@ -82,8 +95,7 @@ def main():
 
     # 许可证验证
     license_dir = os.path.dirname(os.path.abspath(config_file))
-    license_path = os.path.join(license_dir, 'license.dat')
-    if not verify_license(license_path):
+    if not _verify_license(license_dir):
         error("设备授权验证失败：当前设备未授权运行本软件，请联系管理员", LogTag.ATOM)
         _show_error_and_exit(
             title='SpecDetect Atom - 设备授权验证失败',
