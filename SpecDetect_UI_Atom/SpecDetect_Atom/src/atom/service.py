@@ -760,12 +760,22 @@ class AtomService:
             info(f"B_QueryFaciDevStat 未找到 devinfo 文件, key={mfid}_{equid}", LogTag.SOAP)
             return self.preset_manager.build_error_response("设备信息未找到")
 
-        # 从 devinfo 中提取 mfname 和 equname
-        mfname_match = re.search(r'<[^>]*:mfname[^>]*>([^<]+)</[^>]*:mfname>', devinfo_xml, re.IGNORECASE)
+        # 从 devinfo 中提取 equname
         equname_match = re.search(r'<[^>]*:equname[^>]*>([^<]+)</[^>]*:equname>', devinfo_xml, re.IGNORECASE)
-
-        mfname = mfname_match.group(1).strip() if mfname_match else 'Unknown'
         equname = equname_match.group(1).strip() if equname_match else 'Unknown'
+
+        # mfname 从 settings.json 的 device.presets[].station.name 获取，而不是 devinfo XML
+        # 查找与当前 mfid/equid 匹配的 preset
+        mfname = 'Unknown'
+        for preset in self.config.device_presets:
+            if preset.get('mfid') == mfid and preset.get('equid') == equid:
+                mfname = preset.get('station', {}).get('name', 'Unknown')
+                break
+        if mfname == 'Unknown':
+            # Fallback: 尝试第一个 preset 的 station name
+            presets = self.config.get('device.presets', [])
+            if presets:
+                mfname = presets[0].get('station', {}).get('name', 'Unknown')
 
         # 检查是否有活动测量
         active_sessions = self.session_manager.get_active_sessions()
