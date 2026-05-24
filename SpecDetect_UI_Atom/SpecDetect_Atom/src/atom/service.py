@@ -5,7 +5,7 @@ Atom 服务主类
 整合所有模块，协调 SOAP、streamsrc、RMCP 的交互
 """
 
-__version__ = "1.2.4"
+__version__ = "1.2.6"
 
 import socket
 import threading
@@ -751,8 +751,10 @@ class AtomService:
 
         mfid = mfid_match.group(1).strip() if mfid_match else ''
         equid = equid_match.group(1).strip() if equid_match else ''
+        userid_match = re.search(r'<[^>]*:userid[^>]*>([^<]+)</[^>]*:userid>', raw_body, re.IGNORECASE)
+        userid = userid_match.group(1).strip() if userid_match else ''
 
-        info(f"B_QueryFaciDevStat mfid={mfid}, equid={equid}", LogTag.SOAP)
+        info(f"B_QueryFaciDevStat mfid={mfid}, equid={equid}, userid={userid}", LogTag.SOAP)
 
         # 从 devinfo 加载设备信息
         devinfo_xml = self.preset_manager.load_responsebody(mfid, equid)
@@ -781,7 +783,6 @@ class AtomService:
         active_sessions = self.session_manager.get_active_sessions()
         state = 'idle'
         taskid = ''
-        userid = ''
         feature = ''
         stc = 0
 
@@ -790,7 +791,6 @@ class AtomService:
             session = active_sessions[0]
             state = 'busy'
             taskid = session.taskid
-            userid = self.config.soap_userid
             stc = session.fscan_params.get('stc', 0)
             # 根据 mode 确定 feature
             mode = session.fscan_params.get('mode', 'fscan')
@@ -811,7 +811,7 @@ class AtomService:
             equname=equname,
             state=state,
             taskid=taskid,
-            userid=userid,
+            userid=userid or self.config.soap_userid,
             feature=feature,
             stc=stc
         )

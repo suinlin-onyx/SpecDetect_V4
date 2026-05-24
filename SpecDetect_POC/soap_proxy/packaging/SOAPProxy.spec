@@ -56,7 +56,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='SOAPProxy_v1.1.7',
+    name='SOAPProxy_v1.1.8',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
