@@ -19,7 +19,7 @@ setlocal enabledelayedexpansion
 REM ========================================
 REM Versions (update manually)
 REM ========================================
-set "ATOM_VERSION=1.2.4"
+set "ATOM_VERSION=1.2.5"
 set "PROXY_VERSION=1.1.8"
 
 REM ========================================

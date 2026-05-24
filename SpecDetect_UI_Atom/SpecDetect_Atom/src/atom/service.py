@@ -767,12 +767,43 @@ class AtomService:
         mfname = mfname_match.group(1).strip() if mfname_match else 'Unknown'
         equname = equname_match.group(1).strip() if equname_match else 'Unknown'
 
+        # 检查是否有活动测量
+        active_sessions = self.session_manager.get_active_sessions()
+        state = 'idle'
+        taskid = ''
+        userid = ''
+        feature = ''
+        stc = 0
+
+        if active_sessions:
+            # 使用最新的活动 session 信息
+            session = active_sessions[0]
+            state = 'busy'
+            taskid = session.taskid
+            userid = self.config.soap_userid
+            stc = session.fscan_params.get('stc', 0)
+            # 根据 mode 确定 feature
+            mode = session.fscan_params.get('mode', 'fscan')
+            if mode == 'fscan':
+                feature = 'B_FScan'
+            elif mode == 'pscan':
+                feature = 'B_PScan'
+            elif mode == 'mscan':
+                feature = 'B_MScan'
+            elif mode == 'sglfreq':
+                feature = 'B_SglFreqMeas'
+
         return self.preset_manager.build_response(
             'B_QueryFaciDevStat',
             mfid=mfid,
             mfname=mfname,
             equid=equid,
-            equname=equname
+            equname=equname,
+            state=state,
+            taskid=taskid,
+            userid=userid,
+            feature=feature,
+            stc=stc
         )
 
     def _handle_undefined_interface(self, method: str) -> bytes:

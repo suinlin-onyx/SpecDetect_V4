@@ -225,3 +225,22 @@ class SessionManager:
             self.sessions.clear()
             self.taskid_to_session.clear()
             self.pending_sessions.clear()
+
+    def get_active_sessions(self) -> list:
+        """获取所有活动状态的 session
+
+        用于 B_QueryFaciDevStat 确定设备是否正在测量
+
+        Returns:
+            活动 session 列表（ACTIVE 状态）
+        """
+        with self.lock:
+            active = []
+            for session in self.sessions.values():
+                if session.state == SessionState.ACTIVE:
+                    active.append(session)
+            # 也检查 pending sessions（Sink 模式启动时先创建 pending 再激活）
+            for session in self.pending_sessions:
+                if session.state == SessionState.ACTIVE and session not in active:
+                    active.append(session)
+            return active
