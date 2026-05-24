@@ -38,11 +38,11 @@ if sys.platform == 'win32':
 # 配置
 SOAP_PORT = 8283
 STREAMSRC_PORT = 18013
-#TARGET_HOST = '127.0.0.1'
-#TARGET_PORT = 9997  # 使用 9997 端口（emulated_atom 专用测试通道）
+TARGET_HOST = '127.0.0.1'
+TARGET_PORT = 9997  # 使用 9997 端口（emulated_atom 专用测试通道）
 # TARGET_PORT = 9996  # 使用 9996 端口（与真实 Atom 相同）
-TARGET_HOST = '100.72.95.36'  # 目标设备IP
-TARGET_PORT = 1449             # 目标设备端口
+#TARGET_HOST = '100.72.95.36'  # 目标设备IP
+#TARGET_PORT = 1449             # 目标设备端口
 
 # 设备信息缓存目录
 DEVINFO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'devinfo')
@@ -853,75 +853,88 @@ def build_pscan_spectrum_frame(spectrum_data: list, start_freq: int = 80000000, 
 
 
 class BandCollector:
-    """三频段收集器 - 使用 Queue 实现严格 FIFO 同步
+    """三频段收集器 - 简化版
 
-    设备持续发送频段数据（可能乱序），此收集器确保：
-    1. 按收到顺序处理每帧数据
-    2. 只有凑齐完整三频段才输出（顺序: Band1 → Band2 → Band3）
-    3. 线程安全，支持多生产者/单消费者
+    核心逻辑：当同一 band 的新帧到达时，说明上一轮结束了
+    1. 存入 current_round
+    2. 如果该 band 已有数据，先输出上一轮
+    3. 凑齐三个 band 时输出
+    4. 超时兜底
     """
 
-    def __init__(self, timeout=2.0):
+    def __init__(self, timeout=5.0):
         import queue
-        self._input_queue = queue.Queue(maxsize=200)  # 输入队列
-        self._output_queue = queue.Queue(maxsize=10)  # 输出队列（完整三频段组）
-        self._band_buffer = {}  # 当前缓冲: {start_index: band_data}
-        self._timeout = timeout  # 超时时间（秒）
-        self._logger_thread = None
-        self._running = False
+        self._input_queue = queue.Queue(maxsize=200)
+        self._output_queue = queue.Queue(maxsize=10)
+        self._timeout = timeout
+        self._current_round = {0: None, 512: None, 1024: None}
+        self._round_start_time = None
 
     def put(self, band_info):
-        """放入一个频段数据（通常在接收线程中调用）"""
         self._input_queue.put(band_info)
-        self.process_input()  # 自动处理，尝试组成完整三频段
+        self.process_input()
 
     def get(self):
-        """获取完整三频段组（阻塞等待）
-
-        Returns:
-            list: [Band1, Band2, Band3] 按顺序排列的频段列表
-            None: 超时返回 None
-        """
-        # 先处理已有输入，避免长时间阻塞
         self.process_input()
+        if self._round_start_time is not None:
+            if time.time() - self._round_start_time > self._timeout:
+                self._do_output()
         try:
-            return self._output_queue.get(timeout=self._timeout)
+            return self._output_queue.get(timeout=0.1)
         except:
             return None
 
     def process_input(self):
-        """处理输入队列，尝试组成完整三频段（在消费者线程中调用）"""
         try:
-            # 非阻塞尝试从输入队列获取数据
             while True:
                 try:
-                    band = self._input_queue.get_nowait()
-                    start_idx = band['counters'][2]
-                    self._band_buffer[start_idx] = band
+                    band_info = self._input_queue.get_nowait()
                 except:
                     break
 
-            # 检查是否完整
-            if 0 in self._band_buffer and 512 in self._band_buffer and 1024 in self._band_buffer:
-                complete = [
-                    self._band_buffer[0],
-                    self._band_buffer[512],
-                    self._band_buffer[1024]
-                ]
-                self._output_queue.put(complete)
-                self._band_buffer.clear()
+                start_idx = band_info['counters'][2]
+                tm_stamp = band_info.get('_tm_stamp', 0)
+                band_name = 'B1' if start_idx == 0 else 'B2' if start_idx == 512 else 'B3'
+
+                if self._current_round[start_idx] is not None:
+                    prev_tm = self._current_round[start_idx][0]
+                    log(f"[BandCollector] {band_name} retransmit: prev=0x{prev_tm:016x}, new=0x{tm_stamp:016x}, 输出上一轮")
+                    self._do_output()
+
+                self._current_round[start_idx] = (tm_stamp, band_info)
+                if self._round_start_time is None:
+                    self._round_start_time = time.time()
+                log(f"[BandCollector] {band_name} tm=0x{tm_stamp:016x} 缓冲, keys={list(k for k,v in self._current_round.items() if v)}")
+
+                if all(v is not None for v in self._current_round.values()):
+                    self._do_output()
 
         except Exception as e:
             log(f"BandCollector process_input 错误: {e}")
 
+    def _do_output(self):
+        complete = []
+        for idx in [0, 512, 1024]:
+            if self._current_round[idx] is not None:
+                _, band_info = self._current_round[idx]
+                complete.append(band_info)
+
+        if len(complete) > 0:
+            self._output_queue.put(complete)
+            tm_stamps = [b.get('_tm_stamp', 0) for b in complete]
+            log(f"[BandCollector] 输出: {len(complete)}/3 频段, tm=[0x{min(tm_stamps):016x}, 0x{max(tm_stamps):016x}]")
+
+        self._current_round = {0: None, 512: None, 1024: None}
+        self._round_start_time = None
+
     def clear(self):
-        """清空缓冲"""
         while not self._input_queue.empty():
             try:
                 self._input_queue.get_nowait()
             except:
                 break
-        self._band_buffer.clear()
+        self._current_round = {0: None, 512: None, 1024: None}
+        self._round_start_time = None
         while not self._output_queue.empty():
             try:
                 self._output_queue.get_nowait()
@@ -929,14 +942,14 @@ class BandCollector:
                 break
 
     def get_status(self):
-        """获取状态信息"""
+        pending_keys = [k for k, v in self._current_round.items() if v is not None]
         return {
             'input_size': self._input_queue.qsize(),
             'output_size': self._output_queue.qsize(),
-            'buffer_keys': list(self._band_buffer.keys()),
-            'has_band1': 0 in self._band_buffer,
-            'has_band2': 512 in self._band_buffer,
-            'has_band3': 1024 in self._band_buffer,
+            'pending_keys': pending_keys,
+            'has_band1': self._current_round.get(0) is not None,
+            'has_band2': self._current_round.get(512) is not None,
+            'has_band3': self._current_round.get(1024) is not None,
         }
 
 
@@ -1892,6 +1905,7 @@ def send_to_target(xml_content: str, timeout: float = 5.0) -> Optional[bytes]:
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
+        sock.bind(('0.0.0.0', 15151))
         sock.connect((TARGET_HOST, TARGET_PORT))
         log(f"已连接到目标设备 {TARGET_HOST}:{TARGET_PORT}")
 
@@ -2415,6 +2429,9 @@ class EmulatedAtomService:
                 recv_buffer = recv_buffer[total_frame_len:]
 
                 if n_msg_type in (0, 29):
+                    # 提取 tm_stamp 用于验证轮次
+                    tm_stamp = struct.unpack('<Q', frame_data[4:12])[0]
+
                     payload = frame_data[18:]
                     result = self._parse_single_fscan_frame(payload)
                     if result is None or result[0] is None:
@@ -2424,10 +2441,15 @@ class EmulatedAtomService:
                     if len(spectrum) < 100:
                         continue
 
+                    start_idx = counters[2]
+                    band_name = 'B1' if start_idx == 0 else 'B2' if start_idx == 512 else 'B3' if start_idx == 1024 else f'B?'
+                    log(f"[RMCP->] tm_stamp=0x{tm_stamp:016x} {band_name} start_idx={start_idx} 已收到")
+
                     band_info = {
                         'levels': spectrum,
                         'counters': counters,
-                        'n_arrays': len(spectrum)
+                        'n_arrays': len(spectrum),
+                        '_tm_stamp': tm_stamp  # 用于验证轮次
                     }
                     band_collector.put(band_info)
                     self.rmcp_logger.log_frame('S->C', frame_data, (TARGET_HOST, TARGET_PORT))

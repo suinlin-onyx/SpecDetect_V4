@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="gb2312" ?>
+<config>
+    <log>
+        <logger trace="false" debug="true" info="true" notice="true" warning="true" error="true" />
+    </log>
+     <system>
+	<!--svc port="8182" atomprotocol = "huari" extend="" isquerytask="" msvcurl=""/-->
+	<svc port="8282" atomprotocol = "boer" extend="" mputequstaturl="" puttimeinterval="60" judgebusybymaxtasknum="false" showlog="false"/>
+	<!--svc port="8188" atomprotocol = "rongxing" extend="" outputchanneltype="FTP"/-->
+	<streamsrc ip = "127.0.0.1" port = "18012" />
+    </system>
+   
+</config>

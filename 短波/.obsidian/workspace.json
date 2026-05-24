@@ -1,0 +1,201 @@
+{
+  "main": {
+    "id": "ca68b435d97504f4",
+    "type": "split",
+    "children": [
+      {
+        "id": "80087fbc3e5bf876",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f6ae5d3a74a5f4c2",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "欢迎.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "欢迎"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "efe0a6e8afcffb4a",
+    "type": "split",
+    "children": [
+      {
+        "id": "c62742f5d4e40edf",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "fefab9d1db679bdc",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "3fae79e8673aed75",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "93d6eb8109492d67",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "e900cf5e223f52f2",
+    "type": "split",
+    "children": [
+      {
+        "id": "3a85ec512289f48f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "97465406361ea86c",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "欢迎.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "欢迎 的反向链接列表"
+            }
+          },
+          {
+            "id": "6a709c41dc03688e",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "soap协议/PDF/GWJ001-2015超短波监测管理一体化服务接口规范 平台架构部分.pdf",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "GWJ001-2015超短波监测管理一体化服务接口规范 平台架构部分 的出链列表"
+            }
+          },
+          {
+            "id": "3c406d8e1a20da5e",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "374dda9230453034",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "11beb47b90cb616b",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "soap协议/PDF/GWJ001-2015超短波监测管理一体化服务接口规范 平台架构部分.pdf",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "GWJ001-2015超短波监测管理一体化服务接口规范 平台架构部分 的大纲"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:新建数据库": false
+    }
+  },
+  "active": "fefab9d1db679bdc",
+  "lastOpenFiles": [
+    "soap协议/~$J004-2015超短波监测管理一体化服务接口规范 数据服务部分.docx",
+    "soap协议/PDF/GWJ001-2015超短波监测管理一体化服务接口规范 平台架构部分.pdf",
+    "欢迎.md",
+    "soap协议/PDF/GWJ003-2015超短波监测管理一体化服务接口规范 设备操作服务部分.pdf",
+    "soap协议/PDF/GWJ002-2015超短波监测管理一体化服务接口规范 服务和接口部分.pdf",
+    "soap协议/PDF/工信部无2016379号-1超短波监测管理服务接口规范.pdf",
+    "无线电协议2.0/RX-RMCPTP_通信协议v2.0_通用协议_整理.md",
+    "soap协议/PDF/附件1：《超短波监测管理一体化平台技术规范 第3部分：设备操作服务》SOAP报文结构补充说明1.pdf",
+    "soap协议/PDF/GWJ006-2016超短波频段监测基础数据存储结构技术规范.pdf",
+    "soap协议/PDF/GWJ004-2015超短波监测管理一体化服务接口规范 数据服务部分.pdf",
+    "soap协议/PDF",
+    "soap协议/附件1：《超短波监测管理一体化平台技术规范 第3部分：设备操作服务》SOAP报文结构补充说明1.docx",
+    "soap协议/工信部无2016379号-1超短波监测管理服务接口规范.docx"
+  ]
+}

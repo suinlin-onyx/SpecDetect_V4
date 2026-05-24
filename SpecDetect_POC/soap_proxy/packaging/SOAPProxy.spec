@@ -1,16 +1,24 @@
 # -*- mode: python ; coding: utf-8 -*-
-import os
+import glob as _glob
+import os as _os
 
 block_cipher = None
 
 _spec_dir = os.path.abspath(os.path.dirname(SPEC))
 
+# runtime dir is at project root (parent of packaging)
+_runtime_dir = os.path.join(_spec_dir, '..', 'runtime')
+_binaries = []
+if os.path.isdir(_runtime_dir):
+    for _dll in _glob.glob(os.path.join(_runtime_dir, '*.dll')):
+        _binaries.append((_dll, '.'))
+
 a = Analysis(
     ['../transparent_proxy.py'],
     pathex=[_spec_dir],
-    binaries=[],
+    binaries=_binaries,
     datas=[
-        ('../settings.json', '.'),
+        ('../config/proxy_settings.json', 'config'),
     ],
     hiddenimports=[
         'encodings',
@@ -48,7 +56,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='SOAPProxy',
+    name='SOAPProxy_v1.1.7',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

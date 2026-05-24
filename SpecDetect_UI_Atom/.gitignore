@@ -1,0 +1,18 @@
+__pycache__/
+*.pyc
+*.pyo
+*.log
+logs/
+
+# Build artifacts
+build/
+dist/
+main.spec
+runtime/
+config_debug.txt
+
+# Stub binaries
+stub/*.dll
+stub/*.exp
+stub/*.lib
+stub/*.obj

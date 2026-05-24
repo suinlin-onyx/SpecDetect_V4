@@ -5,7 +5,7 @@ Atom 服务主类
 整合所有模块，协调 SOAP、streamsrc、RMCP 的交互
 """
 
-__version__ = "1.1.6"
+__version__ = "1.2.4"
 
 import socket
 import threading
@@ -128,6 +128,34 @@ class AtomService:
 
         info("Atom 服务已停止", LogTag.ATOM)
 
+    def _get_response_fields(self, request: dict) -> dict:
+        """从请求中提取响应所需字段，优先使用请求值，fallback到配置"""
+        params = request.get('params', {})
+        headers = request.get('headers', {})
+
+        # mfid: 优先从 params 获取，否则从 URL path 提取
+        mfid = params.get('mfid', '')
+        if not mfid:
+            path = headers.get('path', '')
+            if path:
+                parts = path.strip('/').split('/')
+                if parts:
+                    mfid = parts[0]
+
+        # equid: 优先从 params 获取，否则从设备预置按 mfid 查找
+        equid = params.get('equid', '')
+        if not equid and mfid:
+            equid = self.preset_manager.get_equid_for_mfid(mfid)
+
+        # appid/userid: 优先从 params 获取，否则用配置
+        appid = params.get('appid', '') or self.config.soap_appid
+        userid = params.get('userid', '') or self.config.soap_userid
+
+        # priority: 从请求中提取，默认 0
+        priority = int(params.get('priority', 0))
+
+        return {'mfid': mfid, 'equid': equid, 'appid': appid, 'userid': userid, 'priority': priority}
+
     def _handle_soap_request(self, request: dict) -> bytes:
         """处理 SOAP 请求"""
         soap_action = request.get('soap_action', '') or request.get('method', '')
@@ -180,7 +208,9 @@ class AtomService:
         """处理 B_FScan 请求"""
         params = request.get('params', {})
         taskid = params.get('taskid', f"FSCAN-{int(time.time())}")
-        stc = int(time.time())  # 生成 STC 值，与 emulated_atom 一致
+        # 优先使用请求中的 STC（Sink 模式下请求方用它校验流数据）
+        outputchannel = params.get('outputchannel', {})
+        stc = int(outputchannel.get('stc', 0)) or int(time.time())
 
         # 获取扫描参数
         fscan_params = {
@@ -195,7 +225,14 @@ class AtomService:
             'func_id': params.get('func_id', 15),  # FSCAN 功能 ID
         }
 
-        # 创建 pending session
+        # 检查 outputchannel 模式
+        channel_mode = outputchannel.get('mode', 'source') if outputchannel else 'source'
+
+        # Sink 模式：直接连接 outputchannel 指定的地址
+        if channel_mode == 'sink':
+            return self._handle_fscan_sink(request, params, fscan_params, taskid, stc, outputchannel)
+
+        # Source 模式（默认）：创建 pending session，等待 streamsrc 客户端连接
         try:
             session = self.session_manager.create_pending(taskid, fscan_params)
         except RuntimeError as e:
@@ -204,15 +241,15 @@ class AtomService:
 
         info(f"B_FScan: taskid={taskid}, stc={stc}, 创建pending session", LogTag.SESSION)
 
-        # 使用模板构建响应
+        rf = self._get_response_fields(request)
         return self.preset_manager.build_response(
             'B_FScan',
-            appid=self.config.soap_appid,
-            userid=self.config.soap_userid,
+            appid=rf['appid'],
+            userid=rf['userid'],
             taskid=taskid,
-            mfid='53090001140012',
-            equid='51cd8dfe-e543-40c9-bdc3-a292766fee7f',
-            priority=9,
+            mfid=rf['mfid'],
+            equid=rf['equid'],
+            priority=rf['priority'],
             executetime=0,
             startfreq=fscan_params['startfreq'],
             stopfreq=fscan_params['stopfreq'],
@@ -226,11 +263,290 @@ class AtomService:
             outputchannel_stc=stc
         )
 
+    def _handle_fscan_sink(self, request: dict, params: dict, fscan_params: dict, taskid: str, stc: int, outputchannel: dict) -> bytes:
+        """处理 B_FScan Sink 模式 - Atom 作为客户端主动连接 outputchannel"""
+        sink_host = outputchannel.get('host', '')
+        sink_port = outputchannel.get('port', 0)
+
+        if not sink_host or not sink_port:
+            error(f"B_FScan Sink: 缺少 outputchannel host 或 port", LogTag.SESSION)
+            return self.preset_manager.build_error_response("Sink 模式缺少 outputchannel host 或 port")
+
+        info(f"B_FScan Sink: taskid={taskid}, 连接 {sink_host}:{sink_port}", LogTag.SESSION)
+
+        # 创建到 outputchannel 的 socket 连接
+        sink_socket = None
+        try:
+            sink_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sink_socket.settimeout(10)
+            sink_socket.connect((sink_host, sink_port))
+            info(f"B_FScan Sink: 已连接 {sink_host}:{sink_port}", LogTag.SESSION)
+
+            # 发送 UUID 注册帧（与 RXAtomSvcV3 对齐）
+            from atom.stream.standard_frame import build_uuid_frame
+            uuid_frame = build_uuid_frame(stc)
+            sink_socket.sendall(uuid_frame)
+            info(f"B_FScan Sink: 已发送 UUID 注册帧 ({len(uuid_frame)}B)", LogTag.STREAM)
+        except Exception as e:
+            error(f"B_FScan Sink: 连接失败 {sink_host}:{sink_port} - {e}", LogTag.SESSION)
+            if sink_socket:
+                sink_socket.close()
+            return self.preset_manager.build_error_response(f"Sink 连接失败: {e}")
+
+        # 创建 active session（不等待 streamsrc 客户端）
+        try:
+            session = self.session_manager.create_pending(taskid, fscan_params)
+        except RuntimeError as e:
+            error(f"创建 session 失败: {e}", LogTag.SESSION)
+            sink_socket.close()
+            return self.preset_manager.build_error_response(str(e))
+
+        # 设置 sink forwarder（用于主动发送数据）
+        session.outputchannel_forwarder = sink_socket
+
+        # 立即激活 session（不等待 streamsrc 客户端）
+        session.state = SessionState.ACTIVE
+
+        # 启动 sink 模式数据流
+        self._start_sink_stream(session)
+
+        # 返回响应（mode=sink）
+        rf = self._get_response_fields(request)
+        return self.preset_manager.build_response(
+            'B_FScan',
+            appid=rf['appid'],
+            userid=rf['userid'],
+            taskid=taskid,
+            mfid=rf['mfid'],
+            equid=rf['equid'],
+            priority=rf['priority'],
+            executetime=0,
+            startfreq=fscan_params['startfreq'],
+            stopfreq=fscan_params['stopfreq'],
+            step=fscan_params['step'],
+            gain=fscan_params['gain'],
+            scanmode=fscan_params['scanmode'],
+            outputchannel_mode='sink',
+            outputchannel_datachannel='stream',
+            outputchannel_host=sink_host,
+            outputchannel_port=sink_port,
+            outputchannel_stc=stc
+        )
+
+    def _start_sink_stream(self, session: StreamSession):
+        """启动 Sink 模式数据流
+
+        与 _match_and_start_stream 类似，但不等待 streamsrc 客户端连接。
+        直接连接 RMCP 设备并启动数据接收和推送。
+        """
+        if getattr(session, '_fscan_request_sent', False):
+            info(f"session 已启动过，跳过: taskid={session.taskid}", LogTag.STREAM)
+            return
+        session._fscan_request_sent = True
+
+        info(f"Sink 模式启动数据流: taskid={session.taskid}", LogTag.STREAM)
+
+        # 连接 RMCP 设备
+        rmcp_client = RMCPClient(
+            host=self.config.device_host,
+            port=self.config.device_port,
+            timeout=10
+        )
+
+        if not rmcp_client.connect():
+            error(f"连接设备失败: {self.config.device_host}:{self.config.device_port}", LogTag.RMCP)
+            session.close_all()
+            return
+
+        session.attach_target(rmcp_client)
+        info(f"已连接设备: {self.config.device_host}:{self.config.device_port}", LogTag.RMCP)
+
+        # 构建 RMCP 请求
+        xml_content = self._build_rmcp_request(session.fscan_params)
+        func_id = session.fscan_params.get('func_id', 15)
+        info(f"[RMCP->] 发送RMCP请求内容:\n{xml_content}", LogTag.RMCP)
+
+        # 构建原始帧用于发送
+        xml_bytes = xml_content.encode('gb2312')
+        raw_frame = build_rmcp_frame(xml_bytes, MSG_TYPE_REQUEST, func_id)
+
+        if not rmcp_client.send_raw_frame(raw_frame):
+            error(f"发送 RMCP 请求失败", LogTag.RMCP)
+            session.close_all()
+            return
+
+        info(f"已发送 RMCP 请求: {session.taskid}", LogTag.RMCP)
+
+        # 启动数据接收线程
+        self._start_rmcp_receive(session, rmcp_client)
+
+        # 启动 Sink 推送线程
+        self._start_sink_push(session)
+
+    def _start_sink_push(self, session: StreamSession):
+        """启动 Sink 模式推送线程
+
+        从 band_collector 获取数据，封帧后发送到 outputchannel_forwarder。
+        与 StreamSrcServer._start_push 类似，但只发送给 outputchannel_forwarder。
+        """
+        # 导入标准帧构建函数 + 私有元数据（Sink 模式专用）
+        from atom.stream.standard_frame import build_fscan_frame as build_std_fscan
+        from atom.stream.frame import _get_band_metadata
+
+        def sink_push_loop():
+            session.push_running = True
+            mode = session.fscan_params.get('mode', 'fscan')
+            info(f"[SINK] 推送线程启动: taskid={session.taskid}, mode={mode}", LogTag.STREAM)
+
+            band_collector = session.get_band_collector()
+            sglfreq_frame_count = 0
+            push_count = 0
+
+            while not session._stop_event.is_set():
+                try:
+                    push_count += 1
+                    if mode == 'fscan':
+                        all_bands = band_collector.get()
+                        if not all_bands:
+                            if push_count % 50 == 1:
+                                info(f"[SINK] push_loop 运行中 #{push_count}: 等待band数据...", LogTag.STREAM)
+                            continue
+
+                        # 使用标准 GWJ004 帧格式 + RXAtomSvcV3 对齐的私有元数据
+                        stc = session.fscan_params.get('stc', 0)
+
+                        for band in all_bands:
+                            start_idx = band.get('counters', [0, 0, 0])[2]
+                            levels = band.get('levels', [])
+                            metadata = _get_band_metadata(start_idx)
+                            frame = build_std_fscan(
+                                levels_int16=levels,
+                                metadata=metadata,
+                                stc=stc,
+                            )
+                            info(f"[SINK] Band{1 if start_idx == 0 else 2 if start_idx == 512 else 3}: {len(levels)}点 frame={len(frame)}B", LogTag.STREAM)
+                            if frame and session.outputchannel_forwarder:
+                                try:
+                                    sent = session.outputchannel_forwarder.send(frame)
+                                    if sent > 0:
+                                        session.outputchannel_frame_count += 1
+                                except Exception as e:
+                                    info(f"[SINK] 发送帧失败: {e}", LogTag.STREAM)
+                                    session._stop_event.set()
+                                    break
+
+                    elif mode == 'mscan':
+                        data_queue = getattr(session, '_mscan_data_queue', None)
+                        if data_queue:
+                            try:
+                                band_info = data_queue.get(timeout=3.0)
+                            except Exception:
+                                if push_count % 10 == 1:
+                                    info(f"[SINK] push_loop #{push_count}: MScan等待数据超时", LogTag.STREAM)
+                                continue
+                        else:
+                            time.sleep(0.1)
+                            continue
+
+                        if not band_info or not band_info.get('levels'):
+                            continue
+                        raw_level = band_info['levels'][0]
+                        if raw_level == 0:
+                            continue
+
+                        session._latest_band_info = band_info
+
+                        if self._push_frame:
+                            frame = self._push_frame(session, None)
+                            if frame and session.outputchannel_forwarder:
+                                try:
+                                    sent = session.outputchannel_forwarder.send(frame)
+                                    if sent > 0:
+                                        session.outputchannel_frame_count += 1
+                                except Exception as e:
+                                    info(f"[SINK] 发送帧失败: {e}", LogTag.STREAM)
+                                    session._stop_event.set()
+                                    break
+                                levels = band_info.get('levels', [])
+                                info(f"[SINK] MSCAN: {len(frame)}B, levels={len(levels)}点", LogTag.STREAM)
+
+                    elif mode == 'sglfreq':
+                        data_queue = getattr(session, '_sglfreq_data_queue', None)
+                        if data_queue:
+                            try:
+                                band_info = data_queue.get(timeout=3.0)
+                            except Exception:
+                                if push_count % 10 == 1:
+                                    info(f"[SINK] push_loop #{push_count}: SglFreq等待数据超时", LogTag.STREAM)
+                                continue
+                        else:
+                            time.sleep(0.1)
+                            continue
+
+                        if not band_info or not band_info.get('levels'):
+                            continue
+
+                        session._latest_band_info = band_info
+
+                        if self._push_frame:
+                            for frame_idx in range(3):
+                                frame = self._push_frame(session, None)
+                                if frame and session.outputchannel_forwarder:
+                                    try:
+                                        sent = session.outputchannel_forwarder.send(frame)
+                                        if sent > 0:
+                                            session.outputchannel_frame_count += 1
+                                    except Exception as e:
+                                        info(f"[SINK] 发送帧失败: {e}", LogTag.STREAM)
+                                        session._stop_event.set()
+                                        break
+                                    sglfreq_frame_count += 1
+                                    info(f"[SINK] SglFreq#{sglfreq_frame_count} {len(frame)}B", LogTag.STREAM)
+
+                    elif mode == 'pscan':
+                        data_event = getattr(session, '_pscan_data_event', None)
+                        if data_event:
+                            got_data = data_event.wait(timeout=3.0)
+                            data_event.clear()
+                            if not got_data:
+                                if push_count % 10 == 1:
+                                    info(f"[SINK] push_loop #{push_count}: PScan等待数据超时", LogTag.STREAM)
+                                continue
+
+                        band = getattr(session, '_pscan_band', None)
+                        if band and self._push_frame:
+                            frame = self._push_frame(session, band)
+                            if frame and session.outputchannel_forwarder:
+                                try:
+                                    sent = session.outputchannel_forwarder.send(frame)
+                                    if sent > 0:
+                                        session.outputchannel_frame_count += 1
+                                except Exception as e:
+                                    info(f"[SINK] 发送帧失败: {e}", LogTag.STREAM)
+                                    session._stop_event.set()
+                                    break
+                                levels = band.get('levels', [])
+                                info(f"[SINK] PScan: {len(frame)}B, levels={len(levels)}点", LogTag.STREAM)
+
+                except Exception as e:
+                    info(f"[SINK] 推送错误: {e}", LogTag.STREAM)
+                    break
+
+            session.push_running = False
+            session._stop_event.clear()
+            if band_collector:
+                band_collector.clear()
+            info(f"[SINK] 推送线程结束: taskid={session.taskid}", LogTag.STREAM)
+
+        session.push_thread = threading.Thread(target=sink_push_loop, daemon=True)
+        session.push_thread.start()
+
     def _handle_pscan(self, request: dict) -> bytes:
         """处理 B_PScan - 频点扫描"""
         params = request.get('params', {})
         taskid = params.get('taskid', f"PSCAN-{int(time.time())}")
-        stc = int(time.time())
+        outputchannel = params.get('outputchannel', {})
+        stc = int(outputchannel.get('stc', 0)) or int(time.time())
 
         # 获取扫描参数
         pscan_params = {
@@ -253,14 +569,15 @@ class AtomService:
 
         info(f"B_PScan: taskid={taskid}, stc={stc}, 创建pending session", LogTag.SESSION)
 
+        rf = self._get_response_fields(request)
         return self.preset_manager.build_response(
             'B_PScan',
-            appid=self.config.soap_appid,
-            userid=self.config.soap_userid,
+            appid=rf['appid'],
+            userid=rf['userid'],
             taskid=taskid,
-            mfid='53090001140012',
-            equid='51cd8dfe-e543-40c9-bdc3-a292766fee7f',
-            priority=9,
+            mfid=rf['mfid'],
+            equid=rf['equid'],
+            priority=rf['priority'],
             executetime=0,
             startfreq=pscan_params['startfreq'],
             stopfreq=pscan_params['stopfreq'],
@@ -277,7 +594,8 @@ class AtomService:
         """处理 B_MScan - 单频点扫描"""
         params = request.get('params', {})
         taskid = params.get('taskid', f"MSCAN-{int(time.time())}")
-        stc = int(time.time())
+        outputchannel = params.get('outputchannel', {})
+        stc = int(outputchannel.get('stc', 0)) or int(time.time())
 
         # 获取扫描参数
         mscan_params = {
@@ -298,14 +616,15 @@ class AtomService:
 
         info(f"B_MScan: taskid={taskid}, stc={stc}, 创建pending session", LogTag.SESSION)
 
+        rf = self._get_response_fields(request)
         return self.preset_manager.build_response(
             'B_MScan',
-            appid=self.config.soap_appid,
-            userid=self.config.soap_userid,
+            appid=rf['appid'],
+            userid=rf['userid'],
             taskid=taskid,
-            mfid='53090001140012',
-            equid='51cd8dfe-e543-40c9-bdc3-a292766fee7f',
-            priority=9,
+            mfid=rf['mfid'],
+            equid=rf['equid'],
+            priority=rf['priority'],
             executetime=0,
             frequency=mscan_params['frequency'],
             ifbw=mscan_params['ifbw'],
@@ -321,7 +640,8 @@ class AtomService:
         """处理 B_SglFreqMeas - 扫频频谱观测 (三帧循环: 频谱+电平+ITU)"""
         params = request.get('params', {})
         taskid = params.get('taskid', f"SGLFREQ-{int(time.time())}")
-        stc = int(time.time())
+        outputchannel = params.get('outputchannel', {})
+        stc = int(outputchannel.get('stc', 0)) or int(time.time())
 
         # 获取扫描参数
         sglfreq_params = {
@@ -342,14 +662,15 @@ class AtomService:
 
         info(f"B_SglFreqMeas: taskid={taskid}, stc={stc}, 创建pending session", LogTag.SESSION)
 
+        rf = self._get_response_fields(request)
         return self.preset_manager.build_response(
             'B_SglFreqMeas',
-            appid=self.config.soap_appid,
-            userid=self.config.soap_userid,
+            appid=rf['appid'],
+            userid=rf['userid'],
             taskid=taskid,
-            mfid='53090001140012',
-            equid='51cd8dfe-e543-40c9-bdc3-a292766fee7f',
-            priority=9,
+            mfid=rf['mfid'],
+            equid=rf['equid'],
+            priority=rf['priority'],
             executetime=0,
             frequency=sglfreq_params['frequency'],
             ifbw=sglfreq_params['ifbw'],
@@ -378,13 +699,14 @@ class AtomService:
                 self.session_manager.close_session(session)
                 info(f"B_StopMeas: 关闭 session {taskid}", LogTag.SESSION)
 
+        rf = self._get_response_fields(request)
         return self.preset_manager.build_response(
             'B_StopMeas',
-            appid=self.config.soap_appid,
-            userid=self.config.soap_userid,
+            appid=rf['appid'],
+            userid=rf['userid'],
             taskid=taskid or 'N/A',
-            mfid='53090001140012',
-            equid='51cd8dfe-e543-40c9-bdc3-a292766fee7f'
+            mfid=rf['mfid'],
+            equid=rf['equid']
         )
 
     def _handle_query_device(self, request: dict) -> bytes:

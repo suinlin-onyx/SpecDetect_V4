@@ -1,0 +1,10 @@
+{
+  "soap_proxy": {
+    "listen_port": 8284,
+    "target_host": "127.0.0.1",
+    "target_port": 8282
+  },
+  "log": {
+    "dir": "logs"
+  }
+}

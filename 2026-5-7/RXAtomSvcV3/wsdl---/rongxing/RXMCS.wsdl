@@ -1,0 +1,746 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="RXMCS"
+ targetNamespace="RXMCS"
+ xmlns:tns="RXMCS"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:srrc="http://www.srrc.org.cn"
+ xmlns:ns1="RXMCS"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:HTTP="http://schemas.xmlsoap.org/wsdl/http/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="http://www.srrc.org.cn"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:srrc="http://www.srrc.org.cn"
+  xmlns:ns1="RXMCS"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="RXMCS"/>
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <complexType name="MonitorHeader"><!-- srrc__MonitorHeader -->
+   <sequence>
+     <element ref="srrc:TransId" minOccurs="0" maxOccurs="1"/><!-- srrc__MonitorHeader::srrc__TransId -->
+     <element ref="srrc:BizKey" minOccurs="0" maxOccurs="1"/><!-- srrc__MonitorHeader::srrc__BizKey -->
+     <element ref="srrc:PSCode" minOccurs="0" maxOccurs="1"/><!-- srrc__MonitorHeader::srrc__PSCode -->
+     <element ref="srrc:BSCode" minOccurs="0" maxOccurs="1"/><!-- srrc__MonitorHeader::srrc__BSCode -->
+     <element ref="srrc:appCode" minOccurs="0" maxOccurs="1"/><!-- srrc__MonitorHeader::srrc__appCode -->
+     <element ref="srrc:appName" minOccurs="0" maxOccurs="1"/><!-- srrc__MonitorHeader::srrc__appName -->
+     <element ref="srrc:platFormCode" minOccurs="0" maxOccurs="1"/><!-- srrc__MonitorHeader::srrc__platFormCode -->
+     <element ref="srrc:platFormName" minOccurs="0" maxOccurs="1"/><!-- srrc__MonitorHeader::srrc__platFormName -->
+     <element ref="srrc:resCode1" minOccurs="0" maxOccurs="1"/><!-- srrc__MonitorHeader::srrc__resCode1 -->
+     <element ref="srrc:resCode2" minOccurs="0" maxOccurs="1"/><!-- srrc__MonitorHeader::srrc__resCode2 -->
+   </sequence>
+  </complexType>
+  <complexType name="ProviderResponse"><!-- srrc__ProviderResponse -->
+   <sequence>
+     <element ref="srrc:bizResCd" minOccurs="0" maxOccurs="1"/><!-- srrc__ProviderResponse::srrc__bizResCd -->
+     <element ref="srrc:bizResText" minOccurs="0" maxOccurs="1"/><!-- srrc__ProviderResponse::srrc__bizResText -->
+   </sequence>
+  </complexType>
+  <complexType name="item"><!-- srrc__item -->
+   <sequence>
+     <element ref="srrc:paraname" minOccurs="0" maxOccurs="1"/><!-- srrc__item::srrc__paraname -->
+     <element ref="srrc:paravalue" minOccurs="0" maxOccurs="1"/><!-- srrc__item::srrc__paravalue -->
+   </sequence>
+  </complexType>
+  <complexType name="items"><!-- srrc__items -->
+   <sequence>
+     <element ref="srrc:item" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__items::__sizeitem -->
+   </sequence>
+  </complexType>
+    <complexType name="lt"><!-- srrc__lt -->
+   <sequence>
+     <element ref="srrc:longitude" minOccurs="0" maxOccurs="1"/><!-- srrc__lt::srrc__longitude -->
+     <element ref="srrc:latitude" minOccurs="0" maxOccurs="1"/><!-- srrc__lt::srrc__latitude -->
+   </sequence>
+  </complexType>
+  <complexType name="rb"><!-- srrc__rb -->
+   <sequence>
+     <element ref="srrc:longitude" minOccurs="0" maxOccurs="1"/><!-- srrc__rb::srrc__longitude -->
+     <element ref="srrc:latitude" minOccurs="0" maxOccurs="1"/><!-- srrc__rb::srrc__latitude -->
+   </sequence>
+  </complexType>
+  <complexType name="rectangle"><!-- srrc__rectangle -->
+   <sequence>
+     <element ref="srrc:lt" minOccurs="0" maxOccurs="1"/><!-- srrc__rectangle::srrc__lt -->
+     <element ref="srrc:rb" minOccurs="0" maxOccurs="1"/><!-- srrc__rectangle::srrc__rb -->
+   </sequence>
+  </complexType>
+  
+  <complexType name="taskids"><!-- srrc__taskids -->
+   <sequence>
+     <element ref="srrc:itemname" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__taskids::srrc__itemcommon -->
+   </sequence>
+  </complexType>
+  <complexType name="userids"><!-- srrc__userids -->
+   <sequence>
+     <element ref="srrc:itemname" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__userids::srrc__itemcommon -->
+   </sequence>
+  </complexType>
+  <complexType name="mfids"><!-- srrc__mfids -->
+   <sequence>
+     <element ref="srrc:itemname" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__mfids::srrc__itemcommon -->
+   </sequence>
+  </complexType>
+  <complexType name="equids"><!-- srrc__equids -->
+   <sequence>
+     <element ref="srrc:itemname" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__equids::srrc__itemcommon -->
+   </sequence>
+  </complexType>
+  <complexType name="features"><!-- srrc__features -->
+   <sequence>
+     <element ref="srrc:itemname" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__features::srrc__itemcommon -->
+   </sequence>
+  </complexType>
+  <complexType name="appids"><!-- srrc__appids -->
+   <sequence>
+     <element ref="srrc:itemname" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__appids::srrc__itemcommon -->
+   </sequence>
+  </complexType>
+  <complexType name="statuss"><!-- srrc__statuss -->
+   <sequence>
+     <element ref="srrc:itemname" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__statuss::srrc__itemcommon -->
+   </sequence>
+  </complexType>
+  <complexType name="outfields"><!-- srrc__outfields -->
+   <sequence>
+     <element ref="srrc:itemname" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__outfields::srrc__itemcommon -->
+   </sequence>
+  </complexType>
+  <complexType name="groupitem"><!-- srrc__groupitem -->
+   <sequence>
+     <element ref="srrc:groupid" minOccurs="0" maxOccurs="1"/><!-- srrc__groupitem::srrc__groupid -->
+     <element ref="srrc:items" minOccurs="0" maxOccurs="1"/><!-- srrc__groupitem::srrc__items -->
+   </sequence>
+  </complexType>
+  <complexType name="groupitems"><!-- srrc__groupitems -->
+   <sequence>
+     <element ref="srrc:groupitem" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__groupitems::__sizegroupitem -->
+   </sequence>
+  </complexType>
+  <complexType name="equpara"><!-- srrc__equpara -->
+   <sequence>
+     <element ref="srrc:items" minOccurs="0" maxOccurs="1"/><!-- srrc__equpara::srrc__items -->
+     <element ref="srrc:groupitems" minOccurs="0" maxOccurs="1"/><!-- srrc__equpara::srrc__groupitems -->
+   </sequence>
+  </complexType>
+  <complexType name="exinfo"><!-- srrc__exinfo -->
+   <sequence>
+     <element ref="srrc:item" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__exinfo::__sizeitem -->
+   </sequence>
+  </complexType>
+  <complexType name="outputchannel"><!-- srrc__outputchannel -->
+   <sequence>
+     <element ref="srrc:mode" minOccurs="0" maxOccurs="1"/><!-- srrc__outputchannel::srrc__mode -->
+     <element ref="srrc:datachannel" minOccurs="0" maxOccurs="1"/><!-- srrc__outputchannel::srrc__datachannel -->
+     <element ref="srrc:host" minOccurs="0" maxOccurs="1"/><!-- srrc__outputchannel::srrc__host -->
+     <element ref="srrc:port" minOccurs="0" maxOccurs="1"/><!-- srrc__outputchannel::srrc__port -->
+     <element ref="srrc:stc" minOccurs="0" maxOccurs="1"/><!-- srrc__outputchannel::srrc__stc -->
+     <element ref="srrc:password" minOccurs="0" maxOccurs="1"/><!-- srrc__outputchannel::srrc__password -->
+     <element ref="srrc:user" minOccurs="0" maxOccurs="1"/><!-- srrc__outputchannel::srrc__user -->
+     <element ref="srrc:file" minOccurs="0" maxOccurs="1"/><!-- srrc__outputchannel::srrc__file -->
+     <element ref="srrc:exinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__outputchannel::srrc__exinfo -->
+   </sequence>
+  </complexType>
+  <complexType name="outputchannels"><!-- srrc__outputchannels -->
+   <sequence>
+     <element ref="srrc:outputchannel" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__outputchannels::srrc__outputchannel -->
+   </sequence>
+  </complexType>
+  <complexType name="error"><!-- srrc__error -->
+   <sequence>
+     <element ref="srrc:type" minOccurs="0" maxOccurs="1"/><!-- srrc__error::srrc__type -->
+     <element ref="srrc:code" minOccurs="0" maxOccurs="1"/><!-- srrc__error::srrc__code -->
+     <element ref="srrc:text" minOccurs="0" maxOccurs="1"/><!-- srrc__error::srrc__text -->
+   </sequence>
+  </complexType>
+  <complexType name="requestbody"><!-- srrc__requestbody -->
+   <sequence>
+     <element ref="srrc:appid" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__appid -->
+     <element ref="srrc:userid" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__userid -->
+     <element ref="srrc:priority" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__priority -->
+     <element ref="srrc:executetime" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__executetime -->
+     <element ref="srrc:mfid" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__mfid -->
+	 <element ref="srrc:mfname" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__mfname -->
+	 <element ref="srrc:equname" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__equname -->
+     <element ref="srrc:equid" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__equid -->
+	 <element ref="srrc:mftype" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__mftype -->
+	 <element ref="srrc:areacode" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__areacode -->
+     <element ref="srrc:equpara" minOccurs="1" maxOccurs="1"/><!-- srrc__requestbody::srrc__equpara -->
+     <element ref="srrc:exinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__exinfo -->
+	 <element ref="srrc:outputchannels" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__outputchannels -->
+     <element ref="srrc:feature" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__feature -->
+     <element ref="srrc:taskid" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__taskid -->
+	 <element ref="srrc:baseserviceurl" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__baseserviceurl -->
+	 <element ref="srrc:baseserviceproxyurl" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__baseserviceproxyurl -->
+	 <element ref="srrc:rectangle" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__rectangle -->
+	 <element ref="srrc:taskids" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__taskids -->
+	 <element ref="srrc:userids" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__userids -->
+	 <element ref="srrc:mfids" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__mfids -->
+	 <element ref="srrc:equids" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__equids -->
+	 <element ref="srrc:features" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__features -->
+	 <element ref="srrc:appids" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__appids -->
+	 <element ref="srrc:statuss" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__statuss -->
+	 <element ref="srrc:outfields" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__outfields -->
+	 <element ref="srrc:starttime" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__starttime -->
+	 <element ref="srrc:endtime" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__endtime -->
+	 <element ref="srrc:startrowno" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__startrowno -->
+	 <element ref="srrc:endrowno" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__endrowno --> 
+	 <element ref="srrc:mflistcommon" minOccurs="0" maxOccurs="1"/><!-- srrc__requestbody::srrc__mflistcommon -->
+   </sequence>
+  </complexType>
+  <complexType name="listitem"><!-- srrc__listitem -->
+   <sequence>
+     <element ref="srrc:display" minOccurs="0" maxOccurs="1"/><!-- srrc__listitem::srrc__display -->
+     <element ref="srrc:val" minOccurs="0" maxOccurs="1"/><!-- srrc__listitem::srrc__val -->
+   </sequence>
+  </complexType>
+  <complexType name="listitems"><!-- srrc__listitems -->
+   <sequence>
+     <element ref="srrc:listitem" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__listitems::__sizelistitem -->
+   </sequence>
+  </complexType>
+  <complexType name="range"><!-- srrc__range -->
+   <sequence>
+     <element ref="srrc:startval" minOccurs="0" maxOccurs="1"/><!-- srrc__range::srrc__startval -->
+     <element ref="srrc:stopval" minOccurs="0" maxOccurs="1"/><!-- srrc__range::srrc__stopval -->
+   </sequence>
+  </complexType>
+  <complexType name="parameter"><!-- srrc__parameter -->
+   <sequence>
+     <element ref="srrc:name" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__name -->
+     <element ref="srrc:type" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__type -->
+     <element ref="srrc:advanced" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__advanced -->
+     <element ref="srrc:category" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__category -->
+     <element ref="srrc:defaultvalue" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__defaultvalue -->
+     <element ref="srrc:description" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__description -->
+     <element ref="srrc:displayname" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__displayname -->
+     <element ref="srrc:isbrowsable" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__isbrowsable -->
+     <element ref="srrc:selectonly" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__selectonly -->
+     <element ref="srrc:isreadonly" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__isreadonly -->
+     <element ref="srrc:isgroupset" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__isgroupset -->
+     <element ref="srrc:exinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__exinfo -->
+     <element ref="srrc:range" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__range -->
+     <element ref="srrc:listitems" minOccurs="0" maxOccurs="1"/><!-- srrc__parameter::srrc__listitems -->
+   </sequence>
+  </complexType>
+  <complexType name="input"><!-- srrc__input -->
+   <sequence>
+     <element ref="srrc:parameter" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__input::__sizeparameter -->
+   </sequence>
+  </complexType>
+  <complexType name="featureparam"><!-- srrc__featureparam -->
+   <sequence>
+     <element ref="srrc:code" minOccurs="0" maxOccurs="1"/><!-- srrc__featureparam::srrc__code -->
+     <element ref="srrc:input" minOccurs="0" maxOccurs="1"/><!-- srrc__featureparam::srrc__input -->
+   </sequence>
+  </complexType>
+  <complexType name="featurelistparam"><!-- srrc__featurelistparam -->
+   <sequence>
+     <element ref="srrc:featureparam" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__featurelistparam::__sizefeatureparam -->
+   </sequence>
+  </complexType>
+  <complexType name="featurecode"><!-- srrc__featurecode -->
+   <sequence>
+     <element ref="srrc:code" minOccurs="0" maxOccurs="1"/><!-- srrc__featurecode::srrc__code -->
+	 <element ref="srrc:servicecode" minOccurs="0" maxOccurs="1"/><!-- srrc__featurecode::srrc__servicecode -->
+	 <element ref="srrc:psservicecode" minOccurs="0" maxOccurs="1"/><!-- srrc__featurecode::srrc__psservicecode -->
+	 <element ref="srrc:exinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__featurecode::srrc__exinfo -->
+   </sequence>
+  </complexType>
+  <complexType name="featurelistcode"><!-- srrc__featurelistcode -->
+   <sequence>
+     <element ref="srrc:featurecode" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__featurelistcode::__sizefeaturecode -->
+   </sequence>
+  </complexType>
+  <complexType name="equipmentoutput"><!-- srrc__equipmentoutput -->
+   <sequence>
+     <element ref="srrc:equid" minOccurs="0" maxOccurs="1"/><!-- srrc__equipmentoutput::srrc__equid -->
+	 <element ref="srrc:equname" minOccurs="0" maxOccurs="1"/><!-- srrc__equipmentoutput::srrc__equname -->
+	 <element ref="srrc:equstatus" minOccurs="0" maxOccurs="1"/><!-- srrc__equipmentoutput::srrc__equstatus -->
+	 <element ref="srrc:equtype" minOccurs="0" maxOccurs="1"/><!-- srrc__equipmentoutput::srrc__equtype -->
+	 <element ref="srrc:maxtasknumber" minOccurs="0" maxOccurs="1"/><!-- srrc__equipmentoutput::srrc__maxtasknumber -->
+	 <element ref="srrc:exinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__equipmentoutput::srrc__exinfo -->
+	 <element ref="srrc:featurelistcode" minOccurs="0" maxOccurs="1"/><!-- srrc__equipmentoutput::srrc__featurelistcode -->
+   </sequence>
+  </complexType>
+  <complexType name="equlistoutput"><!-- srrc__equlistoutput -->
+   <sequence>
+     <element ref="srrc:equipmentoutput" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__equlistoutput::srrc__equipmentoutput -->
+   </sequence>
+  </complexType>
+  <complexType name="mfoutput"><!-- srrc__mfoutput -->
+   <sequence>
+     <element ref="srrc:platformcode" minOccurs="0" maxOccurs="1"/><!-- srrc__mfoutput::srrc__platformcode -->
+	 <element ref="srrc:areacode" minOccurs="0" maxOccurs="1"/><!-- srrc__mfoutput::srrc__areacode -->
+	 <element ref="srrc:mfid" minOccurs="0" maxOccurs="1"/><!-- srrc__mfoutput::srrc__mfid -->
+	 <element ref="srrc:mfname" minOccurs="0" maxOccurs="1"/><!-- srrc__mfoutput::srrc__mfname -->
+	 <element ref="srrc:exinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__mfoutput::srrc__exinfo -->
+	 <element ref="srrc:equlistoutput" minOccurs="0" maxOccurs="1"/><!-- srrc__mfoutput::srrc__equlistoutput -->
+   </sequence>
+  </complexType>
+  <complexType name="mflistoutput"><!-- srrc__mflistoutput -->
+   <sequence>
+     <element ref="srrc:mfoutput" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__mflistoutput::srrc__mfoutput -->
+   </sequence>
+  </complexType>
+  <complexType name="featurelist"><!-- srrc__featurelist -->
+   <sequence>
+     <element ref="srrc:feature" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__featurelist::__sizefeature -->
+   </sequence>
+  </complexType>
+  <complexType name="setparameter"><!-- srrc__setparameter -->
+   <sequence>
+     <element ref="srrc:name" minOccurs="0" maxOccurs="1"/><!-- srrc__setparameter::srrc__name -->
+	 <element ref="srrc:range" minOccurs="0" maxOccurs="1"/><!-- srrc__setparameter::srrc__range -->
+	 <element ref="srrc:listitems" minOccurs="0" maxOccurs="1"/><!-- srrc__setparameter::srrc__listitems -->
+   </sequence>
+  </complexType>
+  <complexType name="resultparameter"><!-- srrc__resultparameter -->
+   <sequence>
+     <element ref="srrc:name" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__name -->
+	 <element ref="srrc:type" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__type -->
+	 <element ref="srrc:advanced" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__advanced -->
+	 <element ref="srrc:category" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__category -->
+     <element ref="srrc:defaultvalue" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__defaultvalue -->
+	 <element ref="srrc:description" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__description -->
+	 <element ref="srrc:displayname" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__displayname -->
+	 <element ref="srrc:isbrowsable" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__isbrowsable --> 
+     <element ref="srrc:selectonly" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__selectonly -->
+	 <element ref="srrc:isreadonly" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__isreadonly -->
+	 <element ref="srrc:isgroupset" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__isgroupset -->
+	 <element ref="srrc:exinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__exinfo -->
+	 <element ref="srrc:range" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__range -->
+	 <element ref="srrc:listitems" minOccurs="0" maxOccurs="1"/><!-- srrc__resultparameter::srrc__listitems -->  	 
+   </sequence>
+  </complexType>
+  <complexType name="resultparameters"><!-- srrc__resultparameters -->
+   <sequence>
+     <element ref="srrc:resultparameter" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__resultparameters::srrc__resultparameter --> 
+   </sequence>
+  </complexType>
+   <complexType name="checkrestrict"><!-- srrc__checkrestrict -->
+   <sequence>
+     <element ref="srrc:featurelist" minOccurs="0" maxOccurs="1"/><!-- srrc__checkrestrict::srrc__featurelist -->
+	 <element ref="srrc:setparameter" minOccurs="0" maxOccurs="1"/><!-- srrc__checkrestrict::srrc__setparameter -->
+	 <element ref="srrc:resultparameters" minOccurs="0" maxOccurs="1"/><!-- srrc__checkrestrict::srrc__resultparameters -->
+   </sequence>
+  </complexType>
+  <complexType name="checkrestricts"><!-- srrc__checkrestricts -->
+   <sequence>
+     <element ref="srrc:checkrestrict" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__checkrestricts::__sizecheckrestrict -->
+   </sequence>
+  </complexType>
+  <complexType name="antenna"><!-- srrc__antenna -->
+   <sequence>
+     <element ref="srrc:anteid" minOccurs="0" maxOccurs="1"/><!-- srrc__antenna::srrc__anteid -->
+	 <element ref="srrc:linkmode" minOccurs="0" maxOccurs="1"/><!-- srrc__antenna::srrc__linkmode -->
+	 <element ref="srrc:startfreq" minOccurs="0" maxOccurs="1"/><!-- srrc__antenna::srrc__startfreq -->
+	 <element ref="srrc:stopfreq" minOccurs="0" maxOccurs="1"/><!-- srrc__antenna::srrc__stopfreq -->
+	 <element ref="srrc:antemodel" minOccurs="0" maxOccurs="1"/><!-- srrc__antenna::srrc__antemodel -->
+	 <element ref="srrc:isactiveante" minOccurs="0" maxOccurs="1"/><!-- srrc__antenna::srrc__isactiveante -->
+	 <element ref="srrc:isdirectiveante" minOccurs="0" maxOccurs="1"/><!-- srrc__antenna::srrc__isdirectiveante --> 
+	 <element ref="srrc:polarization" minOccurs="0" maxOccurs="1"/><!-- srrc__antenna::srrc__polarization-->
+	 <element ref="srrc:anteheight" minOccurs="0" maxOccurs="1"/><!-- srrc__antenna::srrc__anteheight -->
+	 <element ref="srrc:exinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__antenna::srrc__exinfo -->
+   </sequence>
+  </complexType>
+   <complexType name="antennalist"><!-- srrc__antennalist -->
+   <sequence>
+     <element ref="srrc:antenna" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__antennalist::__sizeantenna -->
+   </sequence>
+  </complexType>
+  <complexType name="taskoutput"><!-- srrc__taskoutput -->
+   <sequence> 
+     <element ref="srrc:appid" minOccurs="0" maxOccurs="1"/><!-- srrc__taskoutput::srrc__appid -->
+	 <element ref="srrc:equid" minOccurs="0" maxOccurs="1"/><!-- srrc__taskoutput::srrc__equid -->  
+     <element ref="srrc:feature" minOccurs="0" maxOccurs="1"/><!-- srrc__taskoutput::srrc__feature -->
+     <element ref="srrc:mfid" minOccurs="0" maxOccurs="1"/><!-- srrc__taskoutput::srrc__mfid -->
+	 <element ref="srrc:equpara" minOccurs="0" maxOccurs="1"/><!-- srrc__taskoutput::srrc__equpara -->
+	 <element ref="srrc:priority" minOccurs="0" maxOccurs="1"/><!-- srrc__taskoutput::srrc__priority -->
+     <element ref="srrc:starttime" minOccurs="0" maxOccurs="1"/><!-- srrc__taskoutput::srrc__starttime -->
+	 <element ref="srrc:stoptime" minOccurs="0" maxOccurs="1"/><!-- srrc__taskoutput::srrc__stoptime -->
+	 <element ref="srrc:status" minOccurs="0" maxOccurs="1"/><!-- srrc__taskoutput::srrc__status -->
+     <element ref="srrc:taskid" minOccurs="0" maxOccurs="1"/><!-- srrc__taskoutput::srrc__taskid -->
+	 <element ref="srrc:userid" minOccurs="0" maxOccurs="1"/><!-- srrc__taskoutput::srrc__userid -->
+     <element ref="srrc:exinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__taskoutput::srrc__exinfo -->
+   </sequence>
+  </complexType>
+  <complexType name="tasks"><!-- srrc__tasks -->
+   <sequence>
+     <element ref="srrc:taskoutput" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__tasks::__sizetaskoutput -->
+   </sequence>
+  </complexType>
+  <complexType name="taskcommon"><!-- srrc__taskcommon -->
+   <sequence>
+     <element ref="srrc:taskid" minOccurs="0" maxOccurs="1"/><!-- srrc__taskcommon::srrc__taskid -->
+     <element ref="srrc:userid" minOccurs="0" maxOccurs="1"/><!-- srrc__taskcommon::srrc__userid -->
+     <element ref="srrc:feature" minOccurs="0" maxOccurs="1"/><!-- srrc__taskcommon::srrc__feature -->
+     <element ref="srrc:appid" minOccurs="0" maxOccurs="1"/><!-- srrc__taskcommon::srrc__appid -->
+     <element ref="srrc:stc" minOccurs="0" maxOccurs="1"/><!-- srrc__taskcommon::srrc__stc -->
+     <element ref="srrc:exinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__taskcommon::srrc__exinfo -->
+   </sequence>
+  </complexType>
+  <complexType name="tasklist"><!-- srrc__tasklist -->
+   <sequence>
+     <element ref="srrc:taskcommon" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__tasklist::__sizetaskcommon -->
+   </sequence>
+  </complexType>
+  <complexType name="exenviinfos"><!-- srrc__exenviinfos -->
+   <sequence>
+     <element ref="srrc:item" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__exenviinfos::__sizeitem -->
+   </sequence>
+  </complexType>
+  <complexType name="enviinfo"><!-- srrc__enviinfo -->
+   <sequence>
+     <element ref="srrc:current" minOccurs="0" maxOccurs="1"/><!-- srrc__enviinfo::srrc__current -->
+     <element ref="srrc:voltage" minOccurs="0" maxOccurs="1"/><!-- srrc__enviinfo::srrc__voltage -->
+     <element ref="srrc:temperature" minOccurs="0" maxOccurs="1"/><!-- srrc__enviinfo::srrc__temperature -->
+     <element ref="srrc:humidity" minOccurs="0" maxOccurs="1"/><!-- srrc__enviinfo::srrc__humidity -->
+     <element ref="srrc:gatingalarm" minOccurs="0" maxOccurs="1"/><!-- srrc__enviinfo::srrc__gatingalarm -->
+     <element ref="srrc:smokealarm" minOccurs="0" maxOccurs="1"/><!-- srrc__enviinfo::srrc__smokealarm -->
+     <element ref="srrc:floodingalarm" minOccurs="0" maxOccurs="1"/><!-- srrc__enviinfo::srrc__floodingalarm -->
+     <element ref="srrc:powerfailurealarm" minOccurs="0" maxOccurs="1"/><!-- srrc__enviinfo::srrc__powerfailurealarm -->
+     <element ref="srrc:masterswitch" minOccurs="0" maxOccurs="1"/><!-- srrc__enviinfo::srrc__masterswitch -->
+     <element ref="srrc:airconditionerswitch" minOccurs="0" maxOccurs="1"/><!-- srrc__enviinfo::srrc__airconditionerswitch -->
+     <element ref="srrc:lightingswitch" minOccurs="0" maxOccurs="1"/><!-- srrc__enviinfo::srrc__lightingswitch -->
+     <element ref="srrc:equipmentswitch" minOccurs="0" maxOccurs="1"/><!-- srrc__enviinfo::srrc__equipmentswitch -->
+     <element ref="srrc:exenviinfos" minOccurs="0" maxOccurs="1"/><!-- srrc__enviinfo::srrc__exenviinfos -->
+   </sequence>
+  </complexType>
+  <complexType name="equipmentcommon"><!-- srrc__equipmentcommon -->
+   <sequence>
+     <element ref="srrc:equid" minOccurs="0" maxOccurs="1"/><!-- srrc__equipmentcommon::srrc__equid -->
+     <element ref="srrc:equname" minOccurs="0" maxOccurs="1"/><!-- srrc__equipmentcommon::srrc__equname -->
+     <element ref="srrc:exinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__equipmentcommon::srrc__exinfo -->
+     <element ref="srrc:state" minOccurs="0" maxOccurs="1"/><!-- srrc__equipmentcommon::srrc__state -->
+     <element ref="srrc:tasklist" minOccurs="0" maxOccurs="1"/><!-- srrc__equipmentcommon::srrc__tasklist -->
+	 <element ref="srrc:enviinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__equipmentcommon::srrc__enviinfo -->
+   </sequence>
+  </complexType>
+  <complexType name="equlistcommon"><!-- srrc__equlistcommon -->
+   <sequence>
+     <element ref="srrc:equipmentcommon" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__equlistcommon::__sizeiequipmentcommon -->
+   </sequence>
+  </complexType>
+  <complexType name="mfcommon"><!-- srrc__mfcommon -->
+   <sequence>
+	 <element ref="srrc:mfid" minOccurs="0" maxOccurs="1"/><!-- srrc__mfcommon::srrc__mfid -->
+     <element ref="srrc:mfname" minOccurs="0" maxOccurs="1"/><!-- srrc__mfcommon::srrc__mfname -->
+     <element ref="srrc:longitude" minOccurs="0" maxOccurs="1"/><!-- srrc__mfcommon::srrc__longitude -->
+     <element ref="srrc:latitude" minOccurs="0" maxOccurs="1"/><!-- srrc__mfcommon::srrc__latitude -->
+     <element ref="srrc:altitude" minOccurs="0" maxOccurs="1"/><!-- srrc__mfcommon::srrc__altitude -->
+	 <element ref="srrc:speed" minOccurs="0" maxOccurs="1"/><!-- srrc__mfcommon::srrc__speed -->
+     <element ref="srrc:compass" minOccurs="0" maxOccurs="1"/><!-- srrc__mfcommon::srrc__compass -->
+     <element ref="srrc:direction" minOccurs="0" maxOccurs="1"/><!-- srrc__mfcommon::srrc__direction -->
+     <element ref="srrc:gpsnum" minOccurs="0" maxOccurs="1"/><!-- srrc__mfcommon::srrc__gpsnum -->
+     <element ref="srrc:magneticdeclination" minOccurs="0" maxOccurs="1"/><!-- srrc__mfcommon::srrc__magneticdeclination -->
+	 <element ref="srrc:exinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__mfcommon::srrc__exinfo -->
+     <element ref="srrc:equlistcommon" minOccurs="0" maxOccurs="1"/><!-- srrc__mfcommon::srrc__equlistcommon -->
+   </sequence>
+  </complexType>
+  <complexType name="mflistcommon"><!-- srrc__mflistcommon -->
+   <sequence>
+     <element ref="srrc:mfcommon" minOccurs="0" maxOccurs="unbounded"/><!-- srrc__mflistcommon::__sizemfcommon -->
+   </sequence>
+  </complexType>
+  <complexType name="result"><!-- srrc__result -->
+   <sequence>
+     <element ref="srrc:appid" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__appid -->
+     <element ref="srrc:userid" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__userid -->
+     <element ref="srrc:priority" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__priority -->
+     <element ref="srrc:executetime" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__executetime -->
+     <element ref="srrc:mfid" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__mfid -->
+	 <element ref="srrc:address" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__address -->
+	 <element ref="srrc:islink" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__islink -->
+	 <element ref="srrc:integratedco" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__integratedco -->
+	 <element ref="srrc:fmskind" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__fmskind -->
+	 <element ref="srrc:fmaddrtype" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__fmaddrtype -->
+	 <element ref="srrc:remocontip" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__remocontip -->
+	 <element ref="srrc:remocontport" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__remocontport -->
+	 <element ref="srrc:channelcount" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__channelcount -->
+	 <element ref="srrc:count" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__count -->
+	 <element ref="srrc:startrowno" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__startrowno -->
+	 <element ref="srrc:endrowno" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__endrowno -->
+	 <element ref="srrc:statesaving" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__statesaving -->
+	 <element ref="srrc:feature" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__feature -->
+	 <element ref="srrc:status" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__status -->
+     <element ref="srrc:equid" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__equid -->
+	 <element ref="srrc:mftype" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__mftype -->
+     <element ref="srrc:equpara" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__equpara -->
+     <element ref="srrc:taskid" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__taskid -->
+     <element ref="srrc:exinfo" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__exinfo -->
+	 <element ref="srrc:outputchannels" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__outputchannels -->
+     <element ref="srrc:equimanu" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__equimanu -->
+     <element ref="srrc:equmodel" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__equmodel -->
+     <element ref="srrc:equname" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__equname -->
+     <element ref="srrc:equsn" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__equsn -->
+     <element ref="srrc:equstatus" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__equstatus -->
+     <element ref="srrc:equtype" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__equtype -->
+     <element ref="srrc:host" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__host -->
+     <element ref="srrc:port" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__port -->
+     <element ref="srrc:maxtasknumber" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__maxtasknumber -->
+	 <element ref="srrc:featurelistparam" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__featurelistparam -->
+	 <element ref="srrc:checkrestricts" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__checkrestricts -->
+	 <element ref="srrc:antennalist" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__antennalist -->
+     <element ref="srrc:mfname" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__mfname -->
+     <element ref="srrc:longitude" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__longitude -->
+     <element ref="srrc:latitude" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__latitude -->
+     <element ref="srrc:altitude" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__altitude -->
+     <element ref="srrc:speed" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__speed -->
+     <element ref="srrc:direction" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__direction -->
+     <element ref="srrc:compass" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__compass -->
+     <element ref="srrc:gpsnum" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__gpsnum -->
+     <element ref="srrc:magneticdeclination" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__magneticdeclination -->
+	 <element ref="srrc:mflistcommon" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__mflistcommon -->
+	 <element ref="srrc:mflistoutput" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__mflistoutput -->
+	 <element ref="srrc:tasks" minOccurs="0" maxOccurs="1"/><!-- srrc__result::srrc__tasks -->
+   </sequence>
+  </complexType>
+  <complexType name="responsebody"><!-- srrc__responsebody -->
+   <sequence>
+     <element ref="srrc:result" minOccurs="0" maxOccurs="1"/><!-- srrc__responsebody::srrc__result -->
+     <element ref="srrc:error" minOccurs="0" maxOccurs="1"/><!-- srrc__responsebody::srrc__error -->
+   </sequence>
+  </complexType>
+  <!-- operation response element -->
+  <element name="responsebody" type="srrc:responsebody"/>
+  <element name="TransId" type="xsd:string"/>
+  <element name="BizKey" type="xsd:string"/>
+  <element name="PSCode" type="xsd:string"/>
+  <element name="BSCode" type="xsd:string"/>
+  <element name="appCode" type="xsd:string"/>
+  <element name="appName" type="xsd:string"/>
+  <element name="platFormCode" type="xsd:string"/>
+  <element name="platFormName" type="xsd:string"/>
+  <element name="resCode1" type="xsd:string"/>
+  <element name="resCode2" type="xsd:string"/>
+  <element name="bizResCd" type="xsd:string"/>
+  <element name="bizResText" type="xsd:string"/>
+  <element name="paraname" type="xsd:string"/>
+  <element name="paravalue" type="xsd:string"/>
+  <element name="item" type="srrc:item"/>
+  <element name="itemname" type="xsd:string"/>
+  <element name="groupid" type="xsd:string"/>
+  <element name="items" type="srrc:items"/>
+  <element name="groupitem" type="srrc:groupitem"/>
+  <element name="groupitems" type="srrc:groupitems"/>
+  <element name="mode" type="xsd:string"/>
+  <element name="datachannel" type="xsd:string"/>
+  <element name="host" type="xsd:string"/>
+  <element name="port" type="xsd:string"/>
+  <element name="stc" type="xsd:string"/>
+  <element name="password" type="xsd:string"/>
+  <element name="user" type="xsd:string"/>
+  <element name="file" type="xsd:string"/>
+  <element name="exinfo" type="srrc:exinfo"/>
+  <element name="type" type="xsd:string"/>
+  <element name="code" type="xsd:string"/>
+  <element name="text" type="xsd:string"/>
+  <element name="appid" type="xsd:string"/>
+  <element name="userid" type="xsd:string"/>
+  <element name="priority" type="xsd:string"/>
+  <element name="executetime" type="xsd:string"/>
+  <element name="platformcode" type="xsd:string"/>
+  <element name="mfid" type="xsd:string"/>
+  <element name="equid" type="xsd:string"/>
+  <element name="equpara" type="srrc:equpara"/>
+  <element name="outputchannel" type="srrc:outputchannel"/>
+  <element name="outputchannels" type="srrc:outputchannels"/>
+  <element name="feature" type="xsd:string"/>
+  <element name="taskid" type="xsd:string"/>
+  <element name="display" type="xsd:string"/>
+  <element name="val" type="xsd:string"/>
+  <element name="listitem" type="srrc:listitem"/>
+  <element name="startval" type="xsd:string"/>
+  <element name="stopval" type="xsd:string"/>
+  <element name="name" type="xsd:string"/>
+  <element name="advanced" type="xsd:string"/>
+  <element name="category" type="xsd:string"/>
+  <element name="defaultvalue" type="xsd:string"/>
+  <element name="description" type="xsd:string"/>
+  <element name="displayname" type="xsd:string"/>
+  <element name="isbrowsable" type="xsd:string"/>
+  <element name="selectonly" type="xsd:string"/>
+  <element name="isreadonly" type="xsd:string"/>
+  <element name="isgroupset" type="xsd:string"/>
+  <element name="range" type="srrc:range"/>
+  <element name="listitems" type="srrc:listitems"/>
+  <element name="parameter" type="srrc:parameter"/>
+  <element name="input" type="srrc:input"/>
+  <element name="taskcommon" type="srrc:taskcommon"/>
+  <element name="taskoutput" type="srrc:taskoutput"/>
+  <element name="tasklist" type="srrc:tasklist"/>
+  <element name="equname" type="xsd:string"/>
+  <element name="state" type="xsd:string"/> 
+  <element name="equipmentcommon" type="srrc:equipmentcommon"/>
+  <element name="equipmentoutput" type="srrc:equipmentoutput"/>
+  <element name="current" type="xsd:string"/>
+  <element name="voltage" type="xsd:string"/>
+  <element name="temperature" type="xsd:string"/>
+  <element name="humidity" type="xsd:string"/>
+  <element name="gatingalarm" type="xsd:string"/>
+  <element name="smokealarm" type="xsd:string"/>
+  <element name="floodingalarm" type="xsd:string"/>
+  <element name="powerfailurealarm" type="xsd:string"/>
+  <element name="masterswitch" type="xsd:string"/>
+  <element name="airconditionerswitch" type="xsd:string"/>
+  <element name="lightingswitch" type="xsd:string"/>
+  <element name="equipmentswitch" type="xsd:string"/>
+  <element name="exenviinfos" type="srrc:exenviinfos"/>
+  <element name="equimanu" type="xsd:string"/>
+  <element name="equmodel" type="xsd:string"/>
+  <element name="equsn" type="xsd:string"/>
+  <element name="equstatus" type="xsd:string"/>
+  <element name="equtype" type="xsd:string"/>
+  <element name="maxtasknumber" type="xsd:string"/> 
+  <element name="mfname" type="xsd:string"/>
+  <element name="longitude" type="xsd:string"/>
+  <element name="latitude" type="xsd:string"/>
+  <element name="altitude" type="xsd:string"/>
+  <element name="speed" type="xsd:string"/>
+  <element name="direction" type="xsd:string"/>
+  <element name="compass" type="xsd:string"/>
+  <element name="gpsnum" type="xsd:string"/>
+  <element name="magneticdeclination" type="xsd:string"/>
+  <element name="equlistcommon" type="srrc:equlistcommon"/>
+  <element name="equlistoutput" type="srrc:equlistoutput"/>
+  <element name="enviinfo" type="srrc:enviinfo"/>
+  <element name="mftype" type="xsd:string"/>
+  <element name="areacode" type="xsd:string"/>
+  <element name="baseserviceurl" type="xsd:string"/>
+  <element name="baseserviceproxyurl" type="xsd:string"/>
+  <element name="rectangle" type="srrc:rectangle"/>
+  <element name="lt" type="srrc:lt"/>
+  <element name="rb" type="srrc:rb"/>
+  <element name="taskids" type="srrc:taskids"/>
+  <element name="userids" type="srrc:userids"/>
+  <element name="mfids" type="srrc:mfids"/>
+  <element name="equids" type="srrc:equids"/>
+  <element name="features" type="srrc:features"/>
+  <element name="appids" type="srrc:appids"/>
+  <element name="statuss" type="srrc:statuss"/>
+  <element name="outfields" type="srrc:outfields"/>
+  <element name="starttime" type="xsd:string"/>
+  <element name="endtime" type="xsd:string"/>
+  <element name="stoptime" type="xsd:string"/>
+  <element name="startrowno" type="xsd:string"/>
+  <element name="endrowno" type="xsd:string"/> 
+  <element name="address" type="xsd:string"/>
+  <element name="status" type="xsd:string"/>
+  <element name="islink" type="xsd:string"/>
+  <element name="integratedco" type="xsd:string"/>
+  <element name="fmskind" type="xsd:string"/>
+  <element name="fmaddrtype" type="xsd:string"/>
+  <element name="remocontip" type="xsd:string"/>
+  <element name="remocontport" type="xsd:string"/>
+  <element name="channelcount" type="xsd:string"/>
+  <element name="count" type="xsd:string"/>
+  <element name="statesaving" type="xsd:string"/>
+  <element name="anteid" type="xsd:string"/>
+  <element name="linkmode" type="xsd:string"/>
+  <element name="startfreq" type="xsd:string"/>
+  <element name="stopfreq" type="xsd:string"/>
+  <element name="antemodel" type="xsd:string"/>
+  <element name="isactiveante" type="xsd:string"/>
+  <element name="isdirectiveante" type="xsd:string"/>
+  <element name="polarization" type="xsd:string"/>
+  <element name="anteheight" type="xsd:string"/>
+  <element name="servicecode" type="xsd:string"/>
+  <element name="psservicecode" type="xsd:string"/>
+  <element name="setparameter" type="srrc:setparameter"/>
+  <element name="resultparameter" type="srrc:resultparameter"/>
+  <element name="resultparameters" type="srrc:resultparameters"/>
+  <element name="antenna" type="srrc:antenna"/>
+  <element name="checkrestrict" type="srrc:checkrestrict"/>
+  <element name="tasks" type="srrc:tasks"/>
+  <element name="checkrestricts" type="srrc:checkrestricts"/>
+  <element name="antennalist" type="srrc:antennalist"/>
+  <element name="featurelist" type="srrc:featurelist"/>
+  <element name="featurecode" type="srrc:featurecode"/>
+  <element name="featureparam" type="srrc:featureparam"/>
+  <element name="featurelistcode" type="srrc:featurelistcode"/>
+  <element name="featurelistparam" type="srrc:featurelistparam"/>
+  <element name="mfcommon" type="srrc:mfcommon"/>
+  <element name="mfoutput" type="srrc:mfoutput"/>
+  <element name="mflistcommon" type="srrc:mflistcommon"/>
+  <element name="mflistoutput" type="srrc:mflistoutput"/>
+  <element name="result" type="srrc:result"/>
+  <element name="error" type="srrc:error"/>
+  <element name="MonitorHeader" type="srrc:MonitorHeader"/>
+  <element name="ProviderResponse" type="srrc:ProviderResponse"/>
+  <element name="requestbody" type="srrc:requestbody"/>
+ </schema>
+
+ <schema targetNamespace="RXMCS"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:srrc="http://www.srrc.org.cn"
+  xmlns:ns1="RXMCS"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://www.srrc.org.cn"/>
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+ </schema>
+
+</types>
+
+<message name="RmbusRXMCSService">
+ <part name="Body" element="srrc:requestbody"/><!-- __ns1__RmbusRXMCSService::srrc__requestbody -->
+</message>
+
+<message name="responsebody">
+ <part name="Body" element="srrc:responsebody"/>
+</message>
+
+<message name="RXMCSHeader">
+ <part name="MonitorHeader" element="srrc:MonitorHeader"/>
+ <part name="ProviderResponse" element="srrc:ProviderResponse"/>
+</message>
+
+<portType name="RXMCSPortType">
+ <operation name="RmbusRXMCSService">
+  <documentation>Service definition of function __ns1__RmbusRXMCSService</documentation>
+  <input message="tns:RmbusRXMCSService"/>
+  <output message="tns:responsebody"/>
+ </operation>
+</portType>
+
+<binding name="RXMCS" type="tns:RXMCSPortType">
+ <SOAP:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="RmbusRXMCSService">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="Body" use="literal"/>
+     <SOAP:header use="literal" message="tns:RXMCSHeader" part="MonitorHeader"/>
+  </input>
+  <output>
+     <SOAP:body parts="Body" use="literal"/>
+     <SOAP:header use="literal" message="tns:RXMCSHeader" part="ProviderResponse"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="RXMCS">
+ <documentation>gSOAP 2.8.27 generated service definition</documentation>
+ <port name="RXMCS" binding="tns:RXMCS">
+  <SOAP:address location="http://localhost:8188"/>
+ </port>
+</service>
+
+</definitions>

@@ -21,7 +21,8 @@ from config import (
     PROXY_HOST, PROXY_PORT, PROXY_PORT_2, DEVICE_HOST, DEVICE_PORT,
     LOG_DIR, LOG_LEVEL, RMCP_FRAME_HEADER_SIZE,
     MSG_TYPE_REQUEST, MSG_TYPE_RESPONSE, MSG_TYPE_DATA_1, MSG_TYPE_DATA_2,
-    ENABLE_JSON_OUTPUT, ENABLE_RAW_OUTPUT, ENABLE_CONNECTIONS_CSV
+    ENABLE_JSON_OUTPUT, ENABLE_RAW_OUTPUT, ENABLE_CONNECTIONS_CSV,
+    FUNCID_TO_NAME, NBDTYPE_TO_NAME
 )
 
 
@@ -256,6 +257,12 @@ class RMCPFrame:
 class CaptureLogger:
     """流量记录器"""
 
+    # 接口类型常量 (从config加载，使用实测校正值)
+    INTERFACE_TYPE = NBDTYPE_TO_NAME.copy()
+
+    # funcid 到接口名称的映射 (从config加载)
+    FUNCID_TYPE = FUNCID_TO_NAME.copy()
+
     def __init__(self, log_dir, port=0):
         self.log_dir = log_dir
         self.port = port
@@ -269,9 +276,9 @@ class CaptureLogger:
         self.json_file = os.path.join(log_dir, f'capture{port_str}_{timestamp}.json')
         self.conn_file = os.path.join(log_dir, f'connections{port_str}_{timestamp}.csv')
 
-        # 原始 FSCAN 数据日志 (未转换的数据)
-        self.raw_fscan_file = os.path.join(log_dir, f'raw_fscan{port_str}_{timestamp}.log')
-        self._raw_fscan_fp = None
+        # 按接口类型分离的RMCP回调数据日志文件
+        self.rmcp_callback_files = {}  # {interface_type: file_handle}
+        self.rmcp_callback_raw_files = {}  # {interface_type: binary_file_handle}
 
         self.frames = []
         self.connections = []
@@ -289,9 +296,6 @@ class CaptureLogger:
         if ENABLE_CONNECTIONS_CSV:
             with open(self.conn_file, 'w', encoding='utf-8') as f:
                 f.write("timestamp,event,client_ip,client_port,server_ip,server_port,duration_ms,bytes_sent,bytes_recv\n")
-
-        # 初始化原始 FSCAN 日志文件
-        self._raw_fscan_fp = open(self.raw_fscan_file, 'wb')
 
     def log_connection(self, event, client_addr, server_addr, duration_ms=0, bytes_sent=0, bytes_recv=0):
         """记录连接事件"""
@@ -317,7 +321,7 @@ class CaptureLogger:
                            f"{duration_ms},{bytes_sent},{bytes_recv}\n")
         return conn_info
 
-    def log_frame(self, direction, data, addr, listen_port=0):
+    def log_frame(self, direction, data, addr, listen_port=0, related_funcid=None, related_funcid_name=None):
         """记录帧
 
         Args:
@@ -325,6 +329,8 @@ class CaptureLogger:
             data: 帧数据
             addr: 源地址
             listen_port: 监听端口 (9996 or 9997)
+            related_funcid: 关联的SOAP请求funcid (用于RMCP回调关联)
+            related_funcid_name: 关联的SOAP请求接口名
         """
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
         port_str = f":{listen_port}" if listen_port else ""
@@ -336,7 +342,9 @@ class CaptureLogger:
             'src_port': addr[1],
             'size': len(data),
             'hex': data.hex(),
-            'listen_port': listen_port
+            'listen_port': listen_port,
+            'related_funcid': related_funcid,
+            'related_funcid_name': related_funcid_name
         }
 
         header = RMCPFrame.parse_header(data)
@@ -345,6 +353,9 @@ class CaptureLogger:
                 'dwLength': header['dwLength'],
                 'nVersion': header['nVersion'],
                 'nMsgType': header['nMsgType'],
+                'nBdType': None,
+                'nBdTypeName': None,
+                'nBdTypeHex': None,
                 'nMsgTypeName': RMCPFrame.get_msg_type_name(header['nMsgType']),
                 'nFlags': header['nFlags'],
                 'nCheckSum': header['nCheckSum'],
@@ -357,24 +368,36 @@ class CaptureLogger:
                     xml_data = data[RMCP_FRAME_HEADER_SIZE:]
                     xml_start_idx = xml_data.find(b'<?xml')
                     if xml_start_idx >= 0:
-                        frame_info['xml_content'] = xml_data[xml_start_idx:].decode('gb2312', errors='ignore')[:500]
+                        xml_str = xml_data[xml_start_idx:].decode('gb2312', errors='ignore')
+                        frame_info['xml_content'] = xml_str[:500]
+                        # 提取 funcid
+                        import re
+                        funcid_match = re.search(r'funcid[=,]?\s*["\']?(\d+)', xml_str)
+                        if funcid_match:
+                            frame_info['funcid'] = int(funcid_match.group(1))
+                            frame_info['interface'] = self.FUNCID_TYPE.get(frame_info['funcid'], f'FUNC{frame_info["funcid"]}')
                 except:
                     pass
 
-            # 解析 DATA 帧 (nMsgType=0) 的 FSCAN 业务数据
-            if header['nMsgType'] == 0 and len(data) > RMCP_FRAME_HEADER_SIZE + 60:
+            # 解析 DATA 帧 (nMsgType=0) 的业务数据
+            if header['nMsgType'] == 0 and len(data) > RMCP_FRAME_HEADER_SIZE + 10:
                 payload = data[RMCP_FRAME_HEADER_SIZE:]
+                # 提取 nBdType (payload[0])
+                nBdType = payload[0] if len(payload) > 0 else 0
+                nBdTypeName = self.INTERFACE_TYPE.get(nBdType, f'UNKNOWN(0x{nBdType:02x})')
+                frame_info['header']['nBdType'] = nBdType
+                frame_info['header']['nBdTypeHex'] = f'0x{nBdType:02x}'
+                frame_info['header']['nBdTypeName'] = nBdTypeName
+                frame_info['data_type'] = nBdTypeName
+
+                # 尝试解析 FSCAN 业务数据
                 fscan = RMCPFrame.parse_fscan_data(payload)
                 if fscan.get('data_type') == 'FSCAN':
-                    frame_info['data_type'] = 'FSCAN'
                     frame_info['fscan'] = fscan
                 else:
-                    # 尝试简化的 FSCAN 解析
-                    # payload = RMCP payload (after 18-byte header)
-                    # simple parser expects: business header (3) + counters (8) + spectrum
+                    # 尝试简化的解析
                     simple = RMCPFrame.parse_fscan_data_simple(payload)
                     if simple.get('level_count', 0) > 0:
-                        frame_info['data_type'] = 'SIMPLE_FSCAN'
                         frame_info['fscan'] = simple
 
         with self.lock:
@@ -392,8 +415,8 @@ class CaptureLogger:
             self._save_json_line()
         self._save_log_line(frame_info)
 
-        # 记录原始 FSCAN 数据 (独立日志,不影响其他功能)
-        self.log_raw_fscan(direction, data, addr)
+        # 记录RMCP回调数据 (按接口类型分别保存)
+        self.log_rmcp_callback_data(direction, data, addr)
 
     def _print_to_console(self, timestamp, direction, header, size, addr, frame_info=None, port_str=""):
         """打印到控制台"""
@@ -402,12 +425,18 @@ class CaptureLogger:
             extra = ""
             if header['nMsgType'] == MSG_TYPE_REQUEST:
                 extra = " -> REQUEST"
-            elif header['nMsgType'] == 0 and frame_info and 'fscan' in frame_info:
-                fs = frame_info['fscan']
-                if 'level_count' in fs:
-                    extra = f" | {fs['level_count']} points"
-                    if 'dbm_min' in fs:
-                        extra += f" | dBm: {fs['dbm_min']:.1f}~{fs['dbm_max']:.1f}"
+            elif header['nMsgType'] == 0:
+                # DATA帧显示 nBdType
+                nBdType = header.get('nBdType')
+                nBdTypeName = header.get('nBdTypeName', 'UNKNOWN')
+                if nBdType is not None:
+                    extra = f" | {nBdTypeName}(0x{nBdType:02x})"
+                if frame_info and 'fscan' in frame_info:
+                    fs = frame_info['fscan']
+                    if 'level_count' in fs:
+                        extra += f" | {fs['level_count']} points"
+                        if 'dbm_min' in fs:
+                            extra += f" | dBm: {fs['dbm_min']:.1f}~{fs['dbm_max']:.1f}"
             print(f"[{timestamp}]{port_str} {direction:4s} {msg_type:12s} "
                   f"len={size:5d} from={addr[0]}:{addr[1]}{extra}")
         else:
@@ -430,10 +459,57 @@ class CaptureLogger:
             listen_port = frame_info.get('listen_port', 0)
             port_str = f":{listen_port}" if listen_port else ""
             with open(self.log_file, 'a', encoding='utf-8') as f:
+                # 判断是请求还是回调
+                direction = frame_info.get('direction', '')
+                header = frame_info.get('header', {})
+                nMsgType = header.get('nMsgType', -1)
+
+                # 确定接口标题
+                if direction == 'C->S' and nMsgType == MSG_TYPE_REQUEST:
+                    # SOAP 请求
+                    interface = frame_info.get('interface', frame_info.get('data_type', 'UNKNOWN'))
+                    f.write("=" * 80 + "\n")
+                    f.write(f"[{frame_info['timestamp']}] {interface} REQUEST\n")
+                    f.write("=" * 80 + "\n")
+                elif direction == 'S->C' and nMsgType == 0:
+                    # RMCP 回调数据 - 显示 SOAP -> RMCP 关联
+                    related_funcid = frame_info.get('related_funcid')
+                    related_name = frame_info.get('related_funcid_name', 'UNKNOWN')
+                    rmcp_type = frame_info.get('data_type', 'UNKNOWN')
+                    f.write("=" * 80 + "\n")
+                    if related_funcid is not None:
+                        f.write(f"[{frame_info['timestamp']}] {related_name}(funcid={related_funcid}) -> {rmcp_type} CALLBACK\n")
+                    else:
+                        f.write(f"[{frame_info['timestamp']}] {rmcp_type} CALLBACK (no SOAP关联)\n")
+                    f.write("=" * 80 + "\n")
+                else:
+                    # 其他类型
+                    interface = frame_info.get('interface', frame_info.get('data_type', 'UNKNOWN'))
+                    f.write("=" * 80 + "\n")
+                    f.write(f"[{frame_info['timestamp']}] {interface}\n")
+                    f.write("=" * 80 + "\n")
+
                 f.write(f"Time: {frame_info['timestamp']}{port_str}\n")
                 f.write(f"Direction: {frame_info['direction']}\n")
                 f.write(f"Source: {frame_info['src']}:{frame_info['src_port']}\n")
                 f.write(f"Size: {frame_info['size']} bytes\n")
+
+                # SOAP 请求显示 funcid
+                if 'funcid' in frame_info:
+                    f.write(f"FuncID: {frame_info['funcid']} ({frame_info['interface']})\n")
+
+                # RMCP 回调显示关联的 SOAP 信息和 nBdType
+                if direction == 'S->C' and nMsgType == 0:
+                    related_funcid = frame_info.get('related_funcid')
+                    related_name = frame_info.get('related_funcid_name')
+                    if related_funcid is not None:
+                        f.write(f"Related SOAP: {related_name}(funcid={related_funcid})\n")
+                    # 显示 nBdType
+                    nBdType = h.get('nBdType')
+                    nBdTypeHex = h.get('nBdTypeHex')
+                    nBdTypeName = h.get('nBdTypeName')
+                    if nBdType is not None:
+                        f.write(f"RMCP nBdType: {nBdTypeHex} ({nBdType}) - {nBdTypeName}\n")
 
                 if 'header' in frame_info:
                     h = frame_info['header']
@@ -444,6 +520,49 @@ class CaptureLogger:
                     f.write(f"  nFlags: 0x{h['nFlags']:02x}\n")
                     f.write(f"  nCheckSum: {h['nCheckSum']}\n")
                     f.write(f"  FrameTime: {h['timestamp']}\n")
+
+                # 添加十六进制dump
+                if 'hex' in frame_info:
+                    hex_str = frame_info['hex']
+                    f.write(f"\nHex Dump:\n")
+                    for i in range(0, len(hex_str), 32):
+                        hex_part = hex_str[i:i+32]
+                        ascii_part = ''.join(chr(b) if 32 <= b <= 126 else '.' for b in bytes.fromhex(hex_part[i:i+32]) if b < 128)
+                        f.write(f"  {i//2:04X}: {hex_part:<32}  {ascii_part}\n")
+
+                # 添加人类可读的payload摘要
+                if 'hex' in frame_info and 'header' in frame_info:
+                    h = frame_info['header']
+                    if h['nMsgType'] == 0:  # DATA帧
+                        try:
+                            hex_str = frame_info['hex']
+                            full_bytes = bytes.fromhex(hex_str)
+                            payload = full_bytes[RMCP_FRAME_HEADER_SIZE:]
+                            if len(payload) >= 11:
+                                nBdType = payload[0]
+                                counters = struct.unpack('<4h', payload[3:11])
+                                bd_types = {0x0B: 'IFANALYSIS', 0x0E: 'SGLFREQ', 0x0F: 'FSCAN', 0x10: 'DSCAN', 0x01: 'PSCAN'}
+                                bd_name = bd_types.get(nBdType, f'BD{nBdType}')
+                                spectrum_offset = 11
+                                if len(payload) > spectrum_offset:
+                                    spectrum_bytes = payload[spectrum_offset:]
+                                    num_levels = len(spectrum_bytes) // 2
+                                    if num_levels > 0:
+                                        levels = struct.unpack(f'<{num_levels}h', spectrum_bytes[:num_levels*2])
+                                        dbm_values = [v / 10.0 for v in levels]
+                                        # 输出levels数组，最多50个
+                                        if num_levels <= 50:
+                                            levels_str = str([round(v, 1) for v in dbm_values])
+                                        else:
+                                            levels_str = str([round(v, 1) for v in dbm_values[:50]])[:-1] + ', ...]'
+                                        summary = f"[{bd_name}] nArrays={counters[0]} levels=[{levels_str}]"
+                                        f.write(f"\n{summary}\n")
+                                    else:
+                                        f.write(f"\n[{bd_name}] nArrays={counters[0]}\n")
+                                else:
+                                    f.write(f"\n[{bd_name}]\n")
+                        except:
+                            pass
 
                 if 'xml_content' in frame_info:
                     f.write(f"\nXML Content:\n{frame_info['xml_content']}\n")
@@ -494,30 +613,23 @@ class CaptureLogger:
         except:
             pass
 
-    def close(self):
-        """关闭日志文件"""
-        if self._raw_fscan_fp:
-            try:
-                self._raw_fscan_fp.close()
-            except:
-                pass
-            self._raw_fscan_fp = None
-
-    def log_raw_fscan(self, direction, data, addr):
+    def log_rmcp_callback_data(self, direction, data, addr):
         """
-        记录原始 FSCAN 数据到专用文件 (不影响其他日志功能)
+        记录RMCP回调数据到按接口类型分离的专用文件
 
-        仅记录设备返回的 FSCAN 数据帧，保存完整的原始二进制数据
-        格式: 时间戳|方向|源地址|数据长度|原始十六进制数据
+        仅记录设备返回的RMCP DATA帧 (nMsgType=0)，保存完整的原始二进制数据
+        按接口类型分别保存:
+        - FSCAN: B_FScan 接口的频段扫描数据
+        - DSCAN: B_FScan 接口的数字扫描数据
+        - SGLFREQ: B_MScan/B_SglFreqMeas 接口的单频测量数据
+        - IFANALYSIS: B_SglFreqMeas 接口的中频分析数据
+        - PSCAN: B_PScan 接口的频谱扫描数据
         """
-        if not self._raw_fscan_fp:
-            return
-
-        # 只记录设备 -> 客户端的 FSCAN 数据
+        # 只记录设备 -> 客户端的数据
         if direction != 'S->C':
             return
 
-        # 解析帧头判断是否为 FSCAN 数据
+        # 解析帧头
         if len(data) < RMCP_FRAME_HEADER_SIZE + 10:
             return
 
@@ -529,42 +641,165 @@ class CaptureLogger:
         if header['nMsgType'] != 0:
             return
 
-        # 检查是否为 FSCAN 数据 (通过尝试解析)
         payload = data[RMCP_FRAME_HEADER_SIZE:]
         if len(payload) < 11:
             return
 
-        # 检查 nBdType (通常为 0x0F = 15 for FSCAN)
+        # 检查 nBdType 判断接口类型
         nBdType = payload[0]
-        if nBdType != 15:  # FSCAN type
+        interface_type = self.INTERFACE_TYPE.get(nBdType, f'UNKNOWN_{nBdType:02X}')
+
+        # 解析帧信息
+        frame_info = self._parse_rmcp_callback_frame(payload, interface_type)
+
+        # 获取或创建该接口类型的日志文件
+        self._ensure_rmcp_callback_files(interface_type)
+
+        try:
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+
+            # 解析帧头详细信息
+            frame_header = RMCPFrame.parse_header(data) or {}
+
+            # 写入日志文件
+            log_fp = self.rmcp_callback_files.get(interface_type)
+            if log_fp:
+                log_fp.write("=" * 80 + "\n")
+                log_fp.write(f"[{timestamp}] {interface_type} CALLBACK DATA\n")
+                log_fp.write("=" * 80 + "\n")
+                log_fp.write(f"direction={direction}\n")
+                log_fp.write(f"src={addr[0]}:{addr[1]}\n")
+                log_fp.write(f"total_size={len(data)} bytes\n")
+                log_fp.write("\n--- RMCP Frame Header ---\n")
+                log_fp.write(f"  dwLength={frame_header.get('dwLength', '?')}\n")
+                log_fp.write(f"  nVersion={frame_header.get('nVersion', '?')}\n")
+                log_fp.write(f"  nMsgType={frame_header.get('nMsgType', '?')}\n")
+                log_fp.write(f"  nFlags=0x{frame_header.get('nFlags', 0):02X}\n")
+                log_fp.write(f"  nCheckSum={frame_header.get('nCheckSum', '?')}\n")
+                log_fp.write(f"  FrameTime={RMCPFrame.format_timestamp(frame_header.get('tmStamp', 0))}\n")
+                log_fp.write("\n--- Business Header (first 11 bytes) ---\n")
+                log_fp.write(f"  nBdType=0x{nBdType:02X} ({nBdType})\n")
+                if frame_info.get('counters'):
+                    log_fp.write(f"  counters={frame_info['counters']}\n")
+                log_fp.write("\n--- Full Frame Hex ---\n")
+                # 分行显示，每行16字节
+                hex_str = data.hex()
+                for i in range(0, len(hex_str), 32):
+                    hex_part = hex_str[i:i+32]
+                    ascii_part = ''.join(chr(b) if 32 <= b <= 126 else '.' for b in data[i//2:(i//2)+16])
+                    log_fp.write(f"  {i//2:04X}: {hex_part:<32}  {ascii_part}\n")
+                if frame_info:
+                    log_fp.write("\n--- Parsed Data ---\n")
+                    for k, v in frame_info.items():
+                        log_fp.write(f"  {k}={v}\n")
+
+                # 添加人类可读的摘要行
+                try:
+                    if len(payload) >= 11:
+                        counters = struct.unpack('<4h', payload[3:11])
+                        spectrum_offset = 11
+                        if len(payload) > spectrum_offset:
+                            spectrum_bytes = payload[spectrum_offset:]
+                            num_levels = len(spectrum_bytes) // 2
+                            if num_levels > 0:
+                                levels = struct.unpack(f'<{num_levels}h', spectrum_bytes[:num_levels*2])
+                                dbm_values = [v / 10.0 for v in levels]
+                                # 输出levels数组，最多50个
+                                if num_levels <= 50:
+                                    levels_str = str([round(v, 1) for v in dbm_values])
+                                else:
+                                    levels_str = str([round(v, 1) for v in dbm_values[:50]])[:-1] + ', ...]'
+                                summary = f"[{interface_type}] nArrays={counters[0]} levels={num_levels} \"{levels_str}\""
+                                log_fp.write(f"\n{summary}\n")
+                except:
+                    pass
+
+                log_fp.write("\n")
+                log_fp.flush()
+
+            # 写入原始二进制文件
+            raw_fp = self.rmcp_callback_raw_files.get(interface_type)
+            if raw_fp:
+                raw_fp.write(f"={timestamp}=\n".encode('utf-8'))
+                raw_fp.write(f"interface={interface_type}\n".encode('utf-8'))
+                raw_fp.write(f"size={len(data)}\n".encode('utf-8'))
+                raw_fp.write(data)
+                raw_fp.write(b"\n")
+                raw_fp.flush()
+
+        except Exception as e:
+            print(f"[ERROR] log_rmcp_callback_data failed: {e}")
+
+    def _ensure_rmcp_callback_files(self, interface_type):
+        """确保指定接口类型的RMCP回调日志文件已创建"""
+        if interface_type in self.rmcp_callback_files:
             return
 
-        # 解析 levels 数据
-        levels = []
+        port_str = f"_{self.port}" if self.port else ""
+        timestamp = self.session_id
+
+        # 创建该接口类型的日志文件和原始文件
+        log_file = os.path.join(self.log_dir, f'rmcp_{interface_type}{port_str}_{timestamp}.log')
+        raw_file = os.path.join(self.log_dir, f'rmcp_{interface_type}{port_str}_{timestamp}.raw')
+
+        self.rmcp_callback_files[interface_type] = open(log_file, 'w', encoding='utf-8')
+        self.rmcp_callback_raw_files[interface_type] = open(raw_file, 'wb')
+
+        print(f"[LOGGER] Created rmcp callback log: {log_file}")
+        print(f"[LOGGER] Created rmcp callback raw: {raw_file}")
+
+    def _parse_rmcp_callback_frame(self, payload, interface_type):
+        """解析RMCP回调帧的业务数据"""
+        result = {}
+
+        if len(payload) < 11:
+            return result
+
+        nBdType = payload[0]
+        result['nBdType'] = nBdType
+
+        # 解析 counters (bytes 3-10)
+        if len(payload) >= 11:
+            counters = struct.unpack('<4h', payload[3:11])
+            result['counters'] = list(counters)
+
+        # 解析频谱数据
         spectrum_offset = 11
         if len(payload) > spectrum_offset:
             spectrum_bytes = payload[spectrum_offset:]
             num_levels = len(spectrum_bytes) // 2
             if num_levels > 0:
                 levels = struct.unpack(f'<{num_levels}h', spectrum_bytes[:num_levels*2])
+                result['level_count'] = num_levels
+                result['level_min'] = min(levels)
+                result['level_max'] = max(levels)
+                # 根据接口类型决定是否转换为 dBm
+                if interface_type == 'FSCAN':
+                    dbm_values = [round(v / 10, 1) for v in levels]
+                    result['dbm_min'] = round(min(dbm_values), 1)
+                    result['dbm_max'] = round(max(dbm_values), 1)
+                    result['dbm_sample'] = dbm_values[:20]
+                else:
+                    result['raw_sample'] = list(levels[:20])
 
-        # 写入原始数据 + levels 单行格式
-        try:
-            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-            self._raw_fscan_fp.write(f"={timestamp}=\n".encode('utf-8'))
-            self._raw_fscan_fp.write(f"direction={direction}\n".encode('utf-8'))
-            self._raw_fscan_fp.write(f"src={addr[0]}:{addr[1]}\n".encode('utf-8'))
-            self._raw_fscan_fp.write(f"size={len(data)} bytes\n".encode('utf-8'))
-            self._raw_fscan_fp.write(f"header_hex={data[:RMCP_FRAME_HEADER_SIZE].hex()}\n".encode('utf-8'))
-            self._raw_fscan_fp.write(f"payload_hex={payload.hex()}\n".encode('utf-8'))
-            # 输出 levels 单行，值除10
-            if levels:
-                db_values = [round(v / 10, 1) for v in levels]
-                self._raw_fscan_fp.write(f"dbm={db_values}\n".encode('utf-8'))
-            self._raw_fscan_fp.write(f"\n".encode('utf-8'))
-            self._raw_fscan_fp.flush()
-        except:
-            pass
+        return result
+
+    def close(self):
+        """关闭日志文件"""
+        # 关闭RMCP回调数据日志文件
+        for fp in self.rmcp_callback_files.values():
+            try:
+                fp.close()
+            except:
+                pass
+        self.rmcp_callback_files.clear()
+
+        for fp in self.rmcp_callback_raw_files.values():
+            try:
+                fp.close()
+            except:
+                pass
+        self.rmcp_callback_raw_files.clear()
 
 
 class ProxyConnection:
@@ -581,6 +816,9 @@ class ProxyConnection:
         self.start_time = None
         self.bytes_sent = 0
         self.bytes_recv = 0
+        # 跟踪最近的 funcid，用于关联 RMCP 回调
+        self.last_funcid = None
+        self.last_funcid_name = None
 
     def run(self):
         """运行代理"""
@@ -637,8 +875,8 @@ class ProxyConnection:
                     self.bytes_sent += len(data)
                     if self.device_socket:
                         try:
-                            # Debug: print hex of data being forwarded
-                            print(f"[DEBUG] Forwarding to device: {len(data)} bytes, hex={data[:50].hex()}...")
+                            # 解析 funcid (在转发到设备之前)
+                            self._parse_and_store_funcid(data)
                             self.device_socket.sendall(data)
                         except Exception as e:
                             print(f"[PROXY] Send to device failed: {e}")
@@ -691,7 +929,9 @@ class ProxyConnection:
                         self.close()  # 立即关闭
                         break
                     try:
-                        self.logger.log_frame('S->C', data, (DEVICE_HOST, DEVICE_PORT), self.listen_port)
+                        # 传递 related_funcid 用于关联 SOAP 请求和 RMCP 回调
+                        self.logger.log_frame('S->C', data, (DEVICE_HOST, DEVICE_PORT), self.listen_port,
+                                            related_funcid=self.last_funcid, related_funcid_name=self.last_funcid_name)
                     except Exception as e:
                         print(f"[ERROR] Logger error: {e}")
                 except socket.timeout:
@@ -712,6 +952,35 @@ class ProxyConnection:
             traceback.print_exc()
         finally:
             self.running = False
+
+    def _parse_and_store_funcid(self, data):
+        """解析SOAP请求中的funcid并保存，用于关联RMCP回调"""
+        try:
+            # 检查是否是RMCP请求帧 (nMsgType=90)
+            if len(data) < RMCP_FRAME_HEADER_SIZE + 10:
+                return
+
+            header = RMCPFrame.parse_header(data)
+            if not header or header['nMsgType'] != MSG_TYPE_REQUEST:
+                return
+
+            # 解析 XML 获取 funcid
+            xml_data = data[RMCP_FRAME_HEADER_SIZE:]
+            xml_start_idx = xml_data.find(b'<?xml')
+            if xml_start_idx < 0:
+                return
+
+            xml_str = xml_data[xml_start_idx:].decode('gb2312', errors='ignore')
+            import re
+            funcid_match = re.search(r'funcid[=,]?\s*["\']?(\d+)', xml_str)
+            if funcid_match:
+                funcid = int(funcid_match.group(1))
+                funcid_name = self.logger.FUNCID_TYPE.get(funcid, f'FUNC{funcid}')
+                self.last_funcid = funcid
+                self.last_funcid_name = funcid_name
+                print(f"[PROXY] Parsed funcid={funcid} ({funcid_name})")
+        except Exception as e:
+            pass
 
     def _log_connection_close(self):
         """记录连接关闭"""
@@ -823,7 +1092,13 @@ def start_proxy():
             logger.close()
         logger.close()
         print(f"[PROXY] Logs saved to {logger.log_file}")
-        print(f"[PROXY] Raw FSCAN saved to {logger.raw_fscan_file}")
+        # 显示各接口类型的RMCP回调数据日志文件
+        for if_type in logger.rmcp_callback_files.keys():
+            port_str = f"_{logger.port}" if logger.port else ""
+            log_file = os.path.join(logger.log_dir, f'rmcp_{if_type}{port_str}_{logger.session_id}.log')
+            raw_file = os.path.join(logger.log_dir, f'rmcp_{if_type}{port_str}_{logger.session_id}.raw')
+            print(f"[PROXY] RMCP {if_type} callback saved to {log_file}")
+            print(f"[PROXY] RMCP {if_type} callback raw saved to {raw_file}")
 
 
 def main():

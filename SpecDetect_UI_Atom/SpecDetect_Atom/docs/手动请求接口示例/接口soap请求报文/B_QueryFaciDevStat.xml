@@ -1,0 +1,8 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+<soapenv:Body>
+	<srrc:requestbody>
+		<srrc:mfid>53090001140007</srrc:mfid>
+		<srrc:equid>8f1b953d-d618-4d4f-a106-81c47183af3c</srrc:equid>
+		</srrc:requestbody>
+	 </soapenv:Body>
+</soapenv:Envelope>

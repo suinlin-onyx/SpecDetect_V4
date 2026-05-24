@@ -1,7 +1,7 @@
 # 代理服务与原子服务通信协议分析报告
 
-| 版本 | 日期 | 作者 | 变更内容 |
-|------|------|------|----------|
+| 版本  | 日期         | 作者     | 变更内容    |
+| --- | ---------- | ------ | ------- |
 | 1.0 | 2026-04-06 | Claude | 初次分析并归档 |
 
 ---
@@ -50,11 +50,11 @@
 
 ### 2.2 各层通信协议
 
-| 层级 | 文档要求协议 | 说明 |
-|------|-------------|------|
-| Web → Proxy | **HTTP/SOAP** | SOAP 1.1/1.2 + XML |
-| Proxy → Atom | **SOAP/XML** | SOAP消息转发 |
-| Atom → Device | **RX-RMCPTP v2.0** | 二进制协议，TCP通信 |
+| 层级            | 文档要求协议             | 说明                 |
+| ------------- | ------------------ | ------------------ |
+| Web → Proxy   | **HTTP/SOAP**      | SOAP 1.1/1.2 + XML |
+| Proxy → Atom  | **SOAP/XML**       | SOAP消息转发           |
+| Atom → Device | **RX-RMCPTP v2.0** | 二进制协议，TCP通信        |
 
 ---
 
@@ -63,6 +63,7 @@
 ### 3.1 文档要求
 
 **HLD 第5.3节 数据流接口：**
+
 ```
 Web请求 ──▶ SOAP解析 ──▶ Schema验证 ──▶ 认证授权 ──▶ 路由分发
    │                                                        │
@@ -72,6 +73,7 @@ Web请求 ──▶ SOAP解析 ──▶ Schema验证 ──▶ 认证授权 ─
 ```
 
 **HLD 第5.2.1节 StartMeasure接口示例：**
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
@@ -90,6 +92,7 @@ Web请求 ──▶ SOAP解析 ──▶ Schema验证 ──▶ 认证授权 ─
 ```
 
 **LLD 第2.1.1节 SOAP处理类定义：**
+
 ```csharp
 public class SoapMessageHandler
 {
@@ -120,28 +123,31 @@ def dispatch_to_atom_service(operation: str, params: dict) -> dict:
 ```
 
 **实际使用的协议：**
+
 - HTTP POST
 - Content-Type: `application/json`
 - 请求体: `{"frequency": 100000000, "bandwidth": 120000}`
 
 ### 3.3 差异对比
 
-| 项目 | 文档要求 | 实际实现 | 状态 |
-|------|---------|---------|------|
-| **协议** | SOAP 1.1/1.2 + XML | HTTP + JSON | ❌ 不匹配 |
-| **Content-Type** | text/xml | application/json | ❌ 不匹配 |
-| **请求格式** | SOAP Envelope + Body | JSON对象 | ❌ 不匹配 |
-| **认证头** | SOAP Header + AuthToken | 无 | ❌ 缺失 |
-| **路由信息** | MFID/EQUID路由键 | 无 | ❌ 缺失 |
+| 项目               | 文档要求                    | 实际实现             | 状态    |
+| ---------------- | ----------------------- | ---------------- | ----- |
+| **协议**           | SOAP 1.1/1.2 + XML      | HTTP + JSON      | ❌ 不匹配 |
+| **Content-Type** | text/xml                | application/json | ❌ 不匹配 |
+| **请求格式**         | SOAP Envelope + Body    | JSON对象           | ❌ 不匹配 |
+| **认证头**          | SOAP Header + AuthToken | 无                | ❌ 缺失  |
+| **路由信息**         | MFID/EQUID路由键           | 无                | ❌ 缺失  |
 
 ### 3.4 数据流示意
 
 **文档要求：**
+
 ```
 Client ──XML SOAP──▶ Proxy ──XML SOAP──▶ Atom
 ```
 
 **实际实现：**
+
 ```
 Client ──JSON──▶ Proxy ──JSON──▶ Atom
 ```
@@ -153,11 +159,13 @@ Client ──JSON──▶ Proxy ──JSON──▶ Atom
 ### 4.1 文档要求
 
 **HLD 架构图标注：**
+
 ```
 Atom ──▶ RX-RMCPTP v2.0 ──▶ Device
 ```
 
 **LLD 第2.2.1节 设备通信类：**
+
 ```csharp
 public class DeviceCommunicator
 {
@@ -171,6 +179,7 @@ public class DeviceCommunicator
 ```
 
 **LLD 第2.2.2节 RMCPTP协议解析类：**
+
 ```csharp
 public class RmcpProtocolParser
 {
@@ -190,6 +199,7 @@ public class RmcpProtocolParser
 ### 4.2 当前实际实现
 
 **device_client.py：**
+
 ```python
 class DeviceClient:
     async def connect(self):
@@ -204,6 +214,7 @@ class DeviceClient:
 ```
 
 **protocol_builder.py:**
+
 ```python
 class RMCPTPBuilder:
     def build_frame(self, business_type: int, payload: bytes) -> bytes:
@@ -219,13 +230,13 @@ class RMCPTPBuilder:
 
 ### 4.3 差异对比
 
-| 项目 | 文档要求 | 实际实现 | 状态 |
-|------|---------|---------|------|
-| **协议** | RX-RMCPTP v2.0 | RMCPTP (名称略有不同) | ⚠️ 基本一致 |
-| **版本标识** | PROTOCOL_VERSION = 0x07 | 0x07 | ✅ 一致 |
-| **帧头长度** | 18字节 | 18字节 | ✅ 一致 |
-| **心跳机制** | 30000ms间隔 | ❌ 未实现 | ❌ 缺失 |
-| **校验和算法** | 两折半移位相加取反 | 与文档一致 | ✅ 已实现 |
+| 项目        | 文档要求                    | 实际实现            | 状态      |
+| --------- | ----------------------- | --------------- | ------- |
+| **协议**    | RX-RMCPTP v2.0          | RMCPTP (名称略有不同) | ⚠️ 基本一致 |
+| **版本标识**  | PROTOCOL_VERSION = 0x07 | 0x07            | ✅ 一致    |
+| **帧头长度**  | 18字节                    | 18字节            | ✅ 一致    |
+| **心跳机制**  | 30000ms间隔               | ❌ 未实现           | ❌ 缺失    |
+| **校验和算法** | 两折半移位相加取反               | 与文档一致           | ✅ 已实现   |
 
 ---
 
@@ -265,19 +276,19 @@ class RMCPTPBuilder:
 
 ### 6.1 Proxy → Atom 通信问题
 
-| 问题 | 影响 | 优先级 |
-|------|------|--------|
-| 使用HTTP/JSON代替SOAP/XML | 不符合文档架构要求 | P0 |
-| 无认证头解析与验证 | 安全性不合规 | P0 |
-| 无路由头(MFID/EQUID)处理 | 无法支持多设备路由 | P1 |
-| SOAPAction未从Header提取 | 无法正确路由到原子服务 | P1 |
+| 问题                    | 影响          | 优先级 |
+| --------------------- | ----------- | --- |
+| 使用HTTP/JSON代替SOAP/XML | 不符合文档架构要求   | P0  |
+| 无认证头解析与验证             | 安全性不合规      | P0  |
+| 无路由头(MFID/EQUID)处理    | 无法支持多设备路由   | P1  |
+| SOAPAction未从Header提取  | 无法正确路由到原子服务 | P1  |
 
 ### 6.2 Atom → Device 通信问题
 
-| 问题 | 影响 | 优先级 |
-|------|------|--------|
-| 心跳机制未实现 | 无法维持设备连接保活 | P1 |
-| 连接模式为短连接 | 每次请求建立新连接 | P2 |
+| 问题       | 影响         | 优先级 |
+| -------- | ---------- | --- |
+| 心跳机制未实现  | 无法维持设备连接保活 | P1  |
+| 连接模式为短连接 | 每次请求建立新连接  | P2  |
 
 ---
 
@@ -315,26 +326,26 @@ Phase 2: 业务层修复 (P1)
 
 ### 8.1 术语对照
 
-| 术语 | 说明 |
-|------|------|
-| SOAP | Simple Object Access Protocol，XML格式的远程调用协议 |
-| XML | 可扩展标记语言 |
-| JSON | JavaScript Object Notation，轻量级数据交换格式 |
-| RMCPTP | Radio Monitoring Control Protocol，监测控制协议 |
-| RX-RMCPTP | RMCPTP协议的接收数据帧类型 |
-| MFID | 站点标识符 (Monitoring Facility ID) |
-| EQUID | 设备标识符 (Equipment ID) |
-| SOAPAction | SOAP协议中指定操作名称的HTTP Header |
+| 术语         | 说明                                         |
+| ---------- | ------------------------------------------ |
+| SOAP       | Simple Object Access Protocol，XML格式的远程调用协议 |
+| XML        | 可扩展标记语言                                    |
+| JSON       | JavaScript Object Notation，轻量级数据交换格式       |
+| RMCPTP     | Radio Monitoring Control Protocol，监测控制协议   |
+| RX-RMCPTP  | RMCPTP协议的接收数据帧类型                           |
+| MFID       | 站点标识符 (Monitoring Facility ID)             |
+| EQUID      | 设备标识符 (Equipment ID)                       |
+| SOAPAction | SOAP协议中指定操作名称的HTTP Header                  |
 
 ### 8.2 参考代码位置
 
-| 文件 | 说明 |
-|------|------|
-| `app/proxy_service/routes.py` | Proxy路由，调用Atom使用HTTP/JSON |
-| `app/proxy_service/soap_handler.py` | SOAP处理器(仅解析请求，不转发SOAP) |
-| `app/atom_service/device_client.py` | Atom与Device的TCP通信 |
-| `app/atom_service/protocol_builder.py` | RMCPTP帧构建 |
-| `app/atom_service/protocol_parser.py` | RMCPTP帧解析 |
+| 文件                                     | 说明                        |
+| -------------------------------------- | ------------------------- |
+| `app/proxy_service/routes.py`          | Proxy路由，调用Atom使用HTTP/JSON |
+| `app/proxy_service/soap_handler.py`    | SOAP处理器(仅解析请求，不转发SOAP)    |
+| `app/atom_service/device_client.py`    | Atom与Device的TCP通信         |
+| `app/atom_service/protocol_builder.py` | RMCPTP帧构建                 |
+| `app/atom_service/protocol_parser.py`  | RMCPTP帧解析                 |
 
 ---
 

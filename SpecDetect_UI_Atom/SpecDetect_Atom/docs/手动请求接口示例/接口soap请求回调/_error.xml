@@ -1,0 +1,8 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+    <soapenv:Header>
+        <srrc:ProviderResponse>
+            <srrc:bizResCd>BIZ-000001</srrc:bizResCd>
+            <srrc:bizResText>调用失败</srrc:bizResText>
+        </srrc:ProviderResponse>
+    </soapenv:Header>
+</soapenv:Envelope>

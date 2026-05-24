@@ -1,0 +1,3025 @@
+<?xml version="1.0" encoding="gb2312" ?>
+<!-- 配置设备参数转换、配置RX-RMCPTP转换前的监测数据格式 -->
+<config>
+	<device name="RXMS835" ver="7.1">
+        	<func id="10" key="SGLFREQ" />
+        	<func id="11" key="IFANALYSIS" />
+
+        	<func id="14" key="MSCAN" />
+        	<func id="15" key="FSCAN" />
+		<func id="16" key="DSCAN" />
+    	</device>
+	<device name="RXMs918H" ver="7.1" />
+	<device name="RXMD835" ver="7.1">
+        <func id="10" key="SGLFREQ" >
+      		<spectrummode key = "spectrummode"/>
+            <detector key = "detector">
+              <item name="平均" value="平均" />
+              <item name="快速" value="快速" />
+              <item name="峰值" value="峰值" />
+              <item name="均方根" value="均方根" />
+            </detector>
+        </func>
+        <func id="11" key="IFANALYSIS" >
+            <detector key = "detector">
+              <item name="平均" value="平均" />
+              <item name="快速" value="快速" />
+              <item name="峰值" value="峰值" />
+              <item name="均方根" value="均方根" />
+            </detector>
+      	    <spectrummode key = "spectrummode"/>
+        </func>
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" >
+            <detector key = "detector">
+              <item name="平均" value="平均" />
+              <item name="快速" value="快速" />
+              <item name="峰值" value="峰值" />
+              <item name="均方根" value="均方根" />
+            </detector>
+        </func>
+        <func id="15" key="FSCAN" >
+            <detector key = "detector">
+              <item name="平均" value="平均" />
+              <item name="快速" value="快速" />
+              <item name="峰值" value="峰值" />
+              <item name="均方根" value="均方根" />
+            </detector>
+        </func>
+        <func id="16" key="DSCAN" />
+        <func id="20" key="MULTIDF" />
+        <func id="22" key="MSCANE" >
+            <detector key = "detector">
+              <item name="平均" value="平均" />
+              <item name="快速" value="快速" />
+              <item name="峰值" value="峰值" />
+              <item name="均方根" value="均方根" />
+            </detector>
+        </func>
+        <func id="23" key="FSCANE" >
+            <detector key = "detector">
+              <item name="平均" value="平均" />
+              <item name="快速" value="快速" />
+              <item name="峰值" value="峰值" />
+              <item name="均方根" value="均方根" />
+            </detector>
+        </func>
+        <func id="24" key="ITU" >
+      		<spectrummode key = "spectrummode"/>
+        </func>
+        <func id="25" key="WDF" />
+    	</device>
+	<device name="EM100" ver="7.1">
+		<func id="10" key="SGLFREQ" />
+        	<func id="11" key="IFANALYSIS" />
+        	<func id="14" key="MSCAN" />
+        	<func id="15" key="FSCAN" />
+		<func id="16" key="DSCAN" />
+        	<func id="22" key="MSCANE" />
+		<func id="23" key="FSCANE" />
+		<func id="24" key="ITU" />
+	</device>
+	  <device name="EM510" ver="7.1">
+      <func id="10" key="SGLFREQ" >
+        <bandmode key ="bandmode">
+          <item name="XdB带宽" value="xdb" />
+          <item name="β带宽" value="betapercent" />
+        </bandmode>
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func> 
+	    <func id="11" key="IFANALYSIS" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func> 
+	    <func id="14" key="MSCAN" /> 
+      <func id="15" key="FSCAN" />
+	    <func id="16" key="DSCAN" >
+        <stepkey key = "step" />
+      </func>
+    </device>
+		<device name="RXMD950" ver="7.1">
+        <func id="10" key="SGLFREQ" >
+            <detector key = "detector">
+              <item name="平均" value="平均" />
+              <item name="快速" value="快速" />
+              <item name="峰值" value="峰值" />
+              <item name="均方根" value="均方根" />
+            </detector>
+        </func>
+        <func id="11" key="IFANALYSIS" >
+        		<detector key = "detector">
+              <item name="平均" value="平均" />
+              <item name="快速" value="快速" />
+              <item name="峰值" value="峰值" />
+              <item name="均方根" value="均方根" />
+            </detector>
+        </func>
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" >
+        		<detector key = "detector">
+              <item name="平均" value="平均" />
+              <item name="快速" value="快速" />
+              <item name="峰值" value="峰值" />
+              <item name="均方根" value="均方根" />
+            </detector>
+        </func>
+        <func id="15" key="FSCAN" >
+        		<detector key = "detector">
+              <item name="平均" value="平均" />
+              <item name="快速" value="快速" />
+              <item name="峰值" value="峰值" />
+              <item name="均方根" value="均方根" />
+            </detector>
+        </func>
+        <func id="16" key="DSCAN" />
+        <func id="20" key="MULTIDF" />
+        <func id="22" key="MSCANE" >
+        		<detector key = "detector">
+              <item name="平均" value="平均" />
+              <item name="快速" value="快速" />
+              <item name="峰值" value="峰值" />
+              <item name="均方根" value="均方根" />
+            </detector>
+        </func>
+        <func id="23" key="FSCANE" >
+        		<detector key = "detector">
+              <item name="平均" value="平均" />
+              <item name="快速" value="快速" />
+              <item name="峰值" value="峰值" />
+              <item name="均方根" value="均方根" />
+            </detector>
+        </func>
+        <func id="25" key="WDF" />
+        <func id="43" key="DEMREC" >
+        		<detector key = "detector">
+              <item name="平均" value="平均" />
+              <item name="快速" value="快速" />
+              <item name="峰值" value="峰值" />
+              <item name="均方根" value="均方根" />
+            </detector>
+        </func>
+    </device>
+		<device name="RmcpXE21" ver="7.1">
+        <func id="10" key="SGLFREQ" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="21" key="SCANDF" />
+    </device>
+    <device name="N6820E" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="31" key="EDETN" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="34" key="MODREC" />
+        <func id="35" key="SINA" />
+        <func id="25" key="WDF" />
+        <func id="30" key="WMON" />
+    </device>
+    <device name="N6841A" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="31" key="EDETN" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="34" key="MODREC" />
+        <func id="10" key="SGLFREQ" />
+        <func id="35" key="SINA" />
+        <func id="25" key="WDF" />
+        <func id="30" key="WMON" />
+    </device>
+		<device name="IZTR3X00" ver="7.1">
+				<func id="11" key="IFANALYSIS" />
+		    <func id="14" key="MSCAN" />	
+				<func id="15" key="FSCAN" />
+				<func id="16" key="DSCAN" />
+		</device>
+		<device name="MS835" ver="7.1">
+				<func id="10" key="SGLFREQ" />
+				<func id="11" key="IFANALYSIS" />
+		    <func id="14" key="MSCAN" />	
+				<func id="15" key="FSCAN" />
+				<func id="16" key="DSCAN" />
+		</device>
+		<device name="MD835" ver="7.1">
+				<func id="10" key="SGLFREQ" />
+				<func id="11" key="IFANALYSIS" />
+				<func id="12" key="DF" />
+				<func id="13" key="IFDF" />
+		    <func id="14" key="MSCAN" />	
+				<func id="15" key="FSCAN" />
+				<func id="16" key="DSCAN" />
+				<func id="20" key="MULTIDF" >
+					<readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+         </readmode>
+				</func>
+				<func id="21" key="SCANDF" >
+					<readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+         </readmode>
+				</func>
+				<func id="29" key="DIGDEM" />
+		</device>
+    <device name="8500" ver="7.1">
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="AR5000" ver="7.1">
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="ARONE" ver="7.1">
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="BXM321" ver="7.1">
+        <func id="HFDF" key="HFDF" />
+    </device>
+    <device name="CUBIC3570" ver="7.1">
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="CUBIC3570_CUBIC4400" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="CUBIC4400" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="DDF05E" ver="7.1">
+      <func id="12" key="DF" >
+        <readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+        </readmode>
+        <dfmode key="dfmode">
+          <item name="常态" value="normal" />
+          <item name="连续" value="cont" />
+          <item name="脉冲" value="gate" />
+        </dfmode>
+      </func>
+      <func id="39" key="SSDF" >
+        <readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+        </readmode>
+        <dfmode key="dfmode">
+          <item name="常态" value="normal" />
+          <item name="连续" value="cont" />
+          <item name="脉冲" value="gate" />
+        </dfmode>
+      </func>
+      <func id="13" key="IFDF" >
+        <readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+        </readmode>
+        <dfmode key="dfmode">
+          <item name="常态" value="normal" />
+          <item name="连续" value="cont" />
+          <item name="脉冲" value="gate" />
+        </dfmode>
+      </func>
+      <func id="26" key="IFDFEXT" >
+        <readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+        </readmode>
+        <dfmode key="dfmode">
+          <item name="常态" value="normal" />
+          <item name="连续" value="cont" />
+          <item name="脉冲" value="gate" />
+        </dfmode>
+      </func>
+      <func id="20" key="MULTIDF" >
+        <readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+        </readmode>
+      </func>
+      <func id="21" key="SCANDF" >
+        <readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+        </readmode>
+        <dfmode key="dfmode">
+          <item name="常态" value="normal" />
+          <item name="连续" value="cont" />
+          <item name="脉冲" value="gate" />
+        </dfmode>
+      </func>
+    </device>
+    <device name="DDF05EV2" ver="7.1">
+        <func id="12" key="DF" >
+        	<readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+        </readmode>
+        <dfmode key="dfmode">
+          <item name="常态" value="normal" />
+          <item name="连续" value="cont" />
+          <item name="脉冲" value="gate" />
+        </dfmode>
+        </func>
+        <func id="13" key="IFDF" >
+        	<readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+        </readmode>
+        <dfmode key="dfmode">
+          <item name="常态" value="normal" />
+          <item name="连续" value="cont" />
+          <item name="脉冲" value="gate" />
+        </dfmode>
+        </func>
+        <func id="26" key="IFDFEXT" >
+        	<readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+        </readmode>
+        </func>
+        <func id="39" key="SSDF" >
+        	<readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+        </readmode>
+        <dfmode key="dfmode">
+          <item name="常态" value="normal" />
+          <item name="连续" value="cont" />
+          <item name="脉冲" value="gate" />
+        </dfmode>
+        </func>
+        <func id="20" key="MULTIDF" >
+        	<readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+        </readmode>
+        </func>
+        <func id="21" key="SCANDF" >
+        	<readmode key="readmode">
+          <item name="连续" value="CONT" />
+          <item name="上升" value="RAISING" />
+          <item name="连续、上升" value="CONT_RAISING" />
+          <item name="下降" value="FALLING" />
+          <item name="连续、下降" value="CONT_FALLING" />
+          <item name="上升、下降" value="RAISING_FALLING" />
+          <item name="连续、上升、下降" value="CONT_RAISING_FALLING" />
+        </readmode>
+        <dfmode key="dfmode">
+          <item name="常态" value="normal" />
+          <item name="连续" value="cont" />
+          <item name="脉冲" value="gate" />
+        </dfmode>
+        </func>
+    </device>
+    <device name="DDF05M" ver="7.1">
+      <func id="12" key="DF" >
+        <gainctrl key="gainctrl">
+          <item name="慢速自动增益" value="AUTO1" />
+          <item name="快速自动增益" value="AUTO" />
+        </gainctrl>
+        <readmode key="readmode">
+          <item name="间隔、开始、结束" value="6" />
+          <item name="间隔、结束" value="5" />
+          <item name="间隔、开始" value="4" />
+          <item name="开始、结束" value="3" />
+          <item name="结束" value="2" />
+          <item name="开始" value="1" />
+          <item name="间隔" value="0" />
+        </readmode>
+        <dfmode key="averagemode">
+          <item name="常态" value="normal" />
+          <item name="连续" value="cont" />
+          <item name="脉冲" value="gate" />
+        </dfmode>
+      </func>
+      <func id="13" key="IFDF" >
+        <gainctrl key="gainctrl">
+          <item name="慢速自动增益" value="AUTO1" />
+          <item name="快速自动增益" value="AUTO" />
+        </gainctrl>
+        <readmode key="readmode">
+          <item name="间隔、开始、结束" value="6" />
+          <item name="间隔、结束" value="5" />
+          <item name="间隔、开始" value="4" />
+          <item name="开始、结束" value="3" />
+          <item name="结束" value="2" />
+          <item name="开始" value="1" />
+          <item name="间隔" value="0" />
+        </readmode>
+        <dfmode key="averagemode">
+          <item name="常态" value="normal" />
+          <item name="连续" value="cont" />
+          <item name="脉冲" value="gate" />
+        </dfmode>
+      </func>
+      <func id="20" key="MULTIDF" >
+        <gainctrl key="gainctrl">
+          <item name="慢速自动增益" value="AUTO1" />
+          <item name="快速自动增益" value="AUTO" />
+        </gainctrl>
+        <readmode key="readmode">
+          <item name="间隔、开始、结束" value="6" />
+          <item name="间隔、结束" value="5" />
+          <item name="间隔、开始" value="4" />
+          <item name="开始、结束" value="3" />
+          <item name="结束" value="2" />
+          <item name="开始" value="1" />
+          <item name="间隔" value="0" />
+        </readmode>
+        <dfmode key="averagemode">
+          <item name="常态" value="normal" />
+          <item name="连续" value="cont" />
+          <item name="脉冲" value="gate" />
+        </dfmode>
+        <holdtime key="holdtime">
+          <item name="0.1s" value="0.1sec" />
+          <item name="0.2s" value="0.2sec" />
+          <item name="0.5s" value="0.5sec" />
+          <item name="1s" value="1sec" />
+          <item name="2s" value="2sec" />
+          <item name="5s" value="5sec" />
+          <item name="10s" value="10sec" />
+        </holdtime>
+      </func>
+        <func id="21" key="SCANDF" />
+    </device>
+    <device name="DDF205" ver="7.1">
+      <func id="12" key="DF" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="16" key="DSCAN" >
+        <stepkey key = "step" />
+      </func>
+      <func id="15" key="FSCAN" />
+      <func id="23" key="FSCANE" />
+      <func id="11" key="IFANALYSIS" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="13" key="IFDF" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="14" key="MSCAN" />
+      <func id="22" key="MSCANE" />
+      <func id="20" key="MULTIDF" >
+        <preamplifiers key="preamplifiers" >
+          <item name="关" value="关" />
+          <item name="开" value="开" />
+        </preamplifiers>
+      </func>
+      <func id="10" key="SGLFREQ" >
+        <bandmode key ="bandmode">
+          <item name="XdB带宽" value="xdb" />
+          <item name="β带宽" value="betapercent" />
+        </bandmode>
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="21" key="SCANDF" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+    </device>
+    <device name="DDF255" ver="7.1">
+      <func id="12" key="DF" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="16" key="DSCAN" >
+        <stepkey key = "step" />
+      </func>
+      <func id="15" key="FSCAN" />
+      <func id="23" key="FSCANE" />
+      <func id="11" key="IFANALYSIS" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="38" key="DDCDEM" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="13" key="IFDF" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="14" key="MSCAN" />
+      <func id="22" key="MSCANE" />
+      <func id="20" key="MULTIDF" >
+        <preamplifiers key="preamplifiers" >
+          <item name="关" value="关" />
+          <item name="开" value="开" />
+        </preamplifiers>
+      </func>
+      <func id="10" key="SGLFREQ" >
+        <bandmode key ="bandmode">
+          <item name="XdB带宽" value="xdb" />
+          <item name="β带宽" value="betapercent" />
+        </bandmode>
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="25" key="WDF" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="21" key="SCANDF" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="41" key="ACDF" />
+    </device>
+    <device name="DDF255HF" ver="7.1">
+      <func id="12" key="DF" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="16" key="DSCAN" >
+        <stepkey key = "step" />
+      </func>
+      <func id="15" key="FSCAN" />
+      <func id="23" key="FSCANE" />
+      <func id="11" key="IFANALYSIS" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="38" key="DDCDEM" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="13" key="IFDF" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="14" key="MSCAN" />
+      <func id="22" key="MSCANE" />
+      <func id="20" key="MULTIDF" >
+        <preamplifiers key="preamplifiers" >
+          <item name="关" value="关" />
+          <item name="开" value="开" />
+        </preamplifiers>
+      </func>
+      <func id="10" key="SGLFREQ" >
+        <bandmode key ="bandmode">
+          <item name="XdB带宽" value="xdb" />
+          <item name="β带宽" value="betapercent" />
+        </bandmode>
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="25" key="WDF" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="21" key="SCANDF" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+    </device>
+
+    <device name="ESMD" ver="7.1">
+      <func id="12" key="DF" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="16" key="DSCAN" >
+        <stepkey key = "step" />
+      </func>
+      <func id="15" key="FSCAN" />
+      <func id="23" key="FSCANE" />
+      <func id="11" key="IFANALYSIS" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="38" key="DDCDEM" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="13" key="IFDF" >
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="14" key="MSCAN" />
+      <func id="22" key="MSCANE" />
+      <func id="20" key="MULTIDF" >
+        <preamplifiers key="preamplifiers" >
+          <item name="关" value="关" />
+          <item name="开" value="开" />
+        </preamplifiers>
+      </func>
+      <func id="10" key="SGLFREQ" >
+        <bandmode key ="bandmode">
+          <item name="XdB带宽" value="xdb" />
+          <item name="β带宽" value="betapercent" />
+        </bandmode>
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="24" key="ITU" >
+        <bandmode key ="bandmode">
+          <item name="XdB带宽" value="xdb" />
+          <item name="β带宽" value="betapercent" />
+        </bandmode>
+        <gainctrl key="gainctrl" >
+          <item name="自动" value="auto" />
+        </gainctrl>
+      </func>
+      <func id="41" key="ACDF" />
+    </device>
+    <device name="E4402B" ver="7.1">
+      <func id="18" key="SPECTRUM" >
+        <frequency key="cf" />
+      </func>
+      <func id="19" key="TIMEDOM" >
+        <frequency key="cf" />
+      </func>
+    </device>
+    <device name="E4403B" ver="7.1">
+      <func id="18" key="SPECTRUM" >
+        <frequency key="centerfreq" />
+        <detector key="detector">
+          <item name="自动" value="AUTO" />
+        </detector>
+        <reflevel0 key="reflevel" />
+        <reflevel1 key="reflevel" />
+        <reflevel2 key="reflevel" />
+        <reflevel3 key="reflevel" />
+        <reflevel4 key="reflevel" />
+        <reflevel5 key="reflevel" />
+        <reflevel6 key="reflevel" />
+        <reflevel7 key="reflevel" />
+        <reflevel8 key="reflevel" />
+        <reflevel9 key="reflevel" />
+        <reflevel10 key="reflevel" />
+        <reflevel11 key="reflevel" />
+        <reflevel12 key="reflevel" />
+        <appmeasure key="measuremode">
+          <item name="信道功率" value="specchp" />
+          <item name="邻道功率" value="specacp" />
+          <item name="占用带宽" value="specobw" />
+          <item name="无附加测量" value="speconly" />	
+        </appmeasure>
+        <cstandard1 key="cstandard" />
+        <cstandard key="standard">
+          <item name="IS95A" value="IS95" />
+          <item name="J-STD-008" value="JSTD" />
+          <item name="W-CDMA 3GPP" value="W3GPP" />
+          <item name="cdma2000MC-1X" value="C2000MC1" />
+          <item name="cdma2000MC-3X" value="C2000MC3" />
+          <item name="cdma2000DS" value="C2000DS" />
+          <item name="TETRA" value="TETR" />
+          <item name="DVBT L SECAM" value="DVBTGPN" />
+          <item name="DVBT G PAL" value="DVBTIPN" />
+          <item name="DVBT I PAL" value="FCC15" />
+        </cstandard>
+        <powerpercent key="obwpct" />
+        <xdb key="xdbbw" />
+      </func>
+      <func id="19" key="TIMEDOM" >
+        <frequency key="centerfreq" />
+        <detector key="detector">
+          <item name="自动" value="AUTO" />
+        </detector>
+        <reflevel0 key="reflevel" />
+        <reflevel1 key="reflevel" />
+        <reflevel2 key="reflevel" />
+        <reflevel3 key="reflevel" />
+        <reflevel4 key="reflevel" />
+        <reflevel5 key="reflevel" />
+        <reflevel6 key="reflevel" />
+        <reflevel7 key="reflevel" />
+        <reflevel8 key="reflevel" />
+        <reflevel9 key="reflevel" />
+        <reflevel10 key="reflevel" />
+        <reflevel11 key="reflevel" />
+        <reflevel12 key="reflevel" />
+        <appmeasure key="measuremode">
+          <item name="信道功率" value="specchp" />
+          <item name="邻道功率" value="specacp" />
+          <item name="占用带宽" value="specobw" />
+          <item name="无附加测量" value="timedomain" />	
+        </appmeasure>
+      </func>
+    </device>
+    <device name="E4408B" ver="7.1">
+        <func id="18" key="SPECTRUM" />
+        <func id="19" key="TIMEDOM" />
+    </device>
+    <device name="EB100" ver="7.1">
+      <func id="16" key="DSCAN" />
+      <func id="15" key="FSCAN" />
+      <func id="23" key="FSCANE" />
+      <func id="11" key="IFANALYSIS" />
+      <func id="14" key="MSCAN" />
+      <func id="22" key="MSCANE" />
+      <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="EB110" ver="7.1">
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="23" key="FSCANE" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="EB200" ver="7.1">
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="23" key="FSCANE" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="EB200_EBD190" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="EB200_ebd100" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="EBD100" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+    </device>
+    <device name="EBD190" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+    </device>
+    <device name="EBD195" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+    </device>
+    <device name="EC8560" ver="7.1">
+        <func id="10" key="SGLFREQ" />
+        <func id="18" key="SPECTRUM" />
+        <func id="19" key="TIMEDOM" />
+    </device>
+    <device name="EC8563" ver="7.1">
+        <func id="10" key="SGLFREQ" />
+        <func id="18" key="SPECTRUM" />
+        <func id="19" key="TIMEDOM" />
+    </device>
+    <device name="EM050" ver="7.1">
+        <func id="29" key="DIGDEM" >
+          <betapercent key="bandvalue" />
+          <xdb key="bandvalue" />
+        </func>
+        <func id="16" key="DSCAN" >
+          <stepkey key="stepkey" />
+        </func>
+        <func id="15" key="FSCAN" />
+        <func id="23" key="FSCANE" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="24" key="ITU" >
+          <betapercent key="bandvalue" />
+          <xdb key="bandvalue" />
+        </func>
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="17" key="PSCAN" />
+        <func id="10" key="SGLFREQ" >
+          <betapercent key="bandvalue" />
+          <xdb key="bandvalue" />
+        </func>
+    </device>
+    <device name="EM050_EBD190" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+    </device>
+    <device name="EM050_EBD195" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+    </device>
+    <device name="EM050c" ver="7.1">
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="23" key="FSCANE" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="17" key="PSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="EM550" ver="7.1">
+      <func id="29" key="DIGDEM" >
+        <betapercent key="bandvalue" />
+        <xdb key="bandvalue" />
+      </func>
+      <func id="16" key="DSCAN" >
+        <stepkey key="stepkey" />
+      </func>
+      <func id="15" key="FSCAN" />
+      <func id="23" key="FSCANE" />
+      <func id="11" key="IFANALYSIS" />
+      <func id="24" key="ITU" >
+        <betapercent key="bandvalue" />
+        <xdb key="bandvalue" />
+      </func>
+      <func id="14" key="MSCAN" />
+      <func id="22" key="MSCANE" />
+      <func id="17" key="PSCAN" />
+      <func id="10" key="SGLFREQ" >
+        <betapercent key="bandvalue" />
+        <xdb key="bandvalue" />
+      </func>
+    </device>
+    <device name="ESM500" ver="7.1">
+        <func id="15" key="FSCAN" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="ESM500_PP025" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="ESM500_PP055" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="ESMB" ver="7.1">
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="23" key="FSCANE" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="17" key="PSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="ESMB_EBD100" ver="7.1">
+      <func id="12" key="DF" >
+        <detector key="detector">
+          <item name="峰值" value="POS" />
+          <item name="有效值" value="RMS" />
+          <item name="平均值" value="PAV" />
+        </detector>
+      </func>
+      <func id="13" key="IFDF" >
+        <detector key="detector">
+          <item name="峰值" value="POS" />
+          <item name="有效值" value="RMS" />
+          <item name="平均值" value="PAV" />
+        </detector>
+      </func>
+    </device>
+    <device name="ESMB_EBD190" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+    </device>
+    <device name="ESMB_EBD195" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+    </device>
+        <device name="ESMB-EBD195" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+    </device>
+    <device name="ESMC" ver="7.1">
+        <func id="15" key="FSCAN" />
+        <func id="23" key="FSCANE" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="ESMC_EBD190" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="ESMC_EBD195" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="ESMC_ebd100" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="ESMERALDA" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+        <func id="20" key="MULTIDF" />
+        <func id="21" key="SCANDF" />
+    </device>
+    <device name="ESMERALDACHANNEL" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="26" key="IFDFEXT" />
+        <func id="24" key="ITU" />
+        <func id="14" key="MSCAN" />
+        <func id="20" key="MULTIDF" />
+        <func id="21" key="SCANDF" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="ESMERALDASRV6" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="26" key="IFDFEX" />
+        <func id="24" key="ITU" />
+        <func id="14" key="MSCAN" />
+        <func id="20" key="MULTIDF" />
+        <func id="21" key="SCANDF" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="ESN" ver="7.1">
+      <func id="15" key="FSCAN" >
+        <detector key="detector">
+          <item name="准峰值" value="QUASIPEAK"/>
+          <item name="有效值" value="RMS"/>
+          <item name="峰值" value="PEAK"/>
+          <item name="平均值" value="AVERAGE"/>
+        </detector>
+        <demodmode key="demodmode">
+          <item name="1-kHzBEAT" value="A1" />
+          <item name="ZERO-BEAT" value="A0" />
+        </demodmode>
+      </func>
+      <func id="11" key="IFANALYSIS" >
+      	<detector key="detector">
+          <item name="准峰值" value="QUASIPEAK"/>
+          <item name="有效值" value="RMS"/>
+          <item name="峰值" value="PEAK"/>
+          <item name="平均值" value="AVERAGE"/>
+        </detector>
+        <affilter key="affilter">
+          <item name="耦合" value="COUPLED" />
+          <item name="关" value="OFF" />
+        </affilter>
+        <ifattmode key="ifattmode">
+          <item name="低噪声" value="LOWN" />
+          <item name="低失真" value="LOWD" />
+        </ifattmode>
+        <demodmode key="demodmode">
+          <item name="1-kHzBEAT" value="A1" />
+          <item name="ZERO-BEAT" value="A0" />
+        </demodmode>
+      </func>
+      <func id="14" key="MSCAN" >
+      	<detector key="detector">
+          <item name="准峰值" value="QUASIPEAK"/>
+          <item name="有效值" value="RMS"/>
+          <item name="峰值" value="PEAK"/>
+          <item name="平均值" value="AVERAGE"/>
+        </detector>
+        <affilter key="affilter">
+          <item name="耦合" value="COUPLED" />
+          <item name="关" value="OFF" />
+        </affilter>
+        <ifattmode key="ifattmode">
+          <item name="低噪声" value="LOWN" />
+          <item name="低失真" value="LOWD" />
+        </ifattmode>
+        <demodmode key="demodmode">
+          <item name="1-kHzBEAT" value="A1" />
+          <item name="ZERO-BEAT" value="A0" />
+        </demodmode>
+      </func>
+      <func id="10" key="SGLFREQ" >
+      	<detector key="detector">
+          <item name="准峰值" value="QUASIPEAK"/>
+          <item name="有效值" value="RMS"/>
+          <item name="峰值" value="PEAK"/>
+          <item name="平均值" value="AVERAGE"/>
+        </detector>
+        <affilter key="affilter">
+          <item name="耦合" value="COUPLED" />
+          <item name="关" value="OFF" />
+        </affilter>
+        <ifattmode key="ifattmode">
+          <item name="低噪声" value="LOWN" />
+          <item name="低失真" value="LOWD" />
+        </ifattmode>
+        <demodmode key="demodmode">
+          <item name="1-kHzBEAT" value="A1" />
+          <item name="ZERO-BEAT" value="A0" />
+        </demodmode>
+      </func>
+    </device>
+    <device name="ESN_PP025" ver="7.1">
+      <func id="12" key="DF" >
+        <detector key="detector">
+          <item name="准峰值" value="QUASIPEAK"/>
+          <item name="有效值" value="RMS"/>
+          <item name="峰值" value="PEAK"/>
+          <item name="平均值" value="AVERAGE"/>
+        </detector>
+        <affilter key="affilter">
+          <item name="耦合" value="COUPLED" />
+          <item name="关" value="OFF" />
+        </affilter>
+        <ifattmode key="ifattmode">
+          <item name="低噪声" value="LOWN" />
+          <item name="低失真" value="LOWD" />
+        </ifattmode>
+        <demodmode key="demodmode">
+          <item name="1-kHzBEAT" value="A1" />
+          <item name="ZERO-BEAT" value="A0" />
+        </demodmode>
+      </func>
+      <func id="13" key="IFDF" >
+      	<detector key="detector">
+          <item name="准峰值" value="QUASIPEAK"/>
+          <item name="有效值" value="RMS"/>
+          <item name="峰值" value="PEAK"/>
+          <item name="平均值" value="AVERAGE"/>
+        </detector>
+        <affilter key="affilter">
+          <item name="耦合" value="COUPLED" />
+          <item name="关" value="OFF" />
+        </affilter>
+        <ifattmode key="ifattmode">
+          <item name="低噪声" value="LOWN" />
+          <item name="低失真" value="LOWD" />
+        </ifattmode>
+        <demodmode key="demodmode">
+          <item name="1-kHzBEAT" value="A1" />
+          <item name="ZERO-BEAT" value="A0" />
+        </demodmode>
+      </func>
+    </device>
+    <device name="ESVN40" ver="7.1">
+      <func id="15" key="FSCAN" >
+        <detector key="detector">
+          <item name="准峰值" value="QUASIPEAK"/>
+          <item name="有效值" value="RMS"/>
+          <item name="峰值" value="PEAK"/>
+          <item name="平均值" value="AVERAGE"/>
+        </detector>
+      </func>
+      <func id="11" key="IFANALYSIS" >
+        <detector key="detector">
+          <item name="准峰值" value="QUASIPEAK"/>
+          <item name="有效值" value="RMS"/>
+          <item name="峰值" value="PEAK"/>
+          <item name="平均值" value="AVERAGE"/>
+        </detector>
+      </func>
+      <func id="14" key="MSCAN" >
+        <detector key="detector">
+          <item name="准峰值" value="QUASIPEAK"/>
+          <item name="有效值" value="RMS"/>
+          <item name="峰值" value="PEAK"/>
+          <item name="平均值" value="AVERAGE"/>
+        </detector>
+      </func>
+        <func id="10" key="SGLFREQ" >
+          <detector key="detector">
+            <item name="准峰值" value="QUASIPEAK"/>
+            <item name="有效值" value="RMS"/>
+            <item name="峰值" value="PEAK"/>
+            <item name="平均值" value="AVERAGE"/>
+          </detector>
+        </func>
+    </device>
+    <device name="ESVN40_EBD190" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+    </device>
+    <device name="ESVN40_EBD195" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+    </device>
+    <device name="ESVN40_ebd100" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+    </device>
+    <device name="ESVP" ver="7.1">
+      <func id="15" key="FSCAN" >
+        <demodmode key="demodmode">
+          <item name="F3窄"  vlaue="F3narrow"/>
+          <item name="F3宽"  vlaue="F3borad"/>
+          <item name="A3J上"  vlaue="A3Jup"/>
+          <item name="A3J下"  vlaue="A3Jdown"/>
+          <item name="A3窄"  vlaue="A3narrow"/>
+          <item name="A3宽"  vlaue="A3borad"/>
+        </demodmode>
+        <rfatt key="rfatt">
+          <item name="自动低噪声"  vlaue="LOWNoise"/>
+          <item name="自动低失真"  vlaue="LOWDist"/>
+        </rfatt>
+      </func>
+      <func id="14" key="MSCAN" >
+        <demodmode key="demodmode">
+          <item name="F3窄"  vlaue="F3narrow"/>
+          <item name="F3宽"  vlaue="F3borad"/>
+          <item name="A3J上"  vlaue="A3Jup"/>
+          <item name="A3J下"  vlaue="A3Jdown"/>
+          <item name="A3窄"  vlaue="A3narrow"/>
+          <item name="A3宽"  vlaue="A3borad"/>
+        </demodmode>
+        <rfatt key="rfatt">
+          <item name="自动低噪声"  vlaue="LOWNoise"/>
+          <item name="自动低失真"  vlaue="LOWDist"/>
+        </rfatt>
+      </func>
+      <func id="10" key="SGLFREQ" >
+        <demodmode key="demodmode">
+          <item name="F3窄"  vlaue="F3narrow"/>
+          <item name="F3宽"  vlaue="F3borad"/>
+          <item name="A3J上"  vlaue="A3Jup"/>
+          <item name="A3J下"  vlaue="A3Jdown"/>
+          <item name="A3窄"  vlaue="A3narrow"/>
+          <item name="A3宽"  vlaue="A3borad"/>
+        </demodmode>
+        <rfatt key="rfatt">
+          <item name="自动低噪声"  vlaue="LOWNoise"/>
+          <item name="自动低失真"  vlaue="LOWDist"/>
+        </rfatt>
+      </func>
+    </device>
+    <device name="ESVP_EBD190" ver="7.1">
+        <func id="12" key="DF" >
+          <demodmode key="demodmode">
+            <item name="F3窄"  vlaue="F3narrom"/>
+            <item name="F3宽"  vlaue="F3borad"/>
+            <item name="A3J上"  vlaue="A3Jup"/>
+            <item name="A3J下"  vlaue="A3Jdown"/>
+            <item name="A3窄"  vlaue="A3narrow"/>
+            <item name="A3宽"  vlaue="A3borad"/>
+          </demodmode>
+          <rfatt key="rfatt">
+            <item name="自动低噪声"  vlaue="LOWNoise"/>
+            <item name="自动低失真"  vlaue="LOWDist"/>
+          </rfatt>
+        </func>
+    </device>
+    <device name="ESVP_EZM" ver="7.1">
+        <func id="11" key="IFANALYSIS" />
+    </device>
+    <device name="ESVP_ebd100" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="FSEM20" ver="7.1">
+        <func id="18" key="SPECTRUM">
+		    	<frequency key="cf" />
+          <measmode key="measmode">
+            <item name="无附加测量" value="spectrumonly"/>
+            <item name="信道功率" value="chpower"/>
+            <item name="信噪比C/N" value="cn"/>
+            <item name="邻道功率" value="acp"/>
+            <item name="功率占用带宽" value="opb"/>
+            <item name="下降XdB带宽" value="ndbdown"/>
+            <item name="噪声功率密度" value="noisedensity"/>
+            <item name="相位噪声" value="phasenoise"/>
+          </measmode>
+          <cstartard key="acpstandard">
+            <item name="CDMA 800 FWD" value="f8cd"/>
+            <item name="CDMA 800 REV" value="r8cd"/>
+            <item name="CDMA 1900 FWD" value="f19c"/>
+            <item name="CDMA 1900 REV" value="r19c"/>
+            <item name="W-CDMA FWD" value="fwcd"/>
+            <item name="W-CDMA REV" value="rwcd"/>
+            <item name="W-CDMA 3GPP FWD" value="fw3g"/>
+            <item name="W-CDMA 3GPP REV" value="rw3g"/>
+            <item name="CDMA 2000 MC" value="m2cd"/>
+            <item name="CDMA 2000 DS" value="d2cd"/>
+          </cstartard>
+          <reflevel0 key = "reflevel" />
+          <reflevel1 key = "reflevel" />
+          <reflevel2 key = "reflevel" />
+          <reflevel3 key = "reflevel" />
+          <powerpercent key = "opbrate" />
+          <channelspace key = "chspacing" />
+          <channelbw key = "chbw" />
+		    </func>    
+		    <func id="19" key="TIMEDOM">
+		    	<frequency key="cf" />
+          <reflevel0 key = "reflevel" />
+          <reflevel1 key = "reflevel" />
+          <reflevel2 key = "reflevel" />
+          <reflevel3 key = "reflevel" />
+		    </func>
+        <func id="VECTOR" key="VECTOR" />
+    </device>
+    <device name="FSIQ26" ver="7.1">
+        <func id="MODULATIONMEASURE" key="MODULATIONMEASURE" />
+        <func id="18" key="SPECTRUM" />
+        <func id="19" key="TIMEDOM" />
+        <func id="VECTOR" key="VECTOR" />
+    </device>
+    <device name="FSP3" ver="7.1">
+        <func id="18" key="SPECTRUM" />
+        <func id="19" key="TIMEDOM" />
+    </device>
+    <device name="GOTVBOX" ver="7.1">
+        <func id="TVBOX" key="TVBOX" />
+    </device>
+    <device name="HVC400TV" ver="7.1">
+        <func id="TV" key="TV" />
+    </device>
+    <device name="ICR8500" ver="7.1">
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="IFR2398" ver="7.1">
+      <func id="10" key="SGLFREQ" >
+        <detector key="detector">
+          <item name="常态检波" value="NRM"/>
+          <item name="采样检波" value="SAM"/>
+          <item name="正峰检波" value="POS"/>
+          <item name="负峰检波" value="NEG"/>
+          <item name="平均值检波" value="AVG"/>
+        </detector>
+        <reflevel0 key="reflevel" />
+        <reflevel1 key="reflevel" />
+        <reflevel2 key="reflevel" />
+        <reflevel3 key="reflevel" />
+        <reflevel4 key="reflevel" />
+        <reflevel5 key="reflevel" />
+      </func>
+		    <func id="18" key="SPECTRUM">
+          <detector key="detector">
+            <item name="常态检波" value="NRM"/>
+            <item name="采样检波" value="SAM"/>
+            <item name="正峰检波" value="POS"/>
+            <item name="负峰检波" value="NEG"/>
+            <item name="平均值检波" value="AVG"/>
+          </detector>
+		    	<frequency key="cf" />
+          <sweeptime key="sweeptime">
+            <item name="自动" value="AUTO"/>
+          </sweeptime>
+          <reflevel0 key="reflevel" />
+          <reflevel1 key="reflevel" />
+          <reflevel2 key="reflevel" />
+          <reflevel3 key="reflevel" />
+          <reflevel4 key="reflevel" />
+          <reflevel5 key="reflevel" />
+          <appmeasure key = "appmeasure">
+            <item name="无附加测量" value="specnone" />
+            <item name="信道功率" value="specchp" />
+            <item name="邻道功率" value="specacp" />
+            <item name="功率百分比带宽" value="specobw" />
+            <item name="XdB下降带宽" value="specxdb" />
+          </appmeasure>
+		    </func>    
+		    <func id="19" key="TIMEDOM">
+          <detector key="detector">
+            <item name="常态检波" value="NRM"/>
+            <item name="采样检波" value="SAM"/>
+            <item name="正峰检波" value="POS"/>
+            <item name="负峰检波" value="NEG"/>
+            <item name="平均值检波" value="AVG"/>
+          </detector>
+		    	<frequency key="cf" />
+          <sweeptime key="sweeptime">
+            <item name="自动" value="AUTO"/>
+          </sweeptime>
+          <reflevel0 key="reflevel" />
+          <reflevel1 key="reflevel" />
+          <reflevel2 key="reflevel" />
+          <reflevel3 key="reflevel" />
+          <reflevel4 key="reflevel" />
+          <reflevel5 key="reflevel" />
+		    </func>
+    </device>
+    <device name="IFR2398_EBD190" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="IFR2398_ebd100" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="LCR3400" ver="7.1">
+        <func id="15" key="FSCAN" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="LCR3400_EBD190" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="LCR3400_ebd100" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="LG302" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="MA3000" ver="7.1">
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="MA3000_MA3000" ver="7.1">
+        <func id="SDSGNANALYSIS" key="SDSGNANALYSIS" />
+    </device>
+    <device name="MRD3030" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="13" key="IFDF" />
+        <func id="27" key="LPI" />
+        <func id="25" key="WDF" />
+        <func id="WDF2" key="WDF2" />
+    </device>
+    <device name="MRR2000" ver="7.1">
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="23" key="FSCANE" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="MRR6000" ver="7.1">
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="23" key="FSCANE" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="MS2661" ver="7.1">
+        <func id="18" key="SPECTRUM" />
+        <func id="19" key="TIMEDOM" />
+    </device>
+    <device name="PP025" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="PP055" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="PR100" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="PROLINK" ver="7.1">
+        <func id="15" key="FSCAN" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="RMTP" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="ROXI825" ver="7.1">
+        <func id="29" key="DIGDEM" />
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="RR509ADF" ver="7.1">
+        <func id="12" key="DF" />
+    </device>
+    <device name="RR511A" ver="7.1">
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+        <func id="18" key="SPECTRUM" />
+    </device>
+    <device name="RXAMS10" ver="7.1">
+        <func id="10" key="SGLFREQ" />
+    </device>
+    	<device name="RXAMS" ver="7.1">
+        <func id="40" key="MULTICHAN" >
+			<open key="open" >
+				<item name="开" value="ON" />
+				<item name="关" value="OFF" />
+			</open>
+			<channel key="channel" />
+			<agc key="agc" >
+				<item name="开" value="ON" />
+				<item name="关" value="OFF" />
+			</agc>
+			<attenuator key="attenuator" >
+				<item name="开" value="ON" />
+				<item name="关" value="OFF" />
+			</attenuator>
+		</func>
+    </device>
+    <device name="RXMDI" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="13" key="IFDF" />
+        <func id="25" key="WDF" />
+    </device>
+    <device name="RXMD_CUBIC" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+        <func id="25" key="WDF" />
+    </device>
+    <device name="RXMS825" ver="7.1">
+        <func id="CONFIG" key="CONFIG" />
+        <func id="12" key="DF" />
+        <func id="29" key="DIGDEM" />
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="23" key="FSCANE" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+        <func id="28" key="WBM" />
+        <func id="WBM2" key="WBM2" />
+        <func id="25" key="WDF" />
+        <func id="WDF2" key="WDF2" />
+    </device>
+    <device name="RX_MD825" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="29" key="DIGDEM" />
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="23" key="FSCANE" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+        <func id="28" key="WBM" />
+        <func id="WBM2" key="WBM2" />
+        <func id="25" key="WDF" />
+    </device>
+    <device name="RX_MR600" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="29" key="DIGDEM" />
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="23" key="FSCANE" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+        <func id="28" key="WBM" />
+        <func id="WBM2" key="WBM2" />
+        <func id="25" key="WDF" />
+    </device>
+    <device name="RX_MS825" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="29" key="DIGDEM" />
+        <func id="16" key="DSCAN" />
+        <func id="15" key="FSCAN" />
+        <func id="23" key="FSCANE" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+        <func id="28" key="WBM" />
+        <func id="25" key="WDF" />
+    </device>
+    <device name="TCI" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+        <func id="24" key="SIGNALMEAS" />
+        <func id="25" key="WDF" />
+    </device>
+    <device name="TCI.bak" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+        <func id="24" key="SIGNALMEAS" />
+        <func id="25" key="WDF" />
+    </device>
+    <device name="TCI715" ver="7.1">
+      <func id="12" key="DF" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+        <func id="15" key="FSCAN" />
+      <func id="11" key="IFANALYSIS" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+      <func id="13" key="IFDF" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+        <func id="14" key="MSCAN" />
+      <func id="22" key="MSCANE" >
+        <detector key="detector">
+          <item name="线性" value="1" />
+          <item name="对数" value="2" />
+          <item name="均方根" value="3" />
+          <item name="峰值" value="4" />
+        </detector>
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+      <func id="10" key="SGLFREQ" >
+        <fieldmethod key="fieldmethod">
+          <item name="线性" value="1" />
+          <item name="对数" value="2" />
+          <item name="均方根" value="3" />
+          <item name="峰值" value="4" />
+        </fieldmethod>
+      </func>
+      <func id="24" key="SIGNALMEAS" >
+        <fieldmethod key="fieldmethod">
+          <item name="线性" value="1" />
+          <item name="对数" value="2" />
+          <item name="均方根" value="3" />
+          <item name="峰值" value="4" />
+        </fieldmethod>
+      </func>
+        <func id="25" key="WDF" />
+    </device>
+    <device name="TCI715HV" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+        <func id="24" key="SIGNALMEAS" />
+        <func id="25" key="WDF" />
+    </device>
+    <device name="TCI715V" ver="7.1">
+      <func id="12" key="DF" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+        <func id="15" key="FSCAN" />
+      <func id="11" key="IFANALYSIS" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+      <func id="13" key="IFDF" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+        <func id="14" key="MSCAN" />
+      <func id="22" key="MSCANE" >
+        <detector key="detector">
+          <item name="线性" value="1" />
+          <item name="对数" value="2" />
+          <item name="均方根" value="3" />
+          <item name="峰值" value="4" />
+        </detector>
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+      <func id="10" key="SGLFREQ" >
+        <fieldmethod key="fieldmethod">
+          <item name="线性" value="1" />
+          <item name="对数" value="2" />
+          <item name="均方根" value="3" />
+          <item name="峰值" value="4" />
+        </fieldmethod>
+      </func>
+      <func id="24" key="SIGNALMEAS" >
+        <fieldmethod key="fieldmethod">
+          <item name="线性" value="1" />
+          <item name="对数" value="2" />
+          <item name="均方根" value="3" />
+          <item name="峰值" value="4" />
+        </fieldmethod>
+      </func>
+        <func id="25" key="WDF" />
+    </device>
+    <device name="TCI725" ver="7.1">
+      <func id="12" key="DF" >
+        <detector key="detector">
+          <item name="线性" value="1"/>
+          <item name="对数" value="2"/>
+          <item name="均方根" value="3"/>
+          <item name="均方根" value="4"/>
+        </detector>
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100"/>
+          <item name="中速" value="500"/>
+          <item name="慢速" value="2000"/>
+        </gainctrl>
+      </func>
+      <func id="15" key="FSCAN" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100"/>
+          <item name="中速" value="500"/>
+          <item name="慢速" value="2000"/>
+        </gainctrl>
+      </func>
+      <func id="11" key="IFANALYSIS" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100"/>
+          <item name="中速" value="500"/>
+          <item name="慢速" value="2000"/>
+        </gainctrl>
+        <detector key="detector">
+          <item name="线性" value="1"/>
+          <item name="对数" value="2"/>
+          <item name="均方根" value="3"/>
+          <item name="均方根" value="4"/>
+        </detector>
+      </func>
+      <func id="13" key="IFDF" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100"/>
+          <item name="中速" value="500"/>
+          <item name="慢速" value="2000"/>
+        </gainctrl>
+        <detector key="detector">
+          <item name="线性" value="1"/>
+          <item name="对数" value="2"/>
+          <item name="均方根" value="3"/>
+          <item name="均方根" value="4"/>
+        </detector>
+      </func>
+      <func id="14" key="MSCAN" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100"/>
+          <item name="中速" value="500"/>
+          <item name="慢速" value="2000"/>
+        </gainctrl>
+        <detector key="detector">
+          <item name="线性" value="1"/>
+          <item name="对数" value="2"/>
+          <item name="均方根" value="3"/>
+          <item name="均方根" value="4"/>
+        </detector>
+      </func>
+      <func id="22" key="MSCANE" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100"/>
+          <item name="中速" value="500"/>
+          <item name="慢速" value="2000"/>
+        </gainctrl>
+        <detector key="detector">
+          <item name="线性" value="1"/>
+          <item name="对数" value="2"/>
+          <item name="均方根" value="3"/>
+          <item name="均方根" value="4"/>
+        </detector>
+      </func>
+      <func id="10" key="SGLFREQ" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100"/>
+          <item name="中速" value="500"/>
+          <item name="慢速" value="2000"/>
+        </gainctrl>
+        <detector key="detector">
+          <item name="线性" value="1"/>
+          <item name="对数" value="2"/>
+          <item name="均方根" value="3"/>
+          <item name="均方根" value="4"/>
+        </detector>
+      </func>
+        <func id="24" key="SIGNALMEAS" />
+      <func id="25" key="WDF" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100"/>
+          <item name="中速" value="500"/>
+          <item name="慢速" value="2000"/>
+        </gainctrl>
+        <detector key="detector">
+          <item name="线性" value="1"/>
+          <item name="对数" value="2"/>
+          <item name="均方根" value="3"/>
+          <item name="均方根" value="4"/>
+        </detector>
+      </func>
+    </device>
+    <device name="TCI725HV" ver="7.1">
+        <func id="12" key="DF" >
+          <gainctrl key="gainctrl">
+            <item name="快速" value="100"/>
+            <item name="中速" value="500"/>
+            <item name="慢速" value="2000"/>
+          </gainctrl>
+        </func>
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" >
+          <gainctrl key="gainctrl">
+            <item name="快速" value="100"/>
+            <item name="中速" value="500"/>
+            <item name="慢速" value="2000"/>
+          </gainctrl>
+        </func>
+        <func id="13" key="IFDF" >
+          <gainctrl key="gainctrl">
+            <item name="快速" value="100"/>
+            <item name="中速" value="500"/>
+            <item name="慢速" value="2000"/>
+          </gainctrl>
+        </func>
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" >
+          <gainctrl key="gainctrl">
+            <item name="快速" value="100"/>
+            <item name="中速" value="500"/>
+            <item name="慢速" value="2000"/>
+          </gainctrl>
+          <detector key="detector">
+            <item name="线性" value="1"/>
+            <item name="对数" value="2"/>
+            <item name="均方根" value="3"/>
+            <item name="均方根" value="4"/>
+          </detector>
+        </func>
+        <func id="10" key="SGLFREQ" />
+        <func id="24" key="SIGNALMEAS" />
+        <func id="25" key="WDF" />
+    </device>
+    <device name="TCI725V" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+        <func id="24" key="SIGNALMEAS" />
+        <func id="25" key="WDF" />
+    </device>
+    <device name="TCI735HV" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+        <func id="24" key="SIGNALMEAS" />
+        <func id="25" key="WDF" />
+	<func id="16" key="DSCAN" />
+	<func id="21" key="SCANDF" />
+    </device>
+        <device name="TCI737HV" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+        <func id="24" key="SIGNALMEAS" />
+        <func id="25" key="WDF" />
+	<func id="16" key="DSCAN" />
+	<func id="21" key="SCANDF" />
+    </device>
+    <device name="TCIHF" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+        <func id="24" key="SIGNALMEAS" />
+        <func id="25" key="WDF" />
+	<func id="16" key="DSCAN" />
+	<func id="21" key="SCANDF" />
+    </device>
+    <device name="TCI735V" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+        <func id="24" key="SIGNALMEAS" />
+        <func id="25" key="WDF" />
+	<func id="16" key="DSCAN" />
+	<func id="21" key="SCANDF" />
+    </device>
+    <device name="TCI745" ver="7.1">
+        <func id="12" key="DF" />
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="13" key="IFDF" />
+        <func id="14" key="MSCAN" />
+        <func id="22" key="MSCANE" />
+        <func id="10" key="SGLFREQ" />
+        <func id="24" key="SIGNALMEAS" />
+        <func id="25" key="WDF" />
+	<func id="16" key="DSCAN" />
+	<func id="21" key="SCANDF" />
+    </device>
+    <device name="TCI745HV" ver="7.1">
+        <func id="12" key="DF" />
+      <func id="15" key="FSCAN" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+      <func id="11" key="IFANALYSIS" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+        <func id="13" key="IFDF" />
+      <func id="14" key="MSCAN" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+      <func id="22" key="MSCANE" >
+        <detector key="detector">
+          <item name="线性" value="1" />
+          <item name="对数" value="2" />
+          <item name="均方根" value="3" />
+          <item name="峰值" value="4" />
+        </detector>
+      </func>
+      <func id="10" key="SGLFREQ" >
+        <fieldmethod key="fieldmethod">
+          <item name="线性" value="1" />
+          <item name="对数" value="2" />
+          <item name="均方根" value="3" />
+          <item name="峰值" value="4" />
+        </fieldmethod>
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+      <func id="24" key="SIGNALMEAS" >
+        <fieldmethod key="fieldmethod">
+          <item name="线性" value="1" />
+          <item name="对数" value="2" />
+          <item name="均方根" value="3" />
+          <item name="峰值" value="4" />
+        </fieldmethod>
+      </func>
+        <func id="25" key="WDF" />
+	<func id="16" key="DSCAN" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+	<func id="21" key="SCANDF" />
+    </device>
+    <device name="TCI745V" ver="7.1">
+       <func id="12" key="DF" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+        <func id="15" key="FSCAN" />
+      <func id="11" key="IFANALYSIS" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+      <func id="13" key="IFDF" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+        <func id="14" key="MSCAN" />
+      <func id="22" key="MSCANE" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+      <func id="10" key="SGLFREQ" >
+        <fieldmethod key="fieldmethod">
+          <item name="线性" value="1" />
+          <item name="对数" value="2" />
+          <item name="均方根" value="3" />
+          <item name="峰值" value="4" />
+        </fieldmethod>
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+      <func id="24" key="SIGNALMEAS" >
+        <fieldmethod key="fieldmethod">
+          <item name="线性" value="1" />
+          <item name="对数" value="2" />
+          <item name="均方根" value="3" />
+          <item name="峰值" value="4" />
+        </fieldmethod>
+      </func>
+      <func id="16" key="DSCAN" >
+        <gainctrl key="gainctrl">
+          <item name="快速" value="100" />
+          <item name="中速" value="500" />
+          <item name="慢速" value="2000" />
+        </gainctrl>
+      </func>
+        <func id="25" key="WDF" />
+    </device>
+    <device name="TRC8021" ver="7.1">
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="24" key="ITU" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <device name="TRC8024" ver="7.1">
+        <func id="13" key="IFDF" />
+    </device>
+    <device name="WR3700I" ver="7.1">
+        <func id="15" key="FSCAN" />
+        <func id="11" key="IFANALYSIS" />
+        <func id="14" key="MSCAN" />
+        <func id="10" key="SGLFREQ" />
+    </device>
+    <keywordgroup>
+    	<measurementmode key="measurementmode" />
+        <measurementtime key="measurementtime" />
+        <dfmeasuretime key="dfmeasuretime" />  
+        <integrationlevel key="integrationlevel" />
+    		<rfworkmode key="rfworkmode" />
+    		<ch2enabled key="ch2enabled" />
+    		<ch2frequency key="ch2frequency" />
+    		<ch2ifbw key="ch2ifbw" />
+    		<ch2demodmode key="ch2demodmode" />
+        <SpectrumBW key="SpectrumBW" />
+        <VolumeCtrl key="VolumeCtrl" />
+        <dfmeasuretime key="dfmeasuretime" />
+        <measurementmode key="measurementmode" />
+        <measurementtime key="measurementtime" />
+      <_1curve key="trace1mode">
+        <item name="实时" value="clear"/>
+        <item name="最小" value="minhold"/>
+        <item name="最大" value="maxhold"/>
+        <item name="平均" value="averagehold"/>
+        <item name="消隐" value="hide"/>
+      </_1curve>
+      <_2curve key="trace2mode">
+        <item name="实时" value="clear"/>
+        <item name="最小" value="minhold"/>
+        <item name="最大" value="maxhold"/>
+        <item name="平均" value="averagehold"/>
+        <item name="消隐" value="hide"/>
+      </_2curve>
+      <_3curve key="trace3mode">
+        <item name="实时" value="clear"/>
+        <item name="最小" value="minhold"/>
+        <item name="最大" value="maxhold"/>
+        <item name="平均" value="averagehold"/>
+        <item name="消隐" value="hide"/>
+      </_3curve>
+      <_4curve key="trace4mode">
+        <item name="实时" value="clear"/>
+        <item name="最小" value="minhold"/>
+        <item name="最大" value="maxhold"/>
+        <item name="平均" value="averagehold"/>
+        <item name="消隐" value="hide"/>
+      </_4curve>
+      <_0curve key="trace0mode">
+        <item name="实时" value="clear"/>
+        <item name="最小" value="minhold"/>
+        <item name="最大" value="maxhold"/>
+        <item name="平均" value="averagehold"/>
+        <item name="消隐" value="hide"/>
+      </_0curve>
+        <_0curvedetector key="0curvedetector" />        
+        <_1curvedetector key="1curvedetector" />
+        <_1mkr key="1mkr" />        
+        <_2curvedetector key="2curvedetector" />
+        <_2mkr key="2mkr" />      
+        <_3curvedetector key="3curvedetector" />
+        <_3mkr key="3mkr" />
+        <_40measuretime key="40measuretime" />       
+        <_4curvedetector key="4curvedetector" />
+        <_4mkr key="4mkr" />
+        <acbw key="acbw" />
+        <acquirenum key="acquirenum" />
+        <adjbw key="adjbw" />
+        <adjno key="adjno" />
+        <afbw key="afbw" />
+        <afc key="afc" >
+          <item name="开" value="on" />
+          <item name="关" value="off" />
+        </afc>
+        <afcdoor key="afcdoor" />
+        <afcoupling key="afcoupling" />
+        <affilter key="affilter">
+          <item name="耦合" value="COUPLED" />
+          <item name="关" value="off" />
+          <item name="开" value="on" />
+        </affilter>
+        <afgain key="afgain" />
+      <afhighfilter key="afhighpass">
+        <item name="无" value="off"/>
+        <item name="自动" value="AUTO" />
+      </afhighfilter>
+      <aflowfilter key="aflowpass">
+        <item name="无" value="off"/>
+        <item name="5%[解调带宽]" value="5pct"/>
+        <item name="10%[解调带宽]" value="10pct"/>
+        <item name="25%[解调带宽]" value="25pct"/>
+        <item name="自动" value="AUTO" />
+      </aflowfilter>
+        <afthreshold key="afthreshold" />
+      <agc key="agc">
+        <item name="关" value="OFF" />
+        <item name="快速" value="FAST" />
+        <item name="慢速" value="SLOW" />
+        <item name="中速" value="MIDDLE" />
+      </agc>
+        <agcdelayt key="agcdelayt" />
+        <alarmamplcriteria1 key="alarmamplcriteria1" />
+        <alarmamplcriteria2 key="alarmamplcriteria2" />
+        <alarmamplsource key="alarmamplsource" />
+        <alarmampltype key="alarmampltype" />
+        <alarmbwcriteria1 key="alarmbwcriteria1" />
+        <alarmbwcriteria2 key="alarmbwcriteria2" />
+        <alarmbwsource key="alarmbwsource" />
+        <alarmbwtype key="alarmbwtype" />
+        <alarmcolltype key="alarmcolltype" />
+        <alarmcolrecsetup key="alarmcolrecsetup" />
+        <alarmconcriteria1 key="alarmconcriteria1" />
+        <alarmconcriteria2 key="alarmconcriteria2" />
+        <alarmcontype key="alarmcontype" />
+        <alarmcriteria1 key="alarmcriteria1" />
+        <alarmcriteria2 key="alarmcriteria2" />
+        <alarmdectcriteria1 key="alarmdectcriteria1" />
+        <alarmdectcriteria2 key="alarmdectcriteria2" />
+        <alarmdecttype key="alarmdecttype" />
+        <alarmdevcriteria1 key="alarmdevcriteria1" />
+        <alarmdevcriteria2 key="alarmdevcriteria2" />
+        <alarmdevtype key="alarmdevtype" />
+        <alarmenergytype key="alarmenergytype" />
+        <alarmevents key="alarmevents" />
+        <alarmfeature key="alarmfeature" />
+        <alarmfreqcriteria1 key="alarmfreqcriteria1" />
+        <alarmfreqcriteria2 key="alarmfreqcriteria2" />
+        <alarmfreqsource key="alarmfreqsource" />
+        <alarmfreqtype key="alarmfreqtype" />
+        <alarmloctype key="alarmloctype" />
+        <alarmmodtype key="alarmmodtype" />
+        <alarmocccriteria1 key="alarmocccriteria1" />
+        <alarmocccriteria2 key="alarmocccriteria2" />
+        <alarmocctype key="alarmocctype" />
+        <alarmpriority key="alarmpriority" />
+        <alarmsetup key="alarmsetup" />
+        <alarmsnrcriteria1 key="alarmsnrcriteria1" />
+        <alarmsnrcriteria2 key="alarmsnrcriteria2" />
+        <alarmsnrtype key="alarmsnrtype" />
+        <alarmsratetype key="alarmsratetype" />
+        <alarmsrcriteria1 key="alarmsrcriteria1" />
+        <alarmsrcriteria2 key="alarmsrcriteria2" />
+        <alarmssdtype key="alarmssdtype" />
+        <alarmstatus key="alarmstatus" />
+        <alarmtrigger key="alarmtrigger" />
+        <alarmtype key="alarmtype" />
+        <alphabt key="alphabt" />
+        <amplifier key="amplifier" />
+        <analogsignal key="analogsignal" />
+        <anglemode key="anglemode" />
+        <antenna key="antenna" />
+        <antennaangle key="antennaangle" />
+        <antennacontrol key="antennacontrol" />
+        <antennasect key="antennasect" />
+        <antmode key="antmode" />
+        <antpol key="antpol" />
+        <apf key="apf" />
+        <apfvalue key="apfvalue" />
+        <appmeasure key="appmeasure" />
+        <apptimemeas key="apptimemeas" />
+        <armeasuretime key="armeasuretime" />
+        <aspectratio key="aspectratio" />
+        <attenuator key="attenuator" />
+        <audioblock key="audioblock" />
+        <audiochannel key="audiochannel" />
+        <audiodevice key="audiodevice" />
+        <audiolevel key="audiolevel" />
+        <audiomode key="audiomode" />
+        <audiorate key="audiorate" />
+        <audioswitch key="audioswitch">
+            <item name="true" value="on" />
+            <item name="false" value="off" />
+            <item name="开" value="on" />
+            <item name="关" value="off" />
+        </audioswitch>
+        <avemethod key="avemethod" />
+        <averagehold key="averagehold" >
+          <item name="开" value="on" />
+          <item name="关" value="off" />
+        </averagehold>
+        <avernum key="avernum" />
+        <avertype key="avertype" />
+        <azimuth key="azimuth" />
+        <azimuthrange key="azimuthrange" />
+        <band key="band" />
+        <bandmode key ="bandmode">
+          <item name="XdB带宽" value="xdb" />
+          <item name="β带宽" value="betapercent" />
+        </bandmode>
+        <bandvalue key="bandvalue" />
+        <bcch key="bcch" />
+        <beamsform key="beamsform" />
+        <betapercent key="betapercent" />
+        <bfo key="bfo" />
+        <brightness key="brightness" />
+        <burmaxperiod key="burmaxperiod" />
+        <burmaxwidth key="burmaxwidth" />
+        <burminperiod key="burminperiod" />
+        <burminwidth key="burminwidth" />
+        <bwoutputtype key="bwoutputtype" />
+        <cardnum key="cardnum" />
+        <centerfreq key="centerfreq" />
+        <cf key="cf" />
+        <cf1 key="cf1" />
+        <changetime key="changetime" />
+        <channelbw key="channelbw" />
+        <channelcount key="channelcount" />
+        <channelspace key="channelspace" />
+        <chfilter key="chfilter" />
+        <cisprfilter key="cisprfilter" />
+        <colorsys key="colorsys" />
+        <conflevel key="conflevel" />
+        <confthreshold key="confthreshold" />
+        <consultsignal key="consultsignal" />
+        <contrast key="contrast" />
+        <cor key="cor" />
+        <corectionvaule key="corectionvaule" />
+        <correctionvalue key="correctionvalue" />
+        <cortime key="cortime" />
+        <cstandard key="cstandard" />
+        <cstandard1 key="cstandard1" />
+        <cstartard key="cstartard" />
+        <curve key="curve" />
+      <curvehold key="curvehold">
+        <item name="最大保持" value="MAXHOLD"/>
+        <item name="最小保持" value="MINHOLD"/>
+        <item name="平均值" value="average"/>
+        <item name="无" value="HIDE"/>
+      </curvehold>
+        <curveshow key="curveshow" />
+        <cwfreq key="cwfreq" />
+        <declination key="declination" />
+        <deemp key="deemp" />
+      <deemph key="deemphasis">
+        <item name="无" value="off"/>
+        <item name="50μs" value="50us"/>
+        <item name="75μs" value="75us"/>
+        <item name="750μs" value="750us"/>
+      </deemph>
+      <deemphasis key="deemphasis">
+        <item name="自动" value="AUTO" />
+      </deemphasis>
+        <demfreq key="demfreq" />
+        <demodbw key="demodbw" />
+        <demodmode key="demodmode" />
+        <demodtime key="demodtime" />
+        <desiredaccuracy key="desiredaccuracy" />
+        <detecmethod key="detecmethod" />
+        <detectfilter key="detectfilter" />
+        <detectionmode key="detectionmode" />
+        <detectionthrshold key="detectionthrshold" />
+        <detector key = "detector">
+          <item name="峰值" value="POS" />
+          <item name="平均值" value="PAV" />
+          <item name="FAST" value="FAST" />
+          <item name="有效值" value="RMS" />
+        </detector>
+      <detector1 key="detector1">
+        <item name="自动选择" value="auto"/>
+        <item name="自动峰值" value="autopeak"/>
+        <item name="最大峰值" value="max"/>
+        <item name="最小峰值" value="min"/>
+        <item name="采样检波" value="samp"/>
+        <item name="平均值检波" value="aver"/>
+        <item name="有效值" value="rms"/>
+      </detector1>
+      <detector2 key="detector2">
+        <item name="自动选择" value="auto"/>
+        <item name="自动峰值" value="autopeak"/>
+        <item name="最大峰值" value="max"/>
+        <item name="最小峰值" value="min"/>
+        <item name="采样检波" value="samp"/>
+        <item name="平均值检波" value="aver"/>
+        <item name="有效值" value="rms"/>
+      </detector2>
+      <detector3 key="detector3">
+        <item name="自动选择" value="auto"/>
+        <item name="自动峰值" value="autopeak"/>
+        <item name="最大峰值" value="max"/>
+        <item name="最小峰值" value="min"/>
+        <item name="采样检波" value="samp"/>
+        <item name="平均值检波" value="aver"/>
+        <item name="有效值" value="rms"/>
+      </detector3>
+      <detector4 key="detector4">
+        <item name="自动选择" value="auto"/>
+        <item name="自动峰值" value="autopeak"/>
+        <item name="最大峰值" value="max"/>
+        <item name="最小峰值" value="min"/>
+        <item name="采样检波" value="samp"/>
+        <item name="平均值检波" value="aver"/>
+        <item name="有效值" value="rms"/>
+      </detector4>
+        <devchannel key="devchannel" />
+        <device key="device" />
+        <dfalt key="dfalt" />
+        <dfantmode key="dfantmode" />
+        <dfbandwidth key="dfbandwidth" />
+        <dfbw key="dfbw" />
+        <dffilterazibegin key="dffilterazibegin" />
+        <dffilteraziend key="dffilteraziend" />
+        <dffilterelevbegin key="dffilterelevbegin" />
+        <dffilterelevend key="dffilterelevend" />
+        <dfhithreshold key="dfhithreshold" />
+      <dfmode key ="dfmode">
+        <item name="常态" value="NORM" />
+        <item name="连续" value="CONT" />
+        <item name="脉冲" value="GATE" />
+      </dfmode>
+        <dfoutputtype key="dfoutputtype" />
+        <dfqulitythreshold key="dfqulitythreshold" />
+        <dfresolution key="dfresolution" />
+        <dfsource key="dfsource" />
+        <dfthreshold key="dfthreshold" />
+        <digitaldemod key="digitaldemod" />
+      <digitaldemodmode key="digitaldemodmode">
+        <item name="BPSK" value="0"/>
+        <item name="QPSK" value="1"/>
+        <item name="DQPSK" value="2"/>
+        <item name="π/4 DQPSK" value="3"/>
+        <item name="QQPSK" value="4"/>
+        <item name="8PSK" value="5"/>
+        <item name="D8PSK" value="6"/>
+        <item name="3π/8-8PSK" value="7"/>
+        <item name="MSK" value="9"/>
+        <item name="DMSK" value="10"/>
+        <item name="2FSK" value="11"/>
+        <item name="4FSK" value="12"/>
+        <item name="16QAM" value="8"/>
+      </digitaldemodmode>
+      <digitalstandard key="digitalstandard">
+        <item name="IS-95 CDMA FWD CH" value="f95c"/>
+        <item name="IS-95 CDMA REV CH" value="r95c"/>
+        <item name="W-CDMA 4.096 FWD" value="fcdm"/>
+        <item name="W-CDMA 4.096 REV" value="rcdm"/>
+        <item name="W-CDMA 3GPP FWD" value="fw3g"/>
+        <item name="W-CDMA 3GPP REV" value="rw3g"/>
+        <item name="CDMA 2000 SR3/DS FWD" value="cdma2000"/>
+        <item name="EDGE" value="edge"/>
+        <item name="GSM" value="gsm"/>
+        <item name="CT2" value="ct2"/>
+        <item name="ERMES" value="erm"/>
+        <item name="MODACOM" value="mod"/>
+        <item name="FLEX16-2" value="f16"/>
+        <item name="FLEX32-2" value="f322"/>
+        <item name="FLEX32-4" value="f324"/>
+        <item name="FLEX64-4" value="f64"/>
+        <item name="APC025 C4FM" value="apco25c4fm"/>
+        <item name="APC025 CQPSK" value="apco25cqpsk"/>
+        <item name="CDPD" value="cdpd"/>
+        <item name="PDC UP" value="pdc"/>
+        <item name="PDC DOWN" value="pdcd"/>
+        <item name="NADC FWD CH" value="fnad"/>
+        <item name="NADC REV CH" value="rnad"/>
+        <item name="DECT" value="dect"/>
+        <item name="PHS" value="phs"/>
+        <item name="PWT" value="pwt"/>
+        <item name="TETRA" value="tetr"/>
+        <item name="TFTS" value="tfts"/>
+      </digitalstandard>
+      <displaymode key ="displaymode">
+        <item name="常态模式" value="NORM" />
+        <item name="差分模式" value="DIFF" />
+      </displaymode>
+        <displayrange key="displayrange" />
+        <duration key="duration" />
+        <durationmethod key="durationmethod" />
+        <durationtime key="durationtime" />
+        <dweli key="dweli" />
+        <dwelltime key="dwelltime" />
+        <elevation key="elevation" />
+        <environmentctrl key="environmentctrl" />
+        <errorsignal key="errorsignal" />
+        <event1alarmamplcriteria1 key="event1alarmamplcriteria1" />
+        <event1alarmamplcriteria2 key="event1alarmamplcriteria2" />
+        <event1alarmamplsource key="event1alarmamplsource" />
+        <event1alarmampltype key="event1alarmampltype" />
+        <event1alarmbwcriteria1 key="event1alarmbwcriteria1" />
+        <event1alarmbwcriteria2 key="event1alarmbwcriteria2" />
+        <event1alarmbwsource key="event1alarmbwsource" />
+        <event1alarmbwtype key="event1alarmbwtype" />
+        <event1alarmcolltype key="event1alarmcolltype" />
+        <event1alarmcolrecsetup key="event1alarmcolrecsetup" />
+        <event1alarmconcriteria1 key="event1alarmconcriteria1" />
+        <event1alarmconcriteria2 key="event1alarmconcriteria2" />
+        <event1alarmcontype key="event1alarmcontype" />
+        <event1alarmcriteria1 key="event1alarmcriteria1" />
+        <event1alarmcriteria2 key="event1alarmcriteria2" />
+        <event1alarmdectcriteria1 key="event1alarmdectcriteria1" />
+        <event1alarmdectcriteria2 key="event1alarmdectcriteria2" />
+        <event1alarmdecttype key="event1alarmdecttype" />
+        <event1alarmdevcriteria1 key="event1alarmdevcriteria1" />
+        <event1alarmdevcriteria2 key="event1alarmdevcriteria2" />
+        <event1alarmdevtype key="event1alarmdevtype" />
+        <event1alarmenergytype key="event1alarmenergytype" />
+        <event1alarmevents key="event1alarmevents" />
+        <event1alarmfeature key="event1alarmfeature" />
+        <event1alarmfreqcriteria1 key="event1alarmfreqcriteria1" />
+        <event1alarmfreqcriteria2 key="event1alarmfreqcriteria2" />
+        <event1alarmfreqsource key="event1alarmfreqsource" />
+        <event1alarmfreqtype key="event1alarmfreqtype" />
+        <event1alarmloctype key="event1alarmloctype" />
+        <event1alarmmodtype key="event1alarmmodtype" />
+        <event1alarmocccriteria1 key="event1alarmocccriteria1" />
+        <event1alarmocccriteria2 key="event1alarmocccriteria2" />
+        <event1alarmocctype key="event1alarmocctype" />
+        <event1alarmpriority key="event1alarmpriority" />
+        <event1alarmsetup key="event1alarmsetup" />
+        <event1alarmsnrcriteria1 key="event1alarmsnrcriteria1" />
+        <event1alarmsnrcriteria2 key="event1alarmsnrcriteria2" />
+        <event1alarmsnrtype key="event1alarmsnrtype" />
+        <event1alarmsratetype key="event1alarmsratetype" />
+        <event1alarmsrcriteria1 key="event1alarmsrcriteria1" />
+        <event1alarmsrcriteria2 key="event1alarmsrcriteria2" />
+        <event1alarmssdtype key="event1alarmssdtype" />
+        <event1alarmstatus key="event1alarmstatus" />
+        <event1alarmtrigger key="event1alarmtrigger" />
+        <event1alarmtype key="event1alarmtype" />
+        <event2alarmamplcriteria1 key="event2alarmamplcriteria1" />
+        <event2alarmamplcriteria2 key="event2alarmamplcriteria2" />
+        <event2alarmamplsource key="event2alarmamplsource" />
+        <event2alarmampltype key="event2alarmampltype" />
+        <event2alarmbwcriteria1 key="event2alarmbwcriteria1" />
+        <event2alarmbwcriteria2 key="event2alarmbwcriteria2" />
+        <event2alarmbwsource key="event2alarmbwsource" />
+        <event2alarmbwtype key="event2alarmbwtype" />
+        <event2alarmcolltype key="event2alarmcolltype" />
+        <event2alarmcolrecsetup key="event2alarmcolrecsetup" />
+        <event2alarmconcriteria1 key="event2alarmconcriteria1" />
+        <event2alarmconcriteria2 key="event2alarmconcriteria2" />
+        <event2alarmcontype key="event2alarmcontype" />
+        <event2alarmcriteria1 key="event2alarmcriteria1" />
+        <event2alarmcriteria2 key="event2alarmcriteria2" />
+        <event2alarmdectcriteria1 key="event2alarmdectcriteria1" />
+        <event2alarmdectcriteria2 key="event2alarmdectcriteria2" />
+        <event2alarmdecttype key="event2alarmdecttype" />
+        <event2alarmdevcriteria1 key="event2alarmdevcriteria1" />
+        <event2alarmdevcriteria2 key="event2alarmdevcriteria2" />
+        <event2alarmdevtype key="event2alarmdevtype" />
+        <event2alarmenergytype key="event2alarmenergytype" />
+        <event2alarmevents key="event2alarmevents" />
+        <event2alarmfeature key="event2alarmfeature" />
+        <event2alarmfreqcriteria1 key="event2alarmfreqcriteria1" />
+        <event2alarmfreqcriteria2 key="event2alarmfreqcriteria2" />
+        <event2alarmfreqsource key="event2alarmfreqsource" />
+        <event2alarmfreqtype key="event2alarmfreqtype" />
+        <event2alarmloctype key="event2alarmloctype" />
+        <event2alarmmodtype key="event2alarmmodtype" />
+        <event2alarmocccriteria1 key="event2alarmocccriteria1" />
+        <event2alarmocccriteria2 key="event2alarmocccriteria2" />
+        <event2alarmocctype key="event2alarmocctype" />
+        <event2alarmpriority key="event2alarmpriority" />
+        <event2alarmsetup key="event2alarmsetup" />
+        <event2alarmsnrcriteria1 key="event2alarmsnrcriteria1" />
+        <event2alarmsnrcriteria2 key="event2alarmsnrcriteria2" />
+        <event2alarmsnrtype key="event2alarmsnrtype" />
+        <event2alarmsratetype key="event2alarmsratetype" />
+        <event2alarmsrcriteria1 key="event2alarmsrcriteria1" />
+        <event2alarmsrcriteria2 key="event2alarmsrcriteria2" />
+        <event2alarmssdtype key="event2alarmssdtype" />
+        <event2alarmstatus key="event2alarmstatus" />
+        <event2alarmtrigger key="event2alarmtrigger" />
+        <event2alarmtype key="event2alarmtype" />
+        <event2relation key="event2relation" />
+        <event3alarmamplcriteria1 key="event3alarmamplcriteria1" />
+        <event3alarmamplcriteria2 key="event3alarmamplcriteria2" />
+        <event3alarmamplsource key="event3alarmamplsource" />
+        <event3alarmampltype key="event3alarmampltype" />
+        <event3alarmbwcriteria1 key="event3alarmbwcriteria1" />
+        <event3alarmbwcriteria2 key="event3alarmbwcriteria2" />
+        <event3alarmbwsource key="event3alarmbwsource" />
+        <event3alarmbwtype key="event3alarmbwtype" />
+        <event3alarmcolltype key="event3alarmcolltype" />
+        <event3alarmcolrecsetup key="event3alarmcolrecsetup" />
+        <event3alarmconcriteria1 key="event3alarmconcriteria1" />
+        <event3alarmconcriteria2 key="event3alarmconcriteria2" />
+        <event3alarmcontype key="event3alarmcontype" />
+        <event3alarmcriteria1 key="event3alarmcriteria1" />
+        <event3alarmcriteria2 key="event3alarmcriteria2" />
+        <event3alarmdectcriteria1 key="event3alarmdectcriteria1" />
+        <event3alarmdectcriteria2 key="event3alarmdectcriteria2" />
+        <event3alarmdecttype key="event3alarmdecttype" />
+        <event3alarmdevcriteria1 key="event3alarmdevcriteria1" />
+        <event3alarmdevcriteria2 key="event3alarmdevcriteria2" />
+        <event3alarmdevtype key="event3alarmdevtype" />
+        <event3alarmenergytype key="event3alarmenergytype" />
+        <event3alarmevents key="event3alarmevents" />
+        <event3alarmfeature key="event3alarmfeature" />
+        <event3alarmfreqcriteria1 key="event3alarmfreqcriteria1" />
+        <event3alarmfreqcriteria2 key="event3alarmfreqcriteria2" />
+        <event3alarmfreqsource key="event3alarmfreqsource" />
+        <event3alarmfreqtype key="event3alarmfreqtype" />
+        <event3alarmloctype key="event3alarmloctype" />
+        <event3alarmmodtype key="event3alarmmodtype" />
+        <event3alarmocccriteria1 key="event3alarmocccriteria1" />
+        <event3alarmocccriteria2 key="event3alarmocccriteria2" />
+        <event3alarmocctype key="event3alarmocctype" />
+        <event3alarmpriority key="event3alarmpriority" />
+        <event3alarmsetup key="event3alarmsetup" />
+        <event3alarmsnrcriteria1 key="event3alarmsnrcriteria1" />
+        <event3alarmsnrcriteria2 key="event3alarmsnrcriteria2" />
+        <event3alarmsnrtype key="event3alarmsnrtype" />
+        <event3alarmsratetype key="event3alarmsratetype" />
+        <event3alarmsrcriteria1 key="event3alarmsrcriteria1" />
+        <event3alarmsrcriteria2 key="event3alarmsrcriteria2" />
+        <event3alarmssdtype key="event3alarmssdtype" />
+        <event3alarmstatus key="event3alarmstatus" />
+        <event3alarmtrigger key="event3alarmtrigger" />
+        <event3alarmtype key="event3alarmtype" />
+        <event3relation key="event3relation" />
+        <event4alarmamplcriteria1 key="event4alarmamplcriteria1" />
+        <event4alarmamplcriteria2 key="event4alarmamplcriteria2" />
+        <event4alarmamplsource key="event4alarmamplsource" />
+        <event4alarmampltype key="event4alarmampltype" />
+        <event4alarmbwcriteria1 key="event4alarmbwcriteria1" />
+        <event4alarmbwcriteria2 key="event4alarmbwcriteria2" />
+        <event4alarmbwsource key="event4alarmbwsource" />
+        <event4alarmbwtype key="event4alarmbwtype" />
+        <event4alarmcolltype key="event4alarmcolltype" />
+        <event4alarmcolrecsetup key="event4alarmcolrecsetup" />
+        <event4alarmconcriteria1 key="event4alarmconcriteria1" />
+        <event4alarmconcriteria2 key="event4alarmconcriteria2" />
+        <event4alarmcontype key="event4alarmcontype" />
+        <event4alarmcriteria1 key="event4alarmcriteria1" />
+        <event4alarmcriteria2 key="event4alarmcriteria2" />
+        <event4alarmdectcriteria1 key="event4alarmdectcriteria1" />
+        <event4alarmdectcriteria2 key="event4alarmdectcriteria2" />
+        <event4alarmdecttype key="event4alarmdecttype" />
+        <event4alarmdevcriteria1 key="event4alarmdevcriteria1" />
+        <event4alarmdevcriteria2 key="event4alarmdevcriteria2" />
+        <event4alarmdevtype key="event4alarmdevtype" />
+        <event4alarmenergytype key="event4alarmenergytype" />
+        <event4alarmevents key="event4alarmevents" />
+        <event4alarmfeature key="event4alarmfeature" />
+        <event4alarmfreqcriteria1 key="event4alarmfreqcriteria1" />
+        <event4alarmfreqcriteria2 key="event4alarmfreqcriteria2" />
+        <event4alarmfreqsource key="event4alarmfreqsource" />
+        <event4alarmfreqtype key="event4alarmfreqtype" />
+        <event4alarmloctype key="event4alarmloctype" />
+        <event4alarmmodtype key="event4alarmmodtype" />
+        <event4alarmocccriteria1 key="event4alarmocccriteria1" />
+        <event4alarmocccriteria2 key="event4alarmocccriteria2" />
+        <event4alarmocctype key="event4alarmocctype" />
+        <event4alarmpriority key="event4alarmpriority" />
+        <event4alarmsetup key="event4alarmsetup" />
+        <event4alarmsnrcriteria1 key="event4alarmsnrcriteria1" />
+        <event4alarmsnrcriteria2 key="event4alarmsnrcriteria2" />
+        <event4alarmsnrtype key="event4alarmsnrtype" />
+        <event4alarmsratetype key="event4alarmsratetype" />
+        <event4alarmsrcriteria1 key="event4alarmsrcriteria1" />
+        <event4alarmsrcriteria2 key="event4alarmsrcriteria2" />
+        <event4alarmssdtype key="event4alarmssdtype" />
+        <event4alarmstatus key="event4alarmstatus" />
+        <event4alarmtrigger key="event4alarmtrigger" />
+        <event4alarmtype key="event4alarmtype" />
+        <event4relation key="event4relation" />
+        <eventctrl key="eventctrl" />
+        <eventsetup key="eventsetup" />
+        <extralowdist key="extralowdist" >
+          <item name="开" value="on" />
+          <item name="关" value="off" />
+        </extralowdist>
+        <eyelen key="eyelen" />
+        <eyelenght key="eyelenght" />
+        <ezmifbw key="ezmifbw" />
+        <fftdata key="fftdata" />
+        <fieldmethod key="fieldmethod" />
+        <fieldoutputtype key="fieldoutputtype" />
+        <fifilteroffset key="fifilteroffset" />
+        <filter key="filter" />
+        <filterbw key="filterbw" />
+        <filtertype key="filtertype" />
+        <fixedthreshold key="fixedthreshold" />
+        <fmfilter key="fmfilter" />
+        <fmmonitor key="fmmonitor" />
+        <framelen key="framelen" />
+        <framelength key="framelength" />
+        <frameperiod key="frameperiod" />
+        <framerate key="framerate" />
+        <frbw key="frbw" />
+        <freqmethod key="freqmethod" />
+        <freqoutputtype key="freqoutputtype" />
+        <freqrange key="freqrange" />
+        <freqtype key="freqtype" />
+        <frequency key="frequency" />
+        <fskrefdeviation key="fskrefdeviation" />
+        <fskrefoffset key="fskrefoffset" />
+        <fsmeasuretime key="fsmeasuretime" />
+        <gain key="gain" />
+        <gainctrl key="gainctrl" />
+        <gainvalue key="gainvalue" />
+        <harmonicnumber key="harmonicnumber" />
+        <hide key="hide" />
+        <highfilter key="highfilter" />
+        <holdtime key="holdtime" />
+        <hopaccumperiod key="hopaccumperiod" />
+        <hopmaxdwell key="hopmaxdwell" />
+        <hopmindwell key="hopmindwell" />
+        <hoptimeout key="hoptimeout" />
+        <hopupdateperiod key="hopupdateperiod" />
+        <ifatt key="ifatt" />
+      <ifattmode key = "ifattmode">
+        <item name="低噪声" value="LOWN" />
+        <item name="常态" value="NORM" />
+        <item name="低失真" value="LOWD" />
+      </ifattmode> 
+      <attmode key = "attmode">
+        <item name="低失真" value="lowdist" />
+        <item name="低噪声" value="lownoise" />
+        <item name="正常" value="normal" />
+      </attmode>   
+        <ifbw key="ifbw" />
+        <iffilter key="iffilter" />
+        <ifgain key="ifgain" />
+        <ifswitch key="ifswitch" />
+        <iftime key="iftime" />
+        <integrationcount key="integrationcount" />
+        <integrationfactor key="integrationfactor" />
+        <integrationtime key="integrationtime" />
+        <integrationtype key="integrationtype" />
+        <itutype key="itutype" />
+        <key_fscan key="key_fscan" />
+        <keyfscan key="keyfscan" />
+        <levelfloor key="levelfloor" />
+        <levelrange key="levelrange" />
+        <levelshold key="levelshold" />
+        <levelthreshold key="levelthreshold" />
+        <levelunit key="levelunit" />
+        <loopmode key="loopmode" />
+        <lowfilter key="lowfilter" />
+        <lsnaudio key="lsnaudio" >
+	  			<item name="关" value="off" />
+          <item name="开" value="on" />
+				</lsnaudio>
+        <lsnfilter key="lsnfilter" />
+        <markerfreq key="markerfreq" />
+        <markermode key="markermode" />
+        <markertrack key="markertrack" />
+        <maxaveragetime key="maxaveragetime" />
+        <maxazimuth key="maxazimuth" />
+        <maxbitrate key="maxbitrate" />
+        <maxdt key="maxdt" />
+      <maxhold key="maxhold" >
+        <item name="关" value="off" />
+        <item name="开" value="on" />
+      </maxhold>
+        <mbw key="mbw" />
+      <measfilter key="measfilter">
+        <item name="None" value="OFF"/>
+        <item name="Raised Cos" value="RCOS"/>
+        <item name="Root Raised Cos" value="RRC"/>
+        <item name="Gaussian" value="GAUS"/>
+        <item name="Apco25fm" value="A25F"/>
+        <item name="Bess1-22" value="B22"/>
+        <item name="Bess1-25" value="B25"/>
+        <item name="Bess2-44" value="B44"/>
+        <item name="Edge-mes" value="EMES"/>
+        <item name="Edge-ref" value="EREF"/>
+        <item name="Is95-fm" value="FM95"/>
+        <item name="Is95-fr" value="FR95"/>
+        <item name="Is95-rm" value="RM95"/>
+        <item name="Is95-rr" value="RR95"/>
+      </measfilter>
+        <measmode key="measmode" />
+        <measurefilter key="measurefilter" />
+        <measuremode key="measuremode" />
+        <measureresult key="measureresult" />
+        <measuresignal key="measuresignal" />
+        <measuretime key="measuretime" />
+        <memorysize key="memorysize" />
+        <memscanmode key="memscanmode" />
+        <mgcvalue key="mgcvalue" />
+        <minazimuth key="minazimuth" />
+        <mindt key="mindt" />
+      <minhold key="minhold" >
+        <item name="关" value="off" />
+        <item name="开" value="on" />
+      </minhold>
+        <minsignallevel key="minsignallevel" />
+        <mixerlevel key="mixerlevel" />
+        <mixlevel key="mixlevel" />
+        <modeoutputtype key="modeoutputtype" />
+        <modsummary key="modsummary" />
+        <mrlevel key="mrlevel" />
+        <mute key="mute" />
+        <muted key="muted" />
+        <noisefloor key="noisefloor" />
+        <noisethreshold key="noisethreshold" />
+        <north key="north" />
+        <notchfilter key="notchfilter" />
+        <notchfilterswitch key="notchfilterswitch" />
+        <ntscres key="ntscres" />
+        <occupbwmode key="occupbwmode" />
+        <palres key="palres" />
+        <passband key="passband" />
+        <passbandswitch key="passbandswitch" />
+        <peakcriteria key="peakcriteria" />
+        <pnattr key="pnattr" />
+        <polarization key="polarization" />
+        <polarize key="polarize" />
+        <powerpercent key="powerpercent" />
+        <preamplifier key="preamplifier" >
+          <item name="关" value="off" />
+          <item name="开" value="on" />
+        </preamplifier>
+        <preamplifiers key="preamplifiers" >
+          <item name="关" value="off" />
+          <item name="开" value="on" />
+        </preamplifiers>
+        <prolinkmode key="prolinkmode" />
+        <ptspersymbol key="ptspersymbol" />
+        <qfilter key="qfilter" />
+        <qualitythreshold key="qualitythreshold" />
+        <qulitythreshold key="qulitythreshold" />
+      <rbw key="rbw">
+        <item name="自动" value="auto"/>
+      </rbw>
+        <rbwvbw key="rbwvbw" />
+        <readmode key="readmode" />
+        <readmodetime key="readmodetime" />
+        <realtime key="realtime" />
+        <recbw key="recbw" />
+        <record key="record" />
+        <recordthreshold key="recordthreshold" >
+          <item name="关" value="off"/>
+        </recordthreshold>
+        <referencefilter key="referencefilter" />
+        <referencesignal key="referencesignal" />
+      <reffilter key="reffilter">
+        <item name="None" value="OFF"/>
+        <item name="Raised Cos" value="RCOS"/>
+        <item name="Root Raised Cos" value="RRC"/>
+        <item name="Gaussian" value="GAUS"/>
+        <item name="Apco25fm" value="A25F"/>
+        <item name="Bess1-22" value="B22"/>
+        <item name="Bess1-25" value="B25"/>
+        <item name="Bess2-44" value="B44"/>
+        <item name="Edge-mes" value="EMES"/>
+        <item name="Edge-ref" value="EREF"/>
+        <item name="Is95-fm" value="FM95"/>
+        <item name="Is95-fr" value="FR95"/>
+        <item name="Is95-rm" value="RM95"/>
+        <item name="Is95-rr" value="RR95"/>
+      </reffilter>
+        <reflevel key="reflevel" />
+        <reflevel0 key="reflevel0" />
+        <reflevel001 key="reflevel001" />
+        <reflevel002 key="reflevel002" />
+        <reflevel003 key="reflevel003" />
+        <reflevel1 key="reflevel1" />
+        <reflevel10 key="reflevel10" />
+        <reflevel101 key="reflevel101" />
+        <reflevel102 key="reflevel102" />
+        <reflevel103 key="reflevel103" />
+        <reflevel11 key="reflevel11" />
+        <reflevel12 key="reflevel12" />
+        <reflevel2 key="reflevel2" />
+        <reflevel201 key="reflevel201" />
+        <reflevel202 key="reflevel202" />
+        <reflevel203 key="reflevel203" />
+        <reflevel3 key="reflevel3" />
+        <reflevel301 key="reflevel301" />
+        <reflevel302 key="reflevel302" />
+        <reflevel303 key="reflevel303" />
+        <reflevel4 key="reflevel4" />
+        <reflevel5 key="reflevel5" />
+        <reflevel6 key="reflevel6" />
+        <reflevel7 key="reflevel7" />
+        <reflevel8 key="reflevel8" />
+        <reflevel9 key="reflevel9" />
+        <refpointfreq key="refpointfreq" />
+        <refpointlev key="refpointlev" />
+        <refpointlevoffs key="refpointlevoffs" />
+        <refposition key="refposition" />
+        <refvaluepos key="refvaluepos" />
+        <repeatcount key="repeatcount" />
+        <resolution key="resolution" />
+        <resultlen key="resultlen" />
+        <resultlength key="resultlength" />
+        <revvol key="revvol" />
+      <rfamp key="rfamp">
+        <item name="自动" value="AUTO" />
+        <item name="关" value="OFF" />
+      </rfamp>
+        <rfatt key="rfatt" >
+          <item name="开" value="on" />
+          <item name="关" value="off" />
+          <item name="自动" value="auto" />
+        </rfatt>
+      <rfattd key="rfatt">
+        <item name="自动" value="auto"/>
+        <item name="自动低噪声" value="auto"/>
+        <item name="自动低失真" value="auto"/>
+      </rfattd>
+        <rfattenuation key="rfattenuation" />
+        <rfg key="rfg" />
+        <rfgain key="rfgain" />
+        <rfhead key="rfhead" />
+        <rtifbw key="rtifbw" />
+        <samplecount key="samplecount" />
+        <samplefunction key="samplefunction" />
+        <samplemod key="samplemod" />
+        <samplerate key="samplerate" />
+        <saturation key="saturation" />
+        <scanmode key="scanmode" />
+        <searchtype key="searchtype" />
+        <segmentsnum key="segmentsnum" />
+        <shapefactor key="shapefactor" />
+      <sideband key="sideband">
+        <item name="常态" value="NORM"/>
+        <item name="反向" value="INV"/>
+      </sideband>
+        <sigeband key="sigeband" />
+        <sigmaxwidth key="sigmaxwidth" />
+        <sigminperiod key="sigminperiod" />
+        <sigminwidth key="sigminwidth" />
+        <signaltype key="signaltype" />
+        <sigupdateperiod key="sigupdateperiod" />
+        <smoothfactor key="smoothfactor" />
+        <soundmode key="soundmode" />
+        <span key="span" />
+        <span1 key="span1" />
+        <spanrbw key="spanrbw" />
+      <speakerswitch key="speakerswitch" >
+        <item name="关" value="off" />
+        <item name="开" value="on" />
+      </speakerswitch>
+        <specmode key="specmode" />
+      <speed key ="speed">
+        <item name="常态" value="NORM" />
+        <item name="低" value="LOW" />
+        <item name="高" value="HIGH" />
+        <item name="每通道的测量时间" value="HIGH" />
+      </speed>
+      <squelch key="squelch" />
+        <squelchswitch key="squelchswitch" />
+        <squelchthreshold key="squelchthreshold" >
+          <item name="关" value="off"/>
+        </squelchthreshold>
+        <standardselect key="standardselect" />
+        <startfreq key="startfreq" />
+        <startfreqkey key="startfreq" />
+        <step key="step" />
+        <stepkey key="stepkey" />
+        <stfilter key="stfilter" />
+        <stmode key="stmode" />
+        <stopfreq key="stopfreq" />
+        <stopfreqkey key="stopfreq" />
+        <sweepcount key="sweepcount" />
+        <sweeptime key="sweeptime" />
+        <switchantemod key="switchantemod" />
+        <switchantemode key="switchantemode" />
+        <symbolrate key="symbolrate" />
+        <synthmode key="synthmode" />
+        <tciantenna key="tciantenna" />
+        <threshold key="threshold" />
+        <thresholdMargin key="thresholdMargin" />
+        <thresholdlevel key="thresholdlevel" />
+        <thresholdmethod key="thresholdmethod" />
+        <thresholdmode key="thresholdmode" />
+        <trfilter key="trfilter" />
+        <ttyoutctrl key="ttyoutctrl" />
+        <tvarea key="tvarea" />
+        <tvchannel key="tvchannel" />
+        <tvmonitor key="tvmonitor" />
+        <tvsearch key="tvsearch" />
+        <tvsystem key="tvsystem" />
+        <tvvol key="tvvol" />
+        <vbfo key="vbfo" />
+      <vbw key="vbw">
+        <item name="自动" value="auto"/>
+      </vbw>
+        <vcor key="vcor" />
+        <videobitrate key="videobitrate" />
+        <videosource key="videosource" />
+        <volume key="volume" />
+        <wavecount key="wavecount" />
+        <wbfilter key="wbfilter" />
+        <wbm2freq key="wbm2freq" />
+        <wbm2res key="wbm2res" />
+      <weightfilter key="weighting">
+        <item name="无" value="off"/>
+        <item name="CCITT" value="ccit"/>
+        <item name="C-message" value="cmes"/>
+      </weightfilter>
+        <workmode key="workmode" />
+        <x1 key="x1" />
+        <x1db key="x1db" />
+        <x2 key="x2" />
+        <x2db key="x2db" />
+        <xdb key="xdb" />
+        <xdbvalue key="xdbvalue" />
+        <yperdiv key="yperdiv" />
+        <yref key="yref" />
+        <yrefvalue key="yrefvalue" />
+       <synmode key="synmode" />
+       <spectrumcount key="spectrumcount" />
+	<emitcount key="emitcount" />
+	<squelchctrl key="squelchctrl" />
+	<rfattvalue key="rfattvalue" />
+	<mesuretimemode key="measuretimemode" />
+	<gainvalue key="gainvalue" />
+	<waittime key="waittime" />
+    </keywordgroup>
+    <specialprotocol>
+	<device name="RXMS918H" ver="7.1">
+            <func id="22" runProtocol="1" />
+            <func id="23" runProtocol="1" />
+        </device>
+        <device name="RXMD835" ver="7.1">
+            <func id="22" runProtocol="1" />
+            <func id="23" runProtocol="1" />
+        </device>
+
+        <device name="EM550" ver="7.1">
+            <func id="22" runProtocol="1" />
+            <func id="23" runProtocol="1" />
+        </device>
+        <device name="EM050" ver="7.1">
+            <func id="22" runProtocol="1" />
+            <func id="23" runProtocol="1" />
+        </device>
+	<device name="DDF205" ver="7.1">
+          <func id="22" runProtocol="1" />
+          <func id="23" runProtocol="1" />
+        </device>
+        <device name="DDF255" ver="7.1">
+          <func id="22" runProtocol="1" />
+          <func id="23" runProtocol="1" />
+        </device>
+        <device name="ESMD" ver="7.1">
+          <func id="22" runProtocol="1" />
+          <func id="23" runProtocol="1" />
+        </device>
+        <device name="DDF255HF" ver="7.1">
+          <func id="22" runProtocol="1" />
+          <func id="23" runProtocol="1" />
+        </device>
+        <device name="RXMD950" ver="7.1">
+          <func id="22" runProtocol="1" />
+          <func id="23" runProtocol="1" />
+        </device>
+    </specialprotocol>
+</config>

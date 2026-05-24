@@ -1,0 +1,179 @@
+﻿{
+  "use_legacy_xml": {
+    "value": true,
+    "desc": "是否从device中读取配置, 默认开启"
+  },
+  "legacy_xml_path": "legacy/atomsvcconfig.xml",
+  "legacy_devinfo_path": "legacy/devinfo",
+  "atom": {
+    "host": "0.0.0.0",
+    "soap_port": 8282,
+    "streamsrc_port": 18012,
+    "protocol": "boer",
+    "streamsrc_ip": "172.18.114.196"
+  },
+  "soap": {
+    "appid": "123456",
+    "userid": "RX_admin"
+  },
+  "device": {
+    "host": "100.72.95.36",
+    "port": 1449,
+    "presets": [
+      {
+        "mfid": "53090001140010",
+        "equid": "5327d8e3-e04c-4ce0-90cf-605725dd8862",
+        "station": {
+          "id": "53090014",
+          "name": "清水河站",
+          "serverip": "172.18.114.196",
+          "serverport": 9999,
+          "protocol": "rmcp",
+          "testself": "no",
+          "btelnet": "no",
+          "reconn": "no",
+          "querytask": "no",
+          "statusip": "",
+          "statusport": "5050",
+          "longitude": "",
+          "latitude": "",
+          "audioopenval": "ON",
+          "audiocloseval": "OFF"
+        },
+        "srrc_info": {
+          "mfid": "53090001140010",
+          "equid": "5327d8e3-e04c-4ce0-90cf-605725dd8862",
+          "equname": "MS845",
+          "equtype": "01",
+          "equstatus": "01",
+          "equimanu": "RX",
+          "equmodel": "MS845",
+          "equsn": "12345678"
+        }
+      }
+    ]
+  },
+  "session": {
+    "stale_timeout": 30,
+    "idle_timeout": 30,
+    "max_sessions": 5,
+    "put_time_interval": 60,
+    "judge_busy_by_max_task_num": false
+  },
+  "log": {
+    "level": "INFO",
+    "dir": "D:/arvin/claude_workspace/SpecDetect_V4/SpecDetect_UI_Atom/SpecDetect_Atom/logs",
+    "debug": true,
+    "info": true,
+    "warning": true,
+    "error": true
+  },
+  "interface_mapping": {
+    "desc": "SOAP接口(funcid)与RMCP回调(nBdType)的映射关系",
+    "note": "SOAP funcid 与 RMCP nBdType 是两套独立编号体系",
+    "soap_to_rmcp": {
+      "11": {
+        "soap_name": "B_SglFreqMeas",
+        "rmcp_type": "SGLFREQ",
+        "rmcp_nbdtype_doc": "0x0A",
+        "rmcp_nbdtype_real": "0x0E",
+        "params": {
+          "demodmode=FM": {
+            "rmcp_nbdtype": "0x0B",
+            "rmcp_name": "IFANALYSIS"
+          },
+          "default": {
+            "rmcp_nbdtype": "0x0E",
+            "rmcp_name": "SGLFREQ"
+          }
+        },
+        "note": "实测funcid=11返回nBdType=0x0E，与文档0x0A不符"
+      },
+      "13": {
+        "soap_name": "B_SglFreqDF",
+        "note": "待实测"
+      },
+      "14": {
+        "soap_name": "B_MScan",
+        "rmcp_type": "SGLFREQ",
+        "rmcp_nbdtype_real": "0x0E",
+        "note": "实测nBdType=0x0E, 与文档MSACN不符"
+      },
+      "15": {
+        "soap_name": "B_FScan",
+        "rmcp_type": "FSCAN",
+        "rmcp_nbdtype_doc": "0x0F",
+        "rmcp_nbdtype_real": "0x0F",
+        "callback_types": [
+          {
+            "rmcp_nbdtype": "0x0F",
+            "rmcp_name": "FSCAN"
+          },
+          {
+            "rmcp_nbdtype": "0x10",
+            "rmcp_name": "DSCAN"
+          }
+        ],
+        "note": "同时返回FSCAN和DSCAN数据"
+      },
+      "16": {
+        "soap_name": "B_PScan",
+        "rmcp_type": "PSCAN",
+        "rmcp_nbdtype_doc": "0x11",
+        "callback_types": [
+          {
+            "rmcp_nbdtype": "0x01",
+            "rmcp_name": "PSCAN",
+            "note": "实测1671B数据帧"
+          },
+          {
+            "rmcp_nbdtype": "0x10",
+            "rmcp_name": "RESP",
+            "note": "实测51B响应帧"
+          }
+        ],
+        "note": "实测nBdType=0x01(PSCAN数据), 0x10(RESP响应), 与文档0x11不符"
+      },
+      "21": {
+        "soap_name": "B_FScanDF",
+        "note": "待实测"
+      },
+      "25": {
+        "soap_name": "B_WBDF",
+        "rmcp_type": "WBMONDF",
+        "note": "待实测"
+      },
+      "32": {
+        "soap_name": "B_MScanDF",
+        "note": "待实测"
+      }
+    },
+    "rmcp_to_soap": {
+      "0x0B": {
+        "rmcp_name": "IFANALYSIS",
+        "soap_funcid": 11,
+        "soap_name": "B_SglFreqMeas"
+      },
+      "0x0E": {
+        "rmcp_name": "SGLFREQ",
+        "soap_funcid": 14,
+        "soap_name": "B_MScan"
+      },
+      "0x0F": {
+        "rmcp_name": "FSCAN",
+        "soap_funcid": 15,
+        "soap_name": "B_FScan"
+      },
+      "0x10": {
+        "rmcp_name": "DSCAN",
+        "soap_funcid": 15,
+        "soap_name": "B_FScan"
+      },
+      "0x01": {
+        "rmcp_name": "PSCAN",
+        "soap_funcid": 16,
+        "soap_name": "B_PScan"
+      }
+    }
+  }
+}

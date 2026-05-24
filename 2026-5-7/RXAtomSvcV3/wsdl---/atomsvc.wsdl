@@ -1,0 +1,1309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions name="Base" 
+                   targetNamespace="http://www.srrc.org.cn"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:tns="http://www.srrc.org.cn"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+                  xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">
+  <wsdl:types>
+    <xsd:schema xmlns:tns="http://www.srrc.org.cn" elementFormDefault="qualified" targetNamespace="http://www.srrc.org.cn">
+      <xsd:complexType name="MonitorHeader">
+        <xsd:sequence>
+          <xsd:element minOccurs="0" name="BSCode" nillable="true" type="xsd:string"/>
+          <xsd:element minOccurs="0" name="BizKey" nillable="true" type="xsd:string"/>
+          <xsd:element minOccurs="0" name="PSCode" nillable="true" type="xsd:string"/>
+          <xsd:element minOccurs="0" name="TransId" nillable="true" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="MonitorHeader" nillable="true" type="tns:MonitorHeader"/>
+      <xsd:complexType name="ProviderResponse">
+        <xsd:sequence>
+          <xsd:element minOccurs="0" name="bizResCd" nillable="true" type="xsd:string"/>
+          <xsd:element minOccurs="0" name="bizResText" nillable="true" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="ProviderResponse" nillable="true" type="tns:ProviderResponse"/>
+      <xsd:element name="B_SglFreqMeas">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_SglFreqMeasResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_SglFreqMeasResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_WBFFTMon">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_WBFFTMonResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_WBFFTMonResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_FScan">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_FScanResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_FScanResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_PScan">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_PScanResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_PScanResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_MScan">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_MScanResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_MScanResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_SglFreqDF">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_SglFreqDFResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_SglFreqDFResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_WBDF">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_WBDFResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_WBDFResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_FScanDF">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_FScanDFResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_FScanDFResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_MScanDF">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_MScanDFResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_MScanDFResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_DigSglRecDecode">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_DigSglRecDecodeResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_DigSglRecDecodeResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_AnaTVDem">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_AnaTVDemResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_AnaTVDemResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_DigTVDem">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_DigTVDemResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_DigTVDemResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_DigBroadcastDem">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_DigBroadcastDemResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_DigBroadcastDemResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_SpecCommSysSglDem">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_SpecCommSysSglDemResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_SpecCommSysSglDemResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_OccuMeas">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_OccuMeasResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_OccuMeasResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_GenIFSpecTemp">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_GenIFSpecTempResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_GenIFSpecTempResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_GenWBSpecTemp">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_GenWBSpecTempResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_GenWBSpecTempResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_GenFScanSpecTemp">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_GenFScanSpecTempResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_GenFScanSpecTempResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_IFSglInte">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_IFSglInteResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_IFSglInteResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_WBSglInte">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_WBSglInteResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_WBSglInteResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_FScanSglInte">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_FScanSglInteResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_FScanSglInteResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_TDOAqMeas">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_TDOAqMeasResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_TDOAqMeasResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_DDCMeas">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_DDCMeasResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_DDCMeasResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_StopMeas">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_StopMeasResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_StopMeasResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_SelfTest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_SelfTestResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_SelfTestResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_QueryFaciDevStat">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_QueryFaciDevStatResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_QueryFaciDevStatResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_SetDevicePower">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_SetDevicePowerResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_SetDevicePowerResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_LinkAnteDev">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_LinkAnteDevResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_LinkAnteDevResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_QueryDeviceInfo">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_QueryDeviceInfoResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_QueryDeviceInfoResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_TaskModification">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="input" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_TaskModificationResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_TaskModificationResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_QueryStationInfo">
+        <xsd:complexType>
+          <xsd:sequence/>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="B_QueryStationInfoResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="B_QueryStationInfoResult" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="Base_B_SglFreqMeas_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_SglFreqMeas"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SglFreqMeas_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SglFreqMeas_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_SglFreqMeasResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SglFreqMeas_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_WBFFTMon_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_WBFFTMon"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_WBFFTMon_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_WBFFTMon_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_WBFFTMonResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_WBFFTMon_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_FScan_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_FScan"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_FScan_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_FScan_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_FScanResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_FScan_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_PScan_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_PScan"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_PScan_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_PScan_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_PScanResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_PScan_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_MScan_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_MScan"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_MScan_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_MScan_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_MScanResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_MScan_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SglFreqDF_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_SglFreqDF"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SglFreqDF_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SglFreqDF_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_SglFreqDFResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SglFreqDF_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_WBDF_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_WBDF"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_WBDF_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_WBDF_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_WBDFResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_WBDF_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_FScanDF_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_FScanDF"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_FScanDF_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_FScanDF_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_FScanDFResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_FScanDF_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_MScanDF_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_MScanDF"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_MScanDF_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_MScanDF_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_MScanDFResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_MScanDF_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DigSglRecDecode_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_DigSglRecDecode"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DigSglRecDecode_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DigSglRecDecode_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_DigSglRecDecodeResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DigSglRecDecode_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_AnaTVDem_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_AnaTVDem"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_AnaTVDem_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_AnaTVDem_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_AnaTVDemResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_AnaTVDem_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DigTVDem_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_DigTVDem"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DigTVDem_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DigTVDem_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_DigTVDemResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DigTVDem_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DigBroadcastDem_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_DigBroadcastDem"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DigBroadcastDem_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DigBroadcastDem_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_DigBroadcastDemResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DigBroadcastDem_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SpecCommSysSglDem_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_SpecCommSysSglDem"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SpecCommSysSglDem_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SpecCommSysSglDem_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_SpecCommSysSglDemResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SpecCommSysSglDem_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_OccuMeas_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_OccuMeas"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_OccuMeas_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_OccuMeas_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_OccuMeasResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_OccuMeas_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_GenIFSpecTemp_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_GenIFSpecTemp"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_GenIFSpecTemp_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_GenIFSpecTemp_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_GenIFSpecTempResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_GenIFSpecTemp_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_GenWBSpecTemp_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_GenWBSpecTemp"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_GenWBSpecTemp_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_GenWBSpecTemp_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_GenWBSpecTempResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_GenWBSpecTemp_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_GenFScanSpecTemp_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_GenFScanSpecTemp"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_GenFScanSpecTemp_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_GenFScanSpecTemp_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_GenFScanSpecTempResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_GenFScanSpecTemp_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_IFSglInte_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_IFSglInte"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_IFSglInte_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_IFSglInte_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_IFSglInteResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_IFSglInte_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_WBSglInte_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_WBSglInte"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_WBSglInte_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_WBSglInte_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_WBSglInteResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_WBSglInte_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_FScanSglInte_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_FScanSglInte"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_FScanSglInte_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_FScanSglInte_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_FScanSglInteResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_FScanSglInte_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_TDOAqMeas_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_TDOAqMeas"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_TDOAqMeas_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_TDOAqMeas_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_TDOAqMeasResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_TDOAqMeas_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DDCMeas_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_DDCMeas"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DDCMeas_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DDCMeas_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_DDCMeasResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_DDCMeas_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_StopMeas_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_StopMeas"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_StopMeas_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_StopMeas_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_StopMeasResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_StopMeas_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SelfTest_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_SelfTest"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SelfTest_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SelfTest_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_SelfTestResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SelfTest_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_QueryFaciDevStat_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_QueryFaciDevStat"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_QueryFaciDevStat_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_QueryFaciDevStat_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_QueryFaciDevStatResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_QueryFaciDevStat_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SetDevicePower_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_SetDevicePower"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SetDevicePower_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SetDevicePower_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_SetDevicePowerResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_SetDevicePower_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_LinkAnteDev_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_LinkAnteDev"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_LinkAnteDev_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_LinkAnteDev_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_LinkAnteDevResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_LinkAnteDev_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_QueryDeviceInfo_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_QueryDeviceInfo"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_QueryDeviceInfo_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_QueryDeviceInfo_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_QueryDeviceInfoResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_QueryDeviceInfo_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_TaskModification_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_TaskModification"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_TaskModification_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_TaskModification_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_TaskModificationResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_TaskModification_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_QueryStationInfo_InputMessage">
+    <wsdl:part name="parameters" element="tns:B_QueryStationInfo"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_QueryStationInfo_InputMessage_Headers">
+    <wsdl:part name="MonitorHeader" element="tns:MonitorHeader"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_QueryStationInfo_OutputMessage">
+    <wsdl:part name="parameters" element="tns:B_QueryStationInfoResponse"/>
+  </wsdl:message>
+  <wsdl:message name="Base_B_QueryStationInfo_OutputMessage_Headers">
+    <wsdl:part name="ProviderResponse" element="tns:ProviderResponse"/>
+  </wsdl:message>
+  <wsdl:portType name="Base">
+    <wsdl:operation name="B_SglFreqMeas">
+      <wsdl:input wsaw:Action="B_SglFreqMeas" message="tns:Base_B_SglFreqMeas_InputMessage"/>
+      <wsdl:output wsaw:Action="B_SglFreqMeasResponse" message="tns:Base_B_SglFreqMeas_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_WBFFTMon">
+      <wsdl:input wsaw:Action="B_WBFFTMon" message="tns:Base_B_WBFFTMon_InputMessage"/>
+      <wsdl:output wsaw:Action="B_WBFFTMonResponse" message="tns:Base_B_WBFFTMon_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_FScan">
+      <wsdl:input wsaw:Action="B_FScan" message="tns:Base_B_FScan_InputMessage"/>
+      <wsdl:output wsaw:Action="B_FScanResponse" message="tns:Base_B_FScan_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_PScan">
+      <wsdl:input wsaw:Action="B_PScan" message="tns:Base_B_PScan_InputMessage"/>
+      <wsdl:output wsaw:Action="B_PScanResponse" message="tns:Base_B_PScan_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_MScan">
+      <wsdl:input wsaw:Action="B_MScan" message="tns:Base_B_MScan_InputMessage"/>
+      <wsdl:output wsaw:Action="B_MScanResponse" message="tns:Base_B_MScan_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_SglFreqDF">
+      <wsdl:input wsaw:Action="B_SglFreqDF" message="tns:Base_B_SglFreqDF_InputMessage"/>
+      <wsdl:output wsaw:Action="B_SglFreqDFResponse" message="tns:Base_B_SglFreqDF_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_WBDF">
+      <wsdl:input wsaw:Action="B_WBDF" message="tns:Base_B_WBDF_InputMessage"/>
+      <wsdl:output wsaw:Action="B_WBDFResponse" message="tns:Base_B_WBDF_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_FScanDF">
+      <wsdl:input wsaw:Action="B_FScanDF" message="tns:Base_B_FScanDF_InputMessage"/>
+      <wsdl:output wsaw:Action="B_FScanDFResponse" message="tns:Base_B_FScanDF_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_MScanDF">
+      <wsdl:input wsaw:Action="B_MScanDF" message="tns:Base_B_MScanDF_InputMessage"/>
+      <wsdl:output wsaw:Action="B_MScanDFResponse" message="tns:Base_B_MScanDF_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_DigSglRecDecode">
+      <wsdl:input wsaw:Action="B_DigSglRecDecode" message="tns:Base_B_DigSglRecDecode_InputMessage"/>
+      <wsdl:output wsaw:Action="B_DigSglRecDecodeResponse" message="tns:Base_B_DigSglRecDecode_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_AnaTVDem">
+      <wsdl:input wsaw:Action="B_AnaTVDem" message="tns:Base_B_AnaTVDem_InputMessage"/>
+      <wsdl:output wsaw:Action="B_AnaTVDemResponse" message="tns:Base_B_AnaTVDem_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_DigTVDem">
+      <wsdl:input wsaw:Action="B_DigTVDem" message="tns:Base_B_DigTVDem_InputMessage"/>
+      <wsdl:output wsaw:Action="B_DigTVDemResponse" message="tns:Base_B_DigTVDem_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_DigBroadcastDem">
+      <wsdl:input wsaw:Action="B_DigBroadcastDem" message="tns:Base_B_DigBroadcastDem_InputMessage"/>
+      <wsdl:output wsaw:Action="B_DigBroadcastDemResponse" message="tns:Base_B_DigBroadcastDem_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_SpecCommSysSglDem">
+      <wsdl:input wsaw:Action="B_SpecCommSysSglDem" message="tns:Base_B_SpecCommSysSglDem_InputMessage"/>
+      <wsdl:output wsaw:Action="B_SpecCommSysSglDemResponse" message="tns:Base_B_SpecCommSysSglDem_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_OccuMeas">
+      <wsdl:input wsaw:Action="B_OccuMeas" message="tns:Base_B_OccuMeas_InputMessage"/>
+      <wsdl:output wsaw:Action="B_OccuMeasResponse" message="tns:Base_B_OccuMeas_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_GenIFSpecTemp">
+      <wsdl:input wsaw:Action="B_GenIFSpecTemp" message="tns:Base_B_GenIFSpecTemp_InputMessage"/>
+      <wsdl:output wsaw:Action="B_GenIFSpecTempResponse" message="tns:Base_B_GenIFSpecTemp_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_GenWBSpecTemp">
+      <wsdl:input wsaw:Action="B_GenWBSpecTemp" message="tns:Base_B_GenWBSpecTemp_InputMessage"/>
+      <wsdl:output wsaw:Action="B_GenWBSpecTempResponse" message="tns:Base_B_GenWBSpecTemp_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_GenFScanSpecTemp">
+      <wsdl:input wsaw:Action="B_GenFScanSpecTemp" message="tns:Base_B_GenFScanSpecTemp_InputMessage"/>
+      <wsdl:output wsaw:Action="B_GenFScanSpecTempResponse" message="tns:Base_B_GenFScanSpecTemp_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_IFSglInte">
+      <wsdl:input wsaw:Action="B_IFSglInte" message="tns:Base_B_IFSglInte_InputMessage"/>
+      <wsdl:output wsaw:Action="B_IFSglInteResponse" message="tns:Base_B_IFSglInte_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_WBSglInte">
+      <wsdl:input wsaw:Action="B_WBSglInte" message="tns:Base_B_WBSglInte_InputMessage"/>
+      <wsdl:output wsaw:Action="B_WBSglInteResponse" message="tns:Base_B_WBSglInte_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_FScanSglInte">
+      <wsdl:input wsaw:Action="B_FScanSglInte" message="tns:Base_B_FScanSglInte_InputMessage"/>
+      <wsdl:output wsaw:Action="B_FScanSglInteResponse" message="tns:Base_B_FScanSglInte_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_TDOAqMeas">
+      <wsdl:input wsaw:Action="B_TDOAqMeas" message="tns:Base_B_TDOAqMeas_InputMessage"/>
+      <wsdl:output wsaw:Action="B_TDOAqMeasResponse" message="tns:Base_B_TDOAqMeas_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_DDCMeas">
+      <wsdl:input wsaw:Action="B_DDCMeas" message="tns:Base_B_DDCMeas_InputMessage"/>
+      <wsdl:output wsaw:Action="B_DDCMeasResponse" message="tns:Base_B_DDCMeas_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_StopMeas">
+      <wsdl:input wsaw:Action="B_StopMeas" message="tns:Base_B_StopMeas_InputMessage"/>
+      <wsdl:output wsaw:Action="B_StopMeasResponse" message="tns:Base_B_StopMeas_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_SelfTest">
+      <wsdl:input wsaw:Action="B_SelfTest" message="tns:Base_B_SelfTest_InputMessage"/>
+      <wsdl:output wsaw:Action="B_SelfTestResponse" message="tns:Base_B_SelfTest_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_QueryFaciDevStat">
+      <wsdl:input wsaw:Action="B_QueryFaciDevStat" message="tns:Base_B_QueryFaciDevStat_InputMessage"/>
+      <wsdl:output wsaw:Action="B_QueryFaciDevStatResponse" message="tns:Base_B_QueryFaciDevStat_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_SetDevicePower">
+      <wsdl:input wsaw:Action="B_SetDevicePower" message="tns:Base_B_SetDevicePower_InputMessage"/>
+      <wsdl:output wsaw:Action="B_SetDevicePowerResponse" message="tns:Base_B_SetDevicePower_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_LinkAnteDev">
+      <wsdl:input wsaw:Action="B_LinkAnteDev" message="tns:Base_B_LinkAnteDev_InputMessage"/>
+      <wsdl:output wsaw:Action="B_LinkAnteDevResponse" message="tns:Base_B_LinkAnteDev_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_QueryDeviceInfo">
+      <wsdl:input wsaw:Action="B_QueryDeviceInfo" message="tns:Base_B_QueryDeviceInfo_InputMessage"/>
+      <wsdl:output wsaw:Action="B_QueryDeviceInfoResponse" message="tns:Base_B_QueryDeviceInfo_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_TaskModification">
+      <wsdl:input wsaw:Action="B_TaskModification" message="tns:Base_B_TaskModification_InputMessage"/>
+      <wsdl:output wsaw:Action="B_TaskModificationResponse" message="tns:Base_B_TaskModification_OutputMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="B_QueryStationInfo">
+      <wsdl:input wsaw:Action="B_QueryStationInfo" message="tns:Base_B_QueryStationInfo_InputMessage"/>
+      <wsdl:output wsaw:Action="B_QueryStationInfoResponse" message="tns:Base_B_QueryStationInfo_OutputMessage"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BasicHttpBinding_Base" type="tns:Base">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="B_SglFreqMeas">
+      <soap:operation soapAction="B_SglFreqMeas" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_SglFreqMeas_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_SglFreqMeas_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_WBFFTMon">
+      <soap:operation soapAction="B_WBFFTMon" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_WBFFTMon_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_WBFFTMon_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_FScan">
+      <soap:operation soapAction="B_FScan" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_FScan_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_FScan_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_PScan">
+      <soap:operation soapAction="B_PScan" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_PScan_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_PScan_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_MScan">
+      <soap:operation soapAction="B_MScan" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_MScan_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_MScan_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_SglFreqDF">
+      <soap:operation soapAction="B_SglFreqDF" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_SglFreqDF_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_SglFreqDF_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_WBDF">
+      <soap:operation soapAction="B_WBDF" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_WBDF_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_WBDF_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_FScanDF">
+      <soap:operation soapAction="B_FScanDF" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_FScanDF_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_FScanDF_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_MScanDF">
+      <soap:operation soapAction="B_MScanDF" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_MScanDF_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_MScanDF_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_DigSglRecDecode">
+      <soap:operation soapAction="B_DigSglRecDecode" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_DigSglRecDecode_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_DigSglRecDecode_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_AnaTVDem">
+      <soap:operation soapAction="B_AnaTVDem" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_AnaTVDem_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_AnaTVDem_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_DigTVDem">
+      <soap:operation soapAction="B_DigTVDem" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_DigTVDem_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_DigTVDem_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_DigBroadcastDem">
+      <soap:operation soapAction="B_DigBroadcastDem" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_DigBroadcastDem_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_DigBroadcastDem_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_SpecCommSysSglDem">
+      <soap:operation soapAction="B_SpecCommSysSglDem" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_SpecCommSysSglDem_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_SpecCommSysSglDem_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_OccuMeas">
+      <soap:operation soapAction="B_OccuMeas" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_OccuMeas_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_OccuMeas_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_GenIFSpecTemp">
+      <soap:operation soapAction="B_GenIFSpecTemp" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_GenIFSpecTemp_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_GenIFSpecTemp_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_GenWBSpecTemp">
+      <soap:operation soapAction="B_GenWBSpecTemp" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_GenWBSpecTemp_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_GenWBSpecTemp_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_GenFScanSpecTemp">
+      <soap:operation soapAction="B_GenFScanSpecTemp" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_GenFScanSpecTemp_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_GenFScanSpecTemp_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_IFSglInte">
+      <soap:operation soapAction="B_IFSglInte" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_IFSglInte_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_IFSglInte_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_WBSglInte">
+      <soap:operation soapAction="B_WBSglInte" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_WBSglInte_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_WBSglInte_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_FScanSglInte">
+      <soap:operation soapAction="B_FScanSglInte" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_FScanSglInte_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_FScanSglInte_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_TDOAqMeas">
+      <soap:operation soapAction="B_TDOAqMeas" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_TDOAqMeas_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_TDOAqMeas_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_DDCMeas">
+      <soap:operation soapAction="B_DDCMeas" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_DDCMeas_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_DDCMeas_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_StopMeas">
+      <soap:operation soapAction="B_StopMeas" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_StopMeas_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_StopMeas_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_SelfTest">
+      <soap:operation soapAction="B_SelfTest" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_SelfTest_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_SelfTest_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_QueryFaciDevStat">
+      <soap:operation soapAction="B_QueryFaciDevStat" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_QueryFaciDevStat_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_QueryFaciDevStat_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_SetDevicePower">
+      <soap:operation soapAction="B_SetDevicePower" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_SetDevicePower_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_SetDevicePower_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_LinkAnteDev">
+      <soap:operation soapAction="B_LinkAnteDev" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_LinkAnteDev_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_LinkAnteDev_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_QueryDeviceInfo">
+      <soap:operation soapAction="B_QueryDeviceInfo" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_QueryDeviceInfo_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_QueryDeviceInfo_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_TaskModification">
+      <soap:operation soapAction="B_TaskModification" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_TaskModification_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_TaskModification_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="B_QueryStationInfo">
+      <soap:operation soapAction="B_QueryStationInfo" style="document"/>
+      <wsdl:input>
+        <soap:header message="tns:Base_B_QueryStationInfo_InputMessage_Headers" part="MonitorHeader" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:header message="tns:Base_B_QueryStationInfo_OutputMessage_Headers" part="ProviderResponse" use="literal"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Base">
+    <wsdl:port name="BasicHttpBinding_Base" binding="tns:BasicHttpBinding_Base">
+      <soap:address location="http://locolhost:8188/AtomicService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

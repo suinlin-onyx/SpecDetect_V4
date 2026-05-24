@@ -22,6 +22,7 @@ PyInstaller `--onefile` 模式在 Windows 7 上缺少 `api-ms-win-core-sysinfo-l
 ### 实现细节
 
 **spec 文件**：
+
 ```python
 import glob as _glob
 import os as _os
@@ -42,6 +43,7 @@ a = Analysis(
 ```
 
 **encodings 模块**：Python 3.7 + PyInstaller onefile 需显式声明 encodings 模块：
+
 ```python
 hiddenimports=[
     'encodings',
@@ -70,7 +72,7 @@ soap_proxy/
 
 ## 配置项
 
-`config/settings.json`（首次运行自动生成）：
+`config/proxy_settings.json`（首次运行自动生成）：
 
 ```json
 {
@@ -78,7 +80,8 @@ soap_proxy/
     "listen_host": "127.0.0.1",  // 绑定地址：127.0.0.1=本地, 0.0.0.0=所有网卡
     "listen_port": 8284,           // SOAP 代理监听端口
     "target_host": "127.0.0.1",   // 转发目标地址
-    "target_port": 8282            // 转发目标端口
+    "target_port": 8282,           // 转发目标端口
+    "output_host": "127.0.0.1"    // SINK模式outputchannel使用的地址
   },
   "log": {
     "dir": "logs"                  // 日志目录

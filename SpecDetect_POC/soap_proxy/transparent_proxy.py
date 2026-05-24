@@ -1,4 +1,7 @@
 """SOAP 透明代理 - 仅转发请求，不做任何修改"""
+
+__version__ = "1.1.7"
+
 import socket
 import threading
 import logging
@@ -10,6 +13,7 @@ import random
 import sys
 from datetime import datetime
 from collections import defaultdict
+from typing import Dict, Optional
 
 
 DEFAULT_CONFIG = """{
@@ -41,7 +45,7 @@ def load_config() -> dict:
         app_dir = exe_dir
 
     config_dir = os.path.join(app_dir, 'config')
-    config_file = os.path.join(config_dir, 'settings.json')
+    config_file = os.path.join(config_dir, 'proxy_settings.json')
 
     print(f"[CONFIG] config_file={config_file}", file=sys.stderr)
 
@@ -451,6 +455,115 @@ logging.basicConfig(
 stream_proxy_ports = {}  # {proxy_port: target_port}
 stream_proxy_lock = threading.Lock()
 
+# ============ Sink 模式代理 ============
+# Sink 会话管理: proxy_port -> SinkSession
+# key: proxy_port -> SinkSession
+sink_sessions: Dict[int, dict] = {}
+sink_session_lock = threading.Lock()
+
+
+class SinkSession:
+    """Sink 模式会话"""
+    def __init__(self, proxy_port: int, original_host: str, original_port: int,
+                 interface_name: str, stc: str = ""):
+        self.proxy_port = proxy_port
+        self.original_host = original_host
+        self.original_port = original_port
+        self.interface_name = interface_name
+        self.stc = stc
+        self.atom_socket = None
+        self.target_socket = None
+        self.start_time = datetime.now()
+        self.active = True
+
+
+def parse_outputchannel(request_data: bytes) -> Optional[dict]:
+    """从请求中解析 outputchannel
+
+    Returns:
+        dict with keys: mode, host, port, stc
+        如果没有 outputchannel 返回 None
+    """
+    try:
+        text = request_data.decode('utf-8', errors='replace')
+
+        # 解析 mode (可能为 sink 或 source)
+        mode_match = re.search(r'<srrc:mode>(\w+)</srrc:mode>', text)
+        if not mode_match:
+            mode_match = re.search(r'mode[s]?[=:]?\s*["\']?(\w+)', text, re.IGNORECASE)
+
+        # 解析 host
+        host_match = re.search(r'<srrc:host>([^<]+)</srrc:host>', text)
+        if not host_match:
+            host_match = re.search(r'host[s]?[=:]?\s*["\']?([^"\'\s,>]+)', text, re.IGNORECASE)
+
+        # 解析 port
+        port_match = re.search(r'<srrc:port>(\d+)</srrc:port>', text)
+        if not port_match:
+            port_match = re.search(r'port[s]?[=:]?\s*["\']?(\d+)', text, re.IGNORECASE)
+
+        # 解析 stc (stream token)
+        stc_match = re.search(r'<srrc:stc>(\d+)</srrc:stc>', text)
+
+        if mode_match:
+            return {
+                'mode': mode_match.group(1).strip(),
+                'host': host_match.group(1).strip() if host_match else None,
+                'port': int(port_match.group(1)) if port_match else None,
+                'stc': stc_match.group(1).strip() if stc_match else ""
+            }
+    except Exception as e:
+        logging.error(f"[SINK] Failed to parse outputchannel: {e}")
+    return None
+
+
+def modify_outputchannel(request_data: bytes, new_host: str, new_port: int) -> bytes:
+    """修改请求中 outputchannel 的 host 和 port
+
+    Args:
+        request_data: 原始请求数据
+        new_host: 新的 host
+        new_port: 新的 port
+
+    Returns:
+        修改后的请求数据
+    """
+    try:
+        text = request_data.decode('utf-8', errors='replace')
+
+        # 修改 host
+        if re.search(r'<srrc:host>', text):
+            text = re.sub(
+                r'(<srrc:host>)[^<]+(</srrc:host>)',
+                rf'\g<1>{new_host}\g<2>',
+                text
+            )
+        elif re.search(r'host[s]?[=:]?\s*["\']?[^"\'\s,>]+', text, re.IGNORECASE):
+            text = re.sub(
+                r'(host[s]?[=:]?\s*["\']?)[^"\'\s,>]+',
+                rf'\g<1>{new_host}',
+                text
+            )
+
+        # 修改 port
+        if re.search(r'<srrc:port>', text):
+            text = re.sub(
+                r'(<srrc:port>)\d+(</srrc:port>)',
+                rf'\g<1>{new_port}\g<2>',
+                text
+            )
+        elif re.search(r'port[s]?[=:]?\s*["\']?\d+', text, re.IGNORECASE):
+            text = re.sub(
+                r'(port[s]?[=:]?\s*["\']?)\d+',
+                rf'\g<1>{new_port}',
+                text
+            )
+
+        return text.encode('utf-8')
+    except Exception as e:
+        logging.error(f"[SINK] Failed to modify outputchannel: {e}")
+        return request_data
+
 
 # ============ PScan分片重组逻辑 ============
 
@@ -636,14 +749,55 @@ def handle_http_client(client_socket, target_host, target_port, client_addr):
         logging.info(f"[{log_id}] {format_soap_readable(request_data)}")
         logging.info(f"[{log_id}] Request JSON: {json.dumps(parsed_req, ensure_ascii=False)}")
 
-        # 保存请求内容到文件
-        req_file = os.path.join(LOG_DIR, f"{log_id}_{interface_name}_req.bin")
-        with open(req_file, 'wb') as f:
-            f.write(request_data)
-        logging.info(f"[{log_id}] Request saved: {req_file}")
+        # 保存请求内容到文件（跳过 B_QueryFaciDevStat）
+        if interface_name != 'B_QueryFaciDevStat':
+            req_file = os.path.join(LOG_DIR, f"{log_id}_{interface_name}_req.bin")
+            with open(req_file, 'wb') as f:
+                f.write(request_data)
+            logging.info(f"[{log_id}] Request saved: {req_file}")
+
+        # ============ Sink 模式处理 ============
+        # 解析请求中的 outputchannel，判断是否为 sink 模式
+        is_sink_mode = False
+        outputchannel = parse_outputchannel(request_data)
+        if outputchannel and outputchannel.get('mode', '').lower() == 'sink':
+            original_host = outputchannel.get('host')
+            original_port = outputchannel.get('port')
+            stc = outputchannel.get('stc', '')
+
+            if original_host and original_port:
+                # 计算 proxy 端口 (原始端口+1)
+                proxy_port = original_port + 1
+
+                # 获取 output_host 配置（用于outputchannel，供设备连接）
+                sink_output_host = _config.get('soap_proxy', {}).get('output_host', '127.0.0.1')
+
+                # 记录原始地址
+                logging.info(f"[{log_id}] [{interface_name}] SINK mode detected: original host={original_host}:{original_port}, proxy_port={proxy_port}, stc={stc}")
+
+                # 修改请求中 outputchannel: host=sink_output_host, port=proxy_port
+                # sink_output_host 必须是设备能访问的具体IP
+                request_data = modify_outputchannel(request_data, sink_output_host, proxy_port)
+                logging.info(f"[{log_id}] [{interface_name}] SINK: modified outputchannel to {sink_output_host}:{proxy_port}")
+
+                # 修改后更新 Content-Length（Body 长度变了）
+                body_start = request_data.find(b'\r\n\r\n') + 4
+                new_body_len = len(request_data) - body_start
+                request_data = re.sub(
+                    b'Content-Length: \\d+',
+                    f'Content-Length: {new_body_len}'.encode(),
+                    request_data
+                )
+
+                # 启动 sink_proxy (异步，不会阻塞)
+                ensure_sink_proxy(proxy_port, original_host, original_port, interface_name, stc)
+                is_sink_mode = True
+            else:
+                logging.warning(f"[{log_id}] [{interface_name}] SINK mode but missing host/port in outputchannel: {outputchannel}")
+        # ============ Sink 模式处理结束 ============
 
         # 直接转发到目标服务器
-        with socket.create_connection((target_host, target_port), timeout=10) as target_socket:
+        with socket.create_connection((target_host, target_port), timeout=60) as target_socket:
             target_socket.sendall(request_data)
 
             # 接收响应
@@ -668,12 +822,13 @@ def handle_http_client(client_socket, target_host, target_port, client_addr):
                 elif b'\r\n\r\n' in response_data and b'Content-Length:' not in response_data:
                     break
 
-        # 检查响应中是否有 port，解析并设置代理
-        original_port = parse_stream_port(response_data)
-        if original_port:
-            proxy_port = original_port + 1
-            ensure_stream_proxy(proxy_port, original_port, interface_name)
-            response_data = modify_stream_response(response_data, proxy_port)
+        # 检查响应中是否有 port，解析并设置代理 (仅在非 sink 模式下，sink 模式已在请求时处理)
+        if not is_sink_mode:
+            original_port = parse_stream_port(response_data)
+            if original_port:
+                proxy_port = original_port + 1
+                ensure_stream_proxy(proxy_port, original_port, interface_name)
+                response_data = modify_stream_response(response_data, proxy_port)
 
         # 记录响应日志
         logging.info(f"[{log_id}] [{interface_name}] <<< {client_addr} <- {len(response_data)} bytes")
@@ -682,11 +837,12 @@ def handle_http_client(client_socket, target_host, target_port, client_addr):
         logging.info(f"[{log_id}] {format_soap_readable(response_data)}")
         logging.info(f"[{log_id}] Response JSON: {json.dumps(parsed_res, ensure_ascii=False)}")
 
-        # 保存响应内容到文件
-        res_file = os.path.join(LOG_DIR, f"{log_id}_{interface_name}_res.bin")
-        with open(res_file, 'wb') as f:
-            f.write(response_data)
-        logging.info(f"[{log_id}] Response saved: {res_file}")
+        # 保存响应内容到文件（跳过 B_QueryFaciDevStat）
+        if interface_name != 'B_QueryFaciDevStat':
+            res_file = os.path.join(LOG_DIR, f"{log_id}_{interface_name}_res.bin")
+            with open(res_file, 'wb') as f:
+                f.write(response_data)
+            logging.info(f"[{log_id}] Response saved: {res_file}")
 
         # 透传响应给客户端
         client_socket.sendall(response_data)
@@ -707,7 +863,7 @@ def handle_stream_client(client_socket, target_host, target_port, client_addr):
         req_file = os.path.join(LOG_DIR, f"{log_id}_stream_req.bin")
 
         # 直接转发到目标服务器（流式透传）
-        with socket.create_connection((target_host, target_port), timeout=10) as target_socket:
+        with socket.create_connection((target_host, target_port), timeout=60) as target_socket:
             # 双向转发
             def forward(source, dest, direction):
                 try:
@@ -802,7 +958,7 @@ def start_stream_proxy(listen_host, listen_port, target_port, interface_name="ST
         while True:
             client_socket, client_addr = server_socket.accept()
             try:
-                target_socket = socket.create_connection(('127.0.0.1', target_port), timeout=5)
+                target_socket = socket.create_connection(('127.0.0.1', target_port), timeout=15)
                 logging.info(f"[STREAM/{interface_name}] >>> {client_addr} -> {listen_port}")
 
                 def forward(src, dst, direction):
@@ -962,6 +1118,182 @@ def start_stream_proxy(listen_host, listen_port, target_port, interface_name="ST
     finally:
         stream_file.close()
         server_socket.close()
+
+
+def start_sink_proxy(proxy_port: int, original_host: str, original_port: int,
+                     interface_name: str, stc: str = ""):
+    """启动 sink 模式透明代理
+
+    流程:
+    1. Proxy 绑定并监听 proxy_port (port+1)
+    2. 等待 Atom 连接 Proxy 的 proxy_port
+    3. Atom 连接成功后，Proxy 连接原始目标 original_host:original_port
+    4. 双向透传
+
+    Args:
+        proxy_port: Proxy 监听的端口 (原始端口+1)
+        original_host: 原始 outputchannel 的 host
+        original_port: 原始 outputchannel 的 port
+        interface_name: 接口名 (如 B_FScan)
+        stc: stream token
+    """
+    log_id = datetime.now().strftime("%H%M%S_%f")
+    listen_host = _config.get('soap_proxy', {}).get('listen_host', '127.0.0.1')
+
+    # 创建 stream 二进制日志文件
+    stream_file = os.path.join(LOG_DIR, f"stream_sink_{interface_name}_{proxy_port}_{log_id}.bin")
+    sf = open(stream_file, 'wb')
+    sf_lock = threading.Lock()
+    logging.info(f"[SINK/{interface_name}] Stream log: {stream_file}")
+
+    # 创建会话
+    session = SinkSession(proxy_port, original_host, original_port, interface_name, stc)
+
+    target_socket = None
+    server_socket = None
+    atom_socket = None
+
+    try:
+        # ============ 步骤1: 先连接外部目标 ============
+        try:
+            target_socket = socket.create_connection((original_host, original_port), timeout=60)
+            logging.info(f"[SINK/{interface_name}] Connected to external target: {original_host}:{original_port}")
+            session.target_socket = target_socket
+        except Exception as e:
+            logging.error(f"[SINK/{interface_name}] Failed to connect to external {original_host}:{original_port}: {e}")
+            return
+
+        # ============ 步骤2: 再监听本地端口 ============
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server_socket.settimeout(30)  # 30秒超时
+
+        try:
+            server_socket.bind((listen_host, proxy_port))
+        except OSError as e:
+            logging.error(f"[SINK/{interface_name}] Failed to bind {listen_host}:{proxy_port}: {e}")
+            return
+
+        server_socket.listen(5)
+        logging.info(f"[SINK/{interface_name}] Proxy listening: {listen_host}:{proxy_port} -> {original_host}:{original_port} (stc={stc})")
+
+        # 保存会话
+        with sink_session_lock:
+            sink_sessions[proxy_port] = session
+
+        # ============ 步骤3: 等待 Atom 连接 ============
+        try:
+            atom_socket, atom_addr = server_socket.accept()
+            logging.info(f"[SINK/{interface_name}] Atom connected: {atom_addr}")
+            session.atom_socket = atom_socket
+        except socket.timeout:
+            logging.warning(f"[SINK/{interface_name}] Timeout waiting for Atom connection on {proxy_port}")
+            return
+        except Exception as e:
+            logging.error(f"[SINK/{interface_name}] Error accepting Atom connection: {e}")
+            return
+
+        # 双向透传
+        def forward(src, dst, direction):
+            total_bytes = 0
+            try:
+                while True:
+                    data = src.recv(8192)
+                    if not data:
+                        logging.info(f"[SINK/{interface_name}] {direction}: connection closed, {total_bytes} bytes transferred")
+                        break
+                    dst.sendall(data)
+                    total_bytes += len(data)
+                    # 保存到 stream 日志（加锁防双线程竞争）
+                    try:
+                        with sf_lock:
+                            sf.write(data)
+                            sf.flush()
+                    except Exception:
+                        pass
+            except Exception as e:
+                logging.error(f"[SINK/{interface_name}] {direction} error: {e}")
+            finally:
+                try:
+                    src.close()
+                except:
+                    pass
+                # dst 由主线程 finally 统一关闭，避免跨线程 socket 竞态
+                # (关闭 dst 会导致另一线程 recv 报 WSAENOTSOCK/WSAECONNABORTED)
+
+        t1 = threading.Thread(target=forward, args=(atom_socket, target_socket, "Atom->Host"))
+        t2 = threading.Thread(target=forward, args=(target_socket, atom_socket, "Host->Atom"))
+        t1.daemon = True
+        t2.daemon = True
+        t1.start()
+        t2.start()
+
+        # 等待线程结束
+        t1.join()
+        t2.join()
+
+    except Exception as e:
+        logging.error(f"[SINK/{interface_name}] Proxy error: {e}")
+    finally:
+        # 清理会话
+        with sink_session_lock:
+            sink_sessions.pop(proxy_port, None)
+
+        # 关闭 socket
+        if atom_socket:
+            try:
+                atom_socket.close()
+            except:
+                pass
+        if target_socket:
+            try:
+                target_socket.close()
+            except:
+                pass
+        if server_socket:
+            try:
+                server_socket.close()
+            except:
+                pass
+
+        # 关闭 stream 日志文件
+        try:
+            sf.close()
+        except:
+            pass
+
+        elapsed = (datetime.now() - session.start_time).total_seconds()
+        logging.info(f"[SINK/{interface_name}] Proxy closed after {elapsed:.2f}s")
+
+
+def ensure_sink_proxy(proxy_port: int, original_host: str, original_port: int,
+                      interface_name: str, stc: str = "") -> bool:
+    """确保 sink 代理已启动
+
+    Args:
+        proxy_port: Proxy 监听的端口
+        original_host: 原始 outputchannel 的 host
+        original_port: 原始 outputchannel 的 port
+        interface_name: 接口名
+        stc: stream token
+
+    Returns:
+        True if proxy was started, False if already exists
+    """
+    listen_host = _config.get('soap_proxy', {}).get('listen_host', '127.0.0.1')
+    with sink_session_lock:
+        if proxy_port not in sink_sessions:
+            thread = threading.Thread(
+                target=start_sink_proxy,
+                args=(proxy_port, original_host, original_port, interface_name, stc)
+            )
+            thread.daemon = True
+            thread.start()
+            logging.info(f"[SINK/{interface_name}] Proxy registered: {listen_host}:{proxy_port} -> {original_host}:{original_port}")
+            return True
+        else:
+            logging.info(f"[SINK/{interface_name}] Proxy already exists for port {proxy_port}")
+            return False
 
 
 def ensure_stream_proxy(proxy_port, target_port, interface_name="STREAM"):

@@ -13,6 +13,9 @@ ATOM_PORT = 8282
 
 ATOM_BASE_URL = f"http://{ATOM_HOST}:{ATOM_PORT}"
 
+# SINK模式outputchannel使用的本机IP（供设备连接）
+OUTPUT_HOST = "127.0.0.1"
+
 # 日志配置（使用绝对路径，确保无论从哪个目录运行都能正确保存）
 import os
 # soap_proxy 目录的父目录

@@ -1,0 +1,29 @@
+<srrc:responsebody><srrc:result>
+    <srrc:appid>{appid}</srrc:appid>
+    <srrc:userid>{userid}</srrc:userid>
+    <srrc:priority>{priority}</srrc:priority>
+    <srrc:executetime>{executetime}</srrc:executetime>
+    <srrc:mfid>{mfid}</srrc:mfid>
+    <srrc:equid>{equid}</srrc:equid>
+    <srrc:taskid>{taskid}</srrc:taskid>
+    <srrc:equpara>
+        <srrc:items>
+            <srrc:item><srrc:paraname>frequency</srrc:paraname><srrc:paravalue>{frequency}</srrc:paravalue></srrc:item>
+            <srrc:item><srrc:paraname>ifbw</srrc:paraname><srrc:paravalue>{ifbw}</srrc:paravalue></srrc:item>
+            <srrc:item><srrc:paraname>gain</srrc:paraname><srrc:paravalue>{gain}</srrc:paravalue></srrc:item>
+            <srrc:item><srrc:paraname>rfworkmode</srrc:paraname><srrc:paravalue>{rfworkmode}</srrc:paravalue></srrc:item>
+            <srrc:item><srrc:paraname>audiotype</srrc:paraname><srrc:paravalue>{audiotype}</srrc:paravalue></srrc:item>
+            <srrc:item><srrc:paraname>demodmode</srrc:paraname><srrc:paravalue>{demodmode}</srrc:paravalue></srrc:item>
+            <srrc:item><srrc:paraname>demodbw</srrc:paraname><srrc:paravalue>{demodbw}</srrc:paravalue></srrc:item>
+            <srrc:item><srrc:paraname>spectrumswitch</srrc:paraname><srrc:paravalue>{spectrumswitch}</srrc:paravalue></srrc:item>
+            <srrc:item><srrc:paraname>ITUSwitch</srrc:paraname><srrc:paravalue>{ITUSwitch}</srrc:paravalue></srrc:item>
+        </srrc:items>
+    </srrc:equpara>
+    <srrc:outputchannel>
+        <srrc:mode>{outputchannel_mode}</srrc:mode>
+        <srrc:datachannel>{outputchannel_datachannel}</srrc:datachannel>
+        <srrc:host>{outputchannel_host}</srrc:host>
+        <srrc:port>{outputchannel_port}</srrc:port>
+        <srrc:stc>{outputchannel_stc}</srrc:stc>
+    </srrc:outputchannel>
+</srrc:result></srrc:responsebody>

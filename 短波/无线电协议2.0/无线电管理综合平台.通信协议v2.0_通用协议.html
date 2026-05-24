@@ -1,0 +1,9450 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>无线电管理综合平台.通信协议v2.0_通用协议</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="default" />
+</head>
+<body>
+<p><strong>嵘兴无线电管理综合平台传输控制协议</strong></p>
+<p><strong>[RX-RMCPTP]</strong></p>
+<table style="width:67%;">
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 51%" />
+</colgroup>
+<thead>
+<tr>
+<th>项目名称</th>
+<th>嵘兴无线电监测综合管理平台</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文档编写</td>
+<td>杜小猛</td>
+</tr>
+<tr>
+<td>版 本 号</td>
+<td>1.9</td>
+</tr>
+<tr>
+<td>更新日期</td>
+<td>2012/7/5</td>
+</tr>
+<tr>
+<td>审 核</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><img src="media/image1.wmf" /></p>
+</blockquote>
+<p><strong>深圳市嵘兴实业发展有限公司</strong></p>
+<p><strong>版本历史</strong></p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 16%" />
+<col style="width: 12%" />
+<col style="width: 47%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;">版本</th>
+<th style="text-align: center;">作者</th>
+<th style="text-align: center;">日期</th>
+<th style="text-align: center;">审核人</th>
+<th style="text-align: center;">变更内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.9</td>
+<td style="text-align: center;">杜小猛</td>
+<td style="text-align: center;">2012/7/5</td>
+<td style="text-align: center;"></td>
+<td>修正报文标志位，如果频率放大标志为1， 表示频率被放大1000倍</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.8</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">2011/12/14</td>
+<td style="text-align: center;"></td>
+<td>增加中频宽带测向(11/28)<br />
+增加调制模式识别<br />
+修正频谱分析的描述头定义的错误</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.7</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">2011/11/4</td>
+<td style="text-align: center;"></td>
+<td>增加IQ数字解调29、DDC解调38、空间谱测向39、多信道监听40、旋转云台41的协议定义</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.6</td>
+<td style="text-align: center;">杜小猛</td>
+<td style="text-align: center;">2010/12/06</td>
+<td style="text-align: center;"></td>
+<td>添加宽带监测 能量探测 信号识别,信号告警</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.5</td>
+<td style="text-align: center;">杜小猛</td>
+<td style="text-align: center;">2009/11/12</td>
+<td style="text-align: center;"></td>
+<td><ol type="1">
+<li><p>调整频段扫描返回占用度的数据格式为(有效采样/总采样)</p></li>
+<li><p>调整所有的占用度数据长度为8字节</p></li>
+</ol></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.4</td>
+<td style="text-align: center;">杜小猛</td>
+<td style="text-align: center;">2009-8-24</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">添加通知消息接口</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.3</td>
+<td style="text-align: center;">杜小猛</td>
+<td style="text-align: center;">2009-8-22</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">修正数据校验</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.2</td>
+<td style="text-align: center;">杜小猛</td>
+<td style="text-align: center;">2009-8-21</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">添加音频数据格式</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.1</td>
+<td style="text-align: center;">杜小猛</td>
+<td style="text-align: center;">2009-8-17</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">修正业务数据传输格式</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.0</td>
+<td style="text-align: center;">杜小猛</td>
+<td style="text-align: center;">2009-8-10</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">建立初稿</td>
+</tr>
+</tbody>
+</table>
+<p><strong>目录</strong></p>
+<p><a href="#概述部分">1 概述部分 <span>6</span></a></p>
+<p><a href="#缩略语">1.1 缩略语 <span>6</span></a></p>
+<p><a href="#符号说明">1.2 符号说明 <span>7</span></a></p>
+<p><a href="#名词解释和说明">1.3 名词解释和说明 <span>7</span></a></p>
+<p><a href="#rx-rmcpt连接的说明">1.4 RX-RMCPT连接的说明
+<span>8</span></a></p>
+<p><a href="#请求应答时序">1.5 请求应答时序 <span>9</span></a></p>
+<p><a href="#通用数据报文结构">2 通用数据报文结构 <span>9</span></a></p>
+<p><a href="#帧头说明">2.1 帧头说明 <span>9</span></a></p>
+<p><a href="#byte图">2.1.1 BYTE图 <span>9</span></a></p>
+<p><a href="#c结构定义">2.1.2 C++结构定义 <span>10</span></a></p>
+<p><a href="#报文长度">2.1.3 报文长度 <span>10</span></a></p>
+<p><a href="#报文版本号">2.1.4 报文版本号 <span>10</span></a></p>
+<p><a href="#报文标志">2.1.5 报文标志 <span>10</span></a></p>
+<p><a href="#报文数据类型">2.1.6 报文数据类型 <span>11</span></a></p>
+<p><a href="#头校验和">2.1.7 头校验和 <span>11</span></a></p>
+<p><a href="#数据分发请求报文">3 数据分发请求报文
+<span>12</span></a></p>
+<p><a href="#静态部分">3.1 静态部分 <span>12</span></a></p>
+<p><a href="#监测业务数据报文">4 监测业务数据报文
+<span>12</span></a></p>
+<p><a href="#监测业务数据报文概述">4.1 监测业务数据报文概述
+<span>12</span></a></p>
+<p><a href="#业务数据类型">4.1.1 业务数据类型 <span>12</span></a></p>
+<p><a href="#业务数据描述头报文">4.1.2 业务数据描述头报文
+<span>14</span></a></p>
+<p><a href="#业务数据报文">4.1.3 业务数据报文 <span>14</span></a></p>
+<p><a href="#业务数据描述头">4.2 业务数据描述头 <span>15</span></a></p>
+<p><a href="#单频测量-sglfreq">4.2.1 单频测量 SGLFREQ
+<span>16</span></a></p>
+<p><a href="#中频分析-ifanalysis">4.2.2 中频分析 IFANALYSIS
+<span>16</span></a></p>
+<p><a href="#单频测向-df">4.2.3 单频测向 DF <span>17</span></a></p>
+<p><a href="#中频测向-ifdf">4.2.4 中频测向 IFDF <span>17</span></a></p>
+<p><a href="#离散扫描-msacn">4.2.5 离散扫描 MSACN
+<span>17</span></a></p>
+<p><a href="#频段扫描-fscan">4.2.6 频段扫描 FSCAN
+<span>18</span></a></p>
+<p><a href="#数字扫描-dscan">4.2.7 数字扫描 DSCAN
+<span>18</span></a></p>
+<p><a href="#频谱扫描pscan">4.2.8 频谱扫描PSCAN <span>18</span></a></p>
+<p><a href="#频谱分析-spanalysis">4.2.9 频谱分析 SPANALYSIS
+<span>18</span></a></p>
+<p><a href="#时域分析-tdanalysis">4.2.10 时域分析 TDANALYSIS
+<span>19</span></a></p>
+<p><a href="#搜索测向dfsearch">4.2.11 搜索测向DFSEARCH
+<span>19</span></a></p>
+<p><a href="#频率测向-scandf">4.2.12 频率测向 SCANDF
+<span>20</span></a></p>
+<p><a href="#离散信号搜索-msearch">4.2.13 离散信号搜索 MSEARCH
+<span>20</span></a></p>
+<p><a href="#信号搜索fsearch">4.2.14 信号搜索FSEARCH
+<span>21</span></a></p>
+<p><a href="#itu测量-itu">4.2.15 ITU测量 ITU <span>21</span></a></p>
+<p><a href="#宽带监测测向-wbmondf">4.2.16 宽带监测测向 WBMONDF
+<span>22</span></a></p>
+<p><a href="#中频宽带测向ifdfext">4.2.17 中频宽带测向IFDFEXT
+<span>23</span></a></p>
+<p><a href="#数字解调-digdem">4.2.18 数字解调 DIGDEM
+<span>23</span></a></p>
+<p><a href="#离散测向">4.2.19 离散测向 <span>24</span></a></p>
+<p><a href="#信号测量-signalmeas">4.2.20 信号测量 SIGNALMEAS
+<span>24</span></a></p>
+<p><a href="#宽带监测wmon">4.2.21 宽带监测WMON <span>24</span></a></p>
+<p><a href="#能量探测edetn">4.2.22 能量探测EDETN <span>26</span></a></p>
+<p><a href="#信号告警sina">4.2.23 信号告警SINA <span>27</span></a></p>
+<p><a href="#信号识别modrec">4.2.24 信号识别MODREC
+<span>28</span></a></p>
+<p><a href="#ddc解调-ddcdem">4.2.25 DDC解调 DDCDEM
+<span>30</span></a></p>
+<p><a href="#空间谱测向-ssdf">4.2.26 空间谱测向 SSDF
+<span>30</span></a></p>
+<p><a href="#多信道监听multichan">4.2.27 多信道监听MULTICHAN
+<span>31</span></a></p>
+<p><a href="#旋转云台-acdf">4.2.28 旋转云台 ACDF <span>31</span></a></p>
+<p><a href="#调制模式识别-demrec">4.2.29 调制模式识别 DEMREC
+<span>32</span></a></p>
+<p><a href="#双多信道分析-mulchanana">4.2.30 双/多信道分析 MULCHANANA
+<span>32</span></a></p>
+<p><a href="#业务数据">4.3 业务数据 <span>33</span></a></p>
+<p><a href="#单频测量-sglfreq-1">4.3.1 单频测量 SGLFREQ
+<span>33</span></a></p>
+<p><a href="#中频分析-ifanalysis-1">4.3.2 中频分析 IFANALYSIS
+<span>34</span></a></p>
+<p><a href="#单频测向-df-1">4.3.3 单频测向 DF <span>35</span></a></p>
+<p><a href="#中频测向-ifdf-1">4.3.4 中频测向 IFDF
+<span>35</span></a></p>
+<p><a href="#离散扫描-msacn-1">4.3.5 离散扫描 MSACN
+<span>36</span></a></p>
+<p><a href="#频段扫描-fscan-1">4.3.6 频段扫描 FSCAN
+<span>37</span></a></p>
+<p><a href="#数字扫描-dscan-1">4.3.7 数字扫描 DSCAN
+<span>39</span></a></p>
+<p><a href="#频谱扫描pscan-1">4.3.8 频谱扫描PSCAN
+<span>39</span></a></p>
+<p><a href="#频谱分析spanalysis">4.3.9 频谱分析SPANALYSIS
+<span>39</span></a></p>
+<p><a href="#时域分析tdanalysis">4.3.10 时域分析TDANALYSIS
+<span>40</span></a></p>
+<p><a href="#搜索测向dfsearch-1">4.3.11 搜索测向DFSEARCH
+<span>40</span></a></p>
+<p><a href="#频率测向-scandf-1">4.3.12 频率测向 SCANDF
+<span>42</span></a></p>
+<p><a href="#离散信号搜索msearch">4.3.13 离散信号搜索MSEARCH
+<span>43</span></a></p>
+<p><a href="#信号搜索-fsearch">4.3.14 信号搜索 FSEARCH
+<span>44</span></a></p>
+<p><a href="#itu测量-itu-1">4.3.15 ITU测量 ITU <span>45</span></a></p>
+<p><a href="#中频宽带测向ifdfext-1">4.3.16 中频宽带测向IFDFEXT
+<span>46</span></a></p>
+<p><a href="#数字解调-digdem-1">4.3.17 数字解调 DIGDEM
+<span>48</span></a></p>
+<p><a href="#宽带监测测向">4.3.18 宽带监测测向 <span>49</span></a></p>
+<p><a href="#离散测向-1">4.3.19 离散测向 <span>50</span></a></p>
+<p><a href="#信号测量-signalmeas-1">4.3.20 信号测量 SIGNALMEAS
+<span>52</span></a></p>
+<p><a href="#宽带监测wmon-1">4.3.21 宽带监测WMON <span>52</span></a></p>
+<p><a href="#能量探测edetn-1">4.3.22 能量探测EDETN
+<span>53</span></a></p>
+<p><a href="#信号告警sina-1">4.3.23 信号告警SINA <span>54</span></a></p>
+<p><a href="#信号识别modrec-1">4.3.24 信号识别MODREC
+<span>55</span></a></p>
+<p><a href="#ddc解调-ddcdem-1">4.3.25 DDC解调 DDCDEM
+<span>57</span></a></p>
+<p><a href="#空间谱测向-ssdf-1">4.3.26 空间谱测向 SSDF
+<span>58</span></a></p>
+<p><a href="#多通道监听-multichan">4.3.27 多通道监听 MULTICHAN
+<span>59</span></a></p>
+<p><a href="#旋转云台-acdf-1">4.3.28 旋转云台 ACDF
+<span>60</span></a></p>
+<p><a href="#调制模式识别-demrec-1">4.3.29 调制模式识别 DEMREC
+<span>61</span></a></p>
+<p><a href="#_Toc357069185">4.3.30 双/多信道分析 MULCHANANA
+<span>62</span></a></p>
+<p><a href="#_Toc311637073">5 音频数据 <span>63</span></a></p>
+<p><a href="#音频描述头">5.1 音频描述头 <span>63</span></a></p>
+<p><a href="#音频数据-1">5.2 音频数据 <span>63</span></a></p>
+<p><a href="#通知消息">6 通知消息 <span>64</span></a></p>
+<p><a href="#报文描述">6.1 报文描述 <span>64</span></a></p>
+<p><a href="#gps数据">7 GPS数据 <span>64</span></a></p>
+<p><a href="#报文描述-1">7.1 报文描述 <span>64</span></a></p>
+<h1 id="概述部分">概述部分</h1>
+<h2 id="缩略语"> 缩略语</h2>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 31%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;"><strong>简写</strong></th>
+<th style="text-align: center;"><strong>全拼</strong></th>
+<th style="text-align: center;"><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RX-RMCPTP</strong></td>
+<td>Rongxing Radio Manage Comprehensive Platform Transfer Protocol</td>
+<td>嵘兴无线电综合管理平台实时监测传输协议的简称，用于在嵘兴综合管理平台各类客户端于服务之间进行数据的传输</td>
+</tr>
+<tr>
+<td><strong>parameter</strong></td>
+<td>设备执行参数</td>
+<td><p>&lt;?xml version="1.0" encoding="UTF-8"?&gt;</p>
+<p>&lt;parameter groups="1"&gt;</p>
+<p>&lt;group&gt;</p>
+<p>&lt;item name="frequency" value="97.1000MHz" /&gt;</p>
+<p>&lt;item name="antenna" value="R505" /&gt;</p>
+<p>&lt;item name="ifbw" value="120kHz" /&gt;</p>
+<p>&lt;item name="span" value="10MHz" /&gt;</p>
+<p>&lt;item name="demodmode" value="FM" /&gt;</p>
+<p>&lt;item name="audioswitch" value="OFF" /&gt;</p>
+<p>&lt;item name="detector" value="均方根检波" /&gt;</p>
+<p>&lt;item name="gainctrl" value="AGC" /&gt;</p>
+<p>&lt;/group&gt;</p>
+<p>&lt;/parameter&gt;</p></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="符号说明"> 符号说明</h2>
+<p>在<strong>RX-RMCPTP</strong>协议中，关键字由<strong>加粗</strong>的大写英文字母表示，可变项由<em>斜体</em>的小写英文字母表示。</p>
+<h2 id="名词解释和说明"> 名词解释和说明</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;"><strong>名词</strong></th>
+<th style="text-align: center;"><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>测向统计时间</td>
+<td>从设备读取测向数据的时间统计</td>
+</tr>
+<tr>
+<td>监听统计时间</td>
+<td>从设备读取音频数据的时间统计</td>
+</tr>
+<tr>
+<td>监测统计时间</td>
+<td>获得测向和音频之外的其他监测数据的时间统计</td>
+</tr>
+<tr>
+<td>校验和</td>
+<td>使用简单校验算法，保证数据完整性</td>
+</tr>
+<tr>
+<td>数据单元</td>
+<td>包含业务数据的最小内容，对于不同的业务数据，数据单元的长度的内容不同。</td>
+</tr>
+<tr>
+<td>数据单元ID</td>
+<td>包含业务数据的最小内容，对于不同的业务数据，数据单元的长度的内容不同。</td>
+</tr>
+<tr>
+<td>客户段</td>
+<td>发送请求命令的通信方</td>
+</tr>
+<tr>
+<td>中间服务</td>
+<td>提供连续数据的综合平台服务</td>
+</tr>
+<tr>
+<td>监测站设备组合标识</td>
+<td><blockquote>
+<p>统一编号由站点编码和设备组合编码形成13位全国唯一编码，包含监测站和监测设备的信息，该信息在监测请求命令中指明监测站和要求使用的监测设备，监测站设备组合标识为13字节，字符串的格式为：</p>
+</blockquote>
+<table style="width:34%;">
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th colspan="2">监测站编号</th>
+<th>8字符</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td rowspan="2">设备组合标识</td>
+<td>设组合编号</td>
+<td>3字符</td>
+</tr>
+<tr>
+<td>相同设备组合序号</td>
+<td>2字符</td>
+</tr>
+</tbody>
+</table></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="rx-rmcpt连接的说明"> RX-RMCPT连接的说明</h2>
+<ol type="1">
+<li><p>本协议是基于TCP/IP的应用协议。关于TCP/IP的连接和通信方法参见相关资料。</p></li>
+<li><p>RMTP链接的建立</p></li>
+</ol>
+<p>每个监测业务请求都需要客户端建立一个新的链接，并由客户端发起请求，中间服务端进行应答，业务处理完成后，双方断开本次链接。</p>
+<h2 id="请求应答时序"> 请求应答时序</h2>
+<p>客户端</p>
+<p>服务端</p>
+<p>一次完整通讯过程的请求和应答过程时序如下：</p>
+<p>发起连接(connect)</p>
+<p>求</p>
+<p>请求命令</p>
+<p>求</p>
+<p>错误信息</p>
+<p>ACK</p>
+<p>数据</p>
+<p>连续果，</p>
+<p>直到停止</p>
+<p>测量。</p>
+<p>数据</p>
+<p>… … … … …</p>
+<p>数据</p>
+<p>通信双方断开连接</p>
+<h4 id="连接建立过程">连接建立过程</h4>
+<ul>
+<li><p>连接请求由客户端发起，客户端通过socket连接到中间服务端,每执行一功能,均单独建立一连接</p></li>
+</ul>
+<h1 id="通用数据报文结构">通用数据报文结构</h1>
+<p>RX-RMCPTP使用
+“数据报文”完成数据的传输。“数据报文”是由连续的数据帧组成。</p>
+<h2 id="帧头说明">帧头说明</h2>
+<p>RX-RMCPTP的数据，是由若干个数据帧组成的，每个数据帧，都有一个帧头。帧头的定义如下表所示。</p>
+<h3 id="byte图">BYTE图</h3>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+</colgroup>
+<thead>
+<tr>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>10</th>
+<th>11</th>
+<th>12</th>
+<th>13</th>
+<th>14</th>
+<th>15</th>
+<th>16</th>
+<th>17</th>
+<th>18</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td colspan="4">报文长度(BYTE)</td>
+<td colspan="8">报文产生时间</td>
+<td colspan="2">报文版本号</td>
+<td>报文数据类型</td>
+<td>报文标志</td>
+<td colspan="2">头校验和</td>
+</tr>
+<tr>
+<td colspan="18"><strong>连续存储空间</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="c结构定义">C++结构定义</h3>
+<table>
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;">C++结构定义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p>#pragma pack(push,1)</p>
+<p>typedef struct tagRmcpFrame</p>
+<p>{</p>
+<p>DWORD dwLength; // 报文长度(BYTE)</p>
+<p>FILETIME tmStamp; // 报文产生时间</p>
+<p>WORD nVersion; // 报文版本号</p>
+<p>BYTE nDataType;// 报文数据类型</p>
+<p>BYTE nFlags ; // 报文标志</p>
+<p>WORD nCheckSum;// 头校验和</p>
+<p>}RMCPFRAME,*LPRMCPFRAME;</p>
+<p>#pragma pack(pop)</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="报文长度">报文长度</h3>
+<blockquote>
+<p>整个报文的BYTE大小。</p>
+</blockquote>
+<h3 id="报文版本号">报文版本号</h3>
+<p>当前版本号：nVersion = MAKEWORD (0, 7)</p>
+<h3 id="报文标志">报文标志</h3>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>7</th>
+<th>6</th>
+<th>5</th>
+<th>4</th>
+<th>3</th>
+<th>2</th>
+<th>1</th>
+<th>0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>保留</td>
+<td>保留</td>
+<td>保留</td>
+<td>保留</td>
+<td>是否将频率转换为1/1000（万分之一HZ），
+1表示数据内的频率都被转换为万分之一HZ，0表示频率为Hz</td>
+<td>是否是场强数据</td>
+<td>是否是电平数据</td>
+<td>数据是否可抛弃标志</td>
+</tr>
+</tbody>
+</table>
+<h3 id="报文数据类型">报文数据类型</h3>
+<p>数据类型分通过帧头中数据类型（nDataType）进行识别。</p>
+<table style="width:93%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 52%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;">nDataType取值</th>
+<th style="text-align: center;">数据类型</th>
+<th style="text-align: center;">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>监测业务数据</td>
+<td>业务数据</td>
+</tr>
+<tr>
+<td>1</td>
+<td>音频描述头</td>
+<td>数据中包含的是音频数据描述头</td>
+</tr>
+<tr>
+<td>2</td>
+<td>音频数据</td>
+<td>数据中包含的是音频数据流</td>
+</tr>
+<tr>
+<td>3</td>
+<td>分发请求</td>
+<td>请求中间层发送的数据</td>
+</tr>
+<tr>
+<td>4</td>
+<td>信息数据</td>
+<td>数据中包含文本信息</td>
+</tr>
+<tr>
+<td><em>5</em></td>
+<td><em>未使用</em></td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td>监测业务数据数据描述头</td>
+<td>该数据帧包含的业务数据是自描述头</td>
+</tr>
+<tr>
+<td>7</td>
+<td>视频数据描述头</td>
+<td></td>
+</tr>
+<tr>
+<td><em>8</em></td>
+<td><em>通知消息</em></td>
+<td>中间服务的通知消息</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>11</em></td>
+<td><em>GPS数据</em></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="头校验和">头校验和</h3>
+<p>以无符号短整型的形式读出时间、长度累加，然后又对这个无符号长整形的结果作两次折半移位相加的处理，即把一个长整形数当做两个短整形数相加，做两次是因为加一次得到的值仍然会超出一个短
+整形数的表示范围；再对这个最后的得到的短整形数取反码既得到校验和。</p>
+<h1 id="数据分发请求报文">数据分发请求报文</h1>
+<ul>
+<li><p>分发请求报文是客户端连接到中间服务，请求中间层分发数据的指令报文。</p></li>
+<li><p>如果任务nTaskid == -1 ,为获取通知消息</p></li>
+</ul>
+<h2 id="静态部分">静态部分</h2>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>nTaskid</td>
+<td>动态</td>
+<td>8</td>
+<td>请求分发数据的任务ID</td>
+</tr>
+<tr>
+<td>char</td>
+<td>szUser [64]</td>
+<td>动态</td>
+<td>64</td>
+<td>用户名称</td>
+</tr>
+</tbody>
+</table>
+<h1 id="监测业务数据报文">监测业务数据报文</h1>
+<h2 id="监测业务数据报文概述">监测业务数据报文概述</h2>
+<h3 id="业务数据类型">业务数据类型</h3>
+<p>在RX-RMCPTP的报文中，数据种类的类型定义如下所列：</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>业务数据种类</strong></th>
+<th><strong>数据种类ID
+（</strong>十六进制一个字节表示<strong>）</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单频测量</td>
+<td>10</td>
+</tr>
+<tr>
+<td>中频分析</td>
+<td>11</td>
+</tr>
+<tr>
+<td>单频测向</td>
+<td>12</td>
+</tr>
+<tr>
+<td>中频测向</td>
+<td>13</td>
+</tr>
+<tr>
+<td>离散扫描</td>
+<td>14</td>
+</tr>
+<tr>
+<td>频段扫描</td>
+<td>15</td>
+</tr>
+<tr>
+<td>数字扫描</td>
+<td>16</td>
+</tr>
+<tr>
+<td>频谱扫描</td>
+<td>17</td>
+</tr>
+<tr>
+<td>频谱分析</td>
+<td>18</td>
+</tr>
+<tr>
+<td>时域分析</td>
+<td>19</td>
+</tr>
+<tr>
+<td>搜索测向</td>
+<td>20</td>
+</tr>
+<tr>
+<td>频率测向</td>
+<td>21</td>
+</tr>
+<tr>
+<td>离散信号搜索</td>
+<td>22</td>
+</tr>
+<tr>
+<td>频段信号搜索</td>
+<td>23</td>
+</tr>
+<tr>
+<td>ITU测量</td>
+<td>24</td>
+</tr>
+<tr>
+<td>宽带监测测向</td>
+<td>25</td>
+</tr>
+<tr>
+<td>中频宽带测向</td>
+<td>26</td>
+</tr>
+<tr>
+<td>跳频监测</td>
+<td>27</td>
+</tr>
+<tr>
+<td>宽带监测</td>
+<td>28</td>
+</tr>
+<tr>
+<td>IQ数字解调</td>
+<td>29</td>
+</tr>
+<tr>
+<td>宽带扫描</td>
+<td>30</td>
+</tr>
+<tr>
+<td>能量探测</td>
+<td>31</td>
+</tr>
+<tr>
+<td>离散测向</td>
+<td>32</td>
+</tr>
+<tr>
+<td>信号测量(TCI专用,实际为ITU)</td>
+<td>33</td>
+</tr>
+<tr>
+<td>信号识别(黑鸟系统)</td>
+<td>34</td>
+</tr>
+<tr>
+<td>信号告警(黑鸟系统)</td>
+<td>35</td>
+</tr>
+<tr>
+<td>和差信号</td>
+<td>36（已被罗盘占有）</td>
+</tr>
+<tr>
+<td>IQ</td>
+<td>37（已被GPS占有）</td>
+</tr>
+<tr>
+<td>DDC解调</td>
+<td>38</td>
+</tr>
+<tr>
+<td>空间谱测向</td>
+<td>39</td>
+</tr>
+<tr>
+<td>多信道监听</td>
+<td>40</td>
+</tr>
+<tr>
+<td>旋转云台</td>
+<td>41</td>
+</tr>
+<tr>
+<td>视频</td>
+<td>42</td>
+</tr>
+<tr>
+<td>调制模式识别</td>
+<td>43</td>
+</tr>
+<tr>
+<td>双/多信道分析</td>
+<td>44</td>
+</tr>
+<tr>
+<td>信号压制</td>
+<td>45</td>
+</tr>
+<tr>
+<td>模拟电视</td>
+<td>46</td>
+</tr>
+<tr>
+<td>数字电视</td>
+<td>47</td>
+</tr>
+<tr>
+<td>电视图像</td>
+<td>48</td>
+</tr>
+<tr>
+<td>荧光谱</td>
+<td>49</td>
+</tr>
+<tr>
+<td>摄像头</td>
+<td>50</td>
+</tr>
+<tr>
+<td>频点分析</td>
+<td>51</td>
+</tr>
+</tbody>
+</table>
+<h3 id="业务数据描述头报文">业务数据描述头报文</h3>
+<p>数据描述头:帧头类型nDataType=6</p>
+<h4 id="byte图-1">BYTE图</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;">1</th>
+<th style="text-align: center;">2</th>
+<th style="text-align: center;">3</th>
+<th style="text-align: center;">4</th>
+<th style="text-align: center;">5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">业务数据类型</td>
+<td colspan="4" style="text-align: center;">报文携带的动态数据数目</td>
+</tr>
+<tr>
+<td colspan="5" style="text-align: center;">连续缓冲区域</td>
+</tr>
+</tbody>
+</table>
+<h4 id="c结构定义-1">C++结构定义</h4>
+<table>
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;">C++结构定义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p>#pragma pack(push,1)</p>
+<p>typedef struct tagRmcpBusinessHead</p>
+<p>{</p>
+<p>BYTE nMonType // 业务数据类型</p>
+<p>DWORD nArrays; // 业务数组长度</p>
+<p>CHAR pOffset[1] ; // 业务偏移占位指针</p>
+<p>}RMCPBUSINESSHEAD,*LPRMCPBUSINESSHEAD;</p>
+<p>#pragma pack(pop)</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="业务数据报文">业务数据报文</h3>
+<p>业务数据:帧头类型nDataType=0</p>
+<h4 id="业务数据通信处理">业务数据通信处理</h4>
+<ol type="1">
+<li><p>业务数据不要求客户端返回应答</p></li>
+<li><p>在通信过程中可以对部分错误数据抛弃处理</p></li>
+</ol>
+<h4 id="byte图-2">BYTE图</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;">1</th>
+<th style="text-align: center;">2</th>
+<th style="text-align: center;">3</th>
+<th style="text-align: center;">4</th>
+<th style="text-align: center;">5</th>
+<th style="text-align: center;">6</th>
+<th style="text-align: center;">7</th>
+<th style="text-align: center;">8</th>
+<th style="text-align: center;">9</th>
+<th style="text-align: center;">10</th>
+<th style="text-align: center;">11</th>
+<th style="text-align: center;">12</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">业务数据类型</td>
+<td colspan="2" style="text-align: center;">业务数据标志</td>
+<td colspan="4" style="text-align: center;">业务数组数目</td>
+<td colspan="4" style="text-align: center;">业务数组偏移</td>
+<td style="text-align: center;">业务数组偏移占位</td>
+</tr>
+<tr>
+<td colspan="12" style="text-align: center;">连续缓冲区</td>
+</tr>
+</tbody>
+</table>
+<h4 id="c结构定义-2">C++结构定义</h4>
+<table>
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;">C++结构定义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p>#pragma pack(push,1)</p>
+<p>typedef struct tagRmcpBusinessData</p>
+<p>{</p>
+<p>BYTE nBdType // 业务数据类型</p>
+<p>SHORT nFlags; // 业务数据标志</p>
+<p>DWORD nArrays; // 业务数组数目</p>
+<p>DWORD nOffset; // 业务数组偏移</p>
+<p>CHAR pOffset[1]; // 业务数组偏移占位</p>
+<p>}RMCPBUSINESSDATA,*LPRMCPBUSINESSDATA;</p>
+<p>#pragma pack(pop)</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="业务数据标志bit图">业务数据标志BIT图</h4>
+<p>携带业务数据必须是0 15
+方向依次携带，顺序不能变更，0表示无该类数据，1表示有该类数据。</p>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+</colgroup>
+<thead>
+<tr>
+<th>15</th>
+<th>14</th>
+<th>13</th>
+<th>12</th>
+<th>11</th>
+<th>10</th>
+<th>9</th>
+<th>8</th>
+<th>7</th>
+<th>6</th>
+<th>5</th>
+<th>4</th>
+<th>3</th>
+<th>2</th>
+<th>1</th>
+<th>0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>保留</td>
+<td>保留</td>
+<td>保留</td>
+<td>保留</td>
+<td>保留</td>
+<td>保留</td>
+<td>保留</td>
+<td>保留</td>
+<td>保留</td>
+<td>保留</td>
+<td>保留</td>
+<td>保留</td>
+<td>手工背噪数据</td>
+<td>占用度统计数据</td>
+<td>自动背噪数据</td>
+<td>基础业务数据</td>
+</tr>
+</tbody>
+</table>
+<h2 id="业务数据描述头">业务数据描述头</h2>
+<p>数据描述头描述业务数据包含哪些信息和格式定义，数据描述头包含部分参数信息，该参数信息是绘制波形图和其他图形的必要因素，对于不同的业务请求类型要求返回的描述头信息不同。</p>
+<h3 id="单频测量-sglfreq">单频测量 SGLFREQ</h3>
+<h4 id="静态部分-1">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>10</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（ITU测量数据个数）</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>固定频率设定频率</td>
+</tr>
+<tr>
+<td>char</td>
+<td>szAntenna[64]</td>
+<td>动态</td>
+<td>64</td>
+<td>天线名</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>char</td>
+<td>szITUName[16]</td>
+<td>动态</td>
+<td>16</td>
+<td>ITU数据名称，最大16字符</td>
+</tr>
+<tr>
+<td>float</td>
+<td>fMinValue</td>
+<td>动态</td>
+<td>4</td>
+<td>该值的缺省最小值</td>
+</tr>
+<tr>
+<td>char</td>
+<td>szUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>单位</td>
+</tr>
+</tbody>
+</table>
+<h3 id="中频分析-ifanalysis">中频分析 <strong>IFANALYSIS</strong></h3>
+<h4 id="静态部分-2">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>11</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>中频分析设定频率</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+<td>测量跨距，单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Ifbw</td>
+<td>动态</td>
+<td>8</td>
+<td>中频带宽，单位Hz</td>
+</tr>
+</tbody>
+</table>
+<h3 id="单频测向-df">单频测向 DF</h3>
+<h4 id="静态部分-3">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>12</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>测量中心频率,单位Hz</td>
+</tr>
+</tbody>
+</table>
+<h3 id="中频测向-ifdf">中频测向 <strong>IFDF</strong></h3>
+<h4 id="静态部分-4">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>13</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>测量中心频率,单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+<td>测量跨距，单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Ifbw</td>
+<td>动态</td>
+<td>8</td>
+<td>频带宽，单位Hz</td>
+</tr>
+</tbody>
+</table>
+<h3 id="离散扫描-msacn">离散扫描 MSACN</h3>
+<h4 id="静态部分-5">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>14</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（离散扫描数点数）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-1">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>离散频率</td>
+</tr>
+</tbody>
+</table>
+<h3 id="频段扫描-fscan">频段扫描 FSCAN</h3>
+<h4 id="静态部分-6">静态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>15</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（频段扫描段数）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-2">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>startfreq</td>
+<td>动态</td>
+<td>8</td>
+<td rowspan="4"><p>开始频率</p>
+<p>结束频率</p>
+<p>步长频率</p>
+<p>本段点数</p>
+<p>（该结构体共有nArrays组）</p></td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>endfreq</td>
+<td>动态</td>
+<td>8</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Step</td>
+<td>动态</td>
+<td>8</td>
+</tr>
+<tr>
+<td>int</td>
+<td>nPoints</td>
+<td>动态</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="数字扫描-dscan">数字扫描 DSCAN</h3>
+<p>数字扫描协议与频段扫描相同，只是业务数据的类型不同。</p>
+<h3 id="频谱扫描pscan">频谱扫描PSCAN</h3>
+<p>预留。</p>
+<h3 id="频谱分析-spanalysis">频谱分析 SPANALYSIS</h3>
+<h4 id="静态部分-7">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>18</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td><p>动态数组数目</p>
+<p>（特殊监测类型个数）</p></td>
+</tr>
+<tr>
+<td>short</td>
+<td>curvecount</td>
+<td>动态</td>
+<td>2</td>
+<td>曲线条数</td>
+</tr>
+<tr>
+<td>byte</td>
+<td>Indexclearwrite</td>
+<td>动态</td>
+<td>1</td>
+<td>实时曲线的索引号(无实时曲线,值为0xFF)</td>
+</tr>
+<tr>
+<td>float</td>
+<td>Reflevel</td>
+<td>动态</td>
+<td>4</td>
+<td>曲线的参考电平</td>
+</tr>
+<tr>
+<td>char</td>
+<td>Unit[10]</td>
+<td>动态</td>
+<td>1</td>
+<td>曲线的电平单位</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nParamLen</td>
+<td>动态</td>
+<td>4</td>
+<td>参数字串长度</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-3">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 22%" />
+<col style="width: 16%" />
+<col style="width: 18%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th>char</th>
+<th>param[nParamLen]</th>
+<th>动态</th>
+<th>nParamLen</th>
+<th>监测参数字符串：<br />
+参数名+冒号+参数值+单位+\n<br />
+...<br />
+参数名+冒号+参数值+单位+\n</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h3 id="时域分析-tdanalysis">时域分析 TDANALYSIS</h3>
+<p>时域分析协议和频谱分析相同，只是业务数据的类型不同。</p>
+<h3 id="搜索测向dfsearch">搜索测向DFSEARCH</h3>
+<h4 id="静态部分-8">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>20</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（离散测向点数）</td>
+</tr>
+<tr>
+<td>Int</td>
+<td>DataType</td>
+<td>{ 0 }</td>
+<td>4</td>
+<td>这个值是为了将描述头和数据统一到一个数据结构中设置的</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-4">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>beginfreq</td>
+<td>动态</td>
+<td>8</td>
+<td>起始频率，单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>endfreq</td>
+<td>动态</td>
+<td>8</td>
+<td>终止频率，单位Hz</td>
+</tr>
+</tbody>
+</table>
+<h3 id="频率测向-scandf">频率测向 SCANDF</h3>
+<h4 id="静态部分-9">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>21</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（频段测向段数）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-5">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>startfreq</td>
+<td>动态</td>
+<td>8</td>
+<td>开始频率，单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>endfreq</td>
+<td>动态</td>
+<td>8</td>
+<td>结束频率，单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Step</td>
+<td>动态</td>
+<td>8</td>
+<td>步长频率，单位Hz</td>
+</tr>
+<tr>
+<td>int</td>
+<td>nPoints</td>
+<td>动态</td>
+<td>4</td>
+<td>本段点数</td>
+</tr>
+</tbody>
+</table>
+<h3 id="离散信号搜索-msearch">离散信号搜索 MSEARCH</h3>
+<h4 id="静态部分-10">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>22</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（离散测向点数）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-6">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>离散频率，单位Hz</td>
+</tr>
+</tbody>
+</table>
+<h3 id="信号搜索fsearch">信号搜索FSEARCH</h3>
+<h4 id="静态部分-11">静态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>23</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（频段扫描段数）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-7">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>startfreq</td>
+<td>动态</td>
+<td>8</td>
+<td>开始频率</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>endfreq</td>
+<td>动态</td>
+<td>8</td>
+<td>结束频率</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Step</td>
+<td>动态</td>
+<td>8</td>
+<td>步长频率</td>
+</tr>
+<tr>
+<td>int</td>
+<td>nPoints</td>
+<td>动态</td>
+<td>4</td>
+<td>本段点数</td>
+</tr>
+</tbody>
+</table>
+<h3 id="itu测量-itu">ITU测量 ITU</h3>
+<h4 id="静态部分-12">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>24</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（ITU测量数据个数）</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>固定频率设定频率</td>
+</tr>
+<tr>
+<td>char</td>
+<td>szAntenna[64]</td>
+<td>动态</td>
+<td>64</td>
+<td>天线名</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-8">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>char</td>
+<td>szITUName[16]</td>
+<td>动态</td>
+<td>16</td>
+<td>ITU数据名称，最大16字符</td>
+</tr>
+<tr>
+<td>float</td>
+<td>fMinValue</td>
+<td>动态</td>
+<td>4</td>
+<td>该值的缺省最小值</td>
+</tr>
+<tr>
+<td>char</td>
+<td>szUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>单位</td>
+</tr>
+</tbody>
+</table>
+<h3 id="宽带监测测向-wbmondf">宽带监测测向 WBMONDF</h3>
+<h4 id="静态部分-13">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>25</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（频段测向段数）</td>
+</tr>
+<tr>
+<td>Byte</td>
+<td>Headtype</td>
+<td>{0，1，2}</td>
+<td>1</td>
+<td><p>0全景频段描述头</p>
+<p>1局部测向描述头</p>
+<p>2中频频谱的描述头</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-9">动态部分</h4>
+<p>当headtype为0和1时，静态部分续接如下内容</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>startfreq</td>
+<td>动态</td>
+<td>8</td>
+<td>开始频率，单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>endfreq</td>
+<td>动态</td>
+<td>8</td>
+<td>结束频率，单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Step</td>
+<td>动态</td>
+<td>8</td>
+<td>步长频率，单位Hz</td>
+</tr>
+</tbody>
+</table>
+<p>当headtype为2时，静态部分续接如下内容</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>测量中心频率,单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+<td>测量跨距，单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Ifbw</td>
+<td>动态</td>
+<td>8</td>
+<td>频带宽，单位Hz</td>
+</tr>
+</tbody>
+</table>
+<h3 id="中频宽带测向ifdfext">中频宽带测向IFDFEXT</h3>
+<h4 id="静态部分-14">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 20%" />
+<col style="width: 15%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>26</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-10">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 15%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>Centerfreq</td>
+<td>动态</td>
+<td>8</td>
+<td>中心频率，单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+<td>跨距，单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>ifbw</td>
+<td>动态</td>
+<td>8</td>
+<td>中频带宽，单位Hz</td>
+</tr>
+</tbody>
+</table>
+<h3 id="数字解调-digdem">数字解调 DIGDEM</h3>
+<h4 id="静态部分-15">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>29</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>中心频率（HZ）</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>IFBW</td>
+<td>动态</td>
+<td>8</td>
+<td>中频带宽（HZ）</td>
+</tr>
+<tr>
+<td>int</td>
+<td>SIQPPacked</td>
+<td>动态</td>
+<td>4</td>
+<td>打包类型（1表示IQ数据顺序交替存储，其他暂无定义）</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>SampleRate</td>
+<td>动态</td>
+<td>8</td>
+<td>采样率</td>
+</tr>
+<tr>
+<td>float</td>
+<td>RefdBFS</td>
+<td>动态</td>
+<td>4</td>
+<td>参考衰减</td>
+</tr>
+<tr>
+<td>float</td>
+<td>GaindBTG</td>
+<td>动态</td>
+<td>4</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="离散测向">离散测向 </h3>
+<h4 id="静态部分-16">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>32</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（离散测向点数）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-11">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>离散频率，单位Hz</td>
+</tr>
+</tbody>
+</table>
+<h3 id="信号测量-signalmeas">信号测量 SIGNALMEAS</h3>
+<p>同ITU测量</p>
+<h3 id="宽带监测wmon">宽带监测WMON</h3>
+<h4 id="静态部分-17">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 31%" />
+<col style="width: 16%" />
+<col style="width: 14%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>30</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（扫描段数）</td>
+</tr>
+<tr>
+<td>float</td>
+<td>level</td>
+<td>动态</td>
+<td>4</td>
+<td>参考电平</td>
+</tr>
+<tr>
+<td>char</td>
+<td>unit [10]</td>
+<td>动态</td>
+<td>10</td>
+<td>参考电平单位</td>
+</tr>
+<tr>
+<td>Long</td>
+<td>nResultNum</td>
+<td>9</td>
+<td>4</td>
+<td>扩展数据数</td>
+</tr>
+<tr>
+<td>char</td>
+<td>TimeSymbol[20]</td>
+<td>时间</td>
+<td>20</td>
+<td>时间标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>TimeUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>时间的单位，如“s”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>FreqSymbol[20]</td>
+<td>频率</td>
+<td>20</td>
+<td>频率标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>FreqUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>频率的单位，如“Hz”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>RbwSymbol[20]</td>
+<td>带宽</td>
+<td>20</td>
+<td>带宽标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>RbwUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>带宽的单位，如“Hz”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmsnrSymbol[20]</td>
+<td>信噪比</td>
+<td>20</td>
+<td>信噪比标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmsnrUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>信噪比的单位，如“dB”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmsRateSymbol[20]</td>
+<td>符号速率</td>
+<td>20</td>
+<td>符号速率标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmsRateUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>符号速率的单位，如“kHz”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmdevSymbol[20]</td>
+<td>频偏</td>
+<td>20</td>
+<td>频偏标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmdevUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>频偏的单位，如“kHz”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>ModemSymbol[20]</td>
+<td>调制类型</td>
+<td>20</td>
+<td>调制类型标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>ModemUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>调制类型的单位</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmconSymbol[20]</td>
+<td>可信度</td>
+<td>20</td>
+<td>可信度标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmconUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>可信度的单位，如“%”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>PreciousTimeSymbol[20]</td>
+<td>高精度时间</td>
+<td>20</td>
+<td>子时间标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>PreciousTimeUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>子时间的单位，如“s”</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-12">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 18%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>nStartFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>开始频率</td>
+</tr>
+<tr>
+<td>float</td>
+<td>nStopFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>结束频率</td>
+</tr>
+<tr>
+<td>float</td>
+<td>rbw</td>
+<td>动态</td>
+<td>4</td>
+<td>带宽</td>
+</tr>
+</tbody>
+</table>
+<h3 id="能量探测edetn">能量探测EDETN</h3>
+<h4 id="静态部分-18">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 31%" />
+<col style="width: 16%" />
+<col style="width: 14%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>31</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（扫描段数）</td>
+</tr>
+<tr>
+<td>float</td>
+<td>level</td>
+<td>动态</td>
+<td>4</td>
+<td>参考电平</td>
+</tr>
+<tr>
+<td>char</td>
+<td>unit [10]</td>
+<td>动态</td>
+<td>10</td>
+<td>参考电平单位</td>
+</tr>
+<tr>
+<td>Long</td>
+<td>nResultNum</td>
+<td>5</td>
+<td>4</td>
+<td>扩展数据数</td>
+</tr>
+<tr>
+<td>char</td>
+<td>TimeSymbol[20]</td>
+<td>时间</td>
+<td>20</td>
+<td>时间标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>TimeUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>时间的单位，如“s”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>FreqSymbol[20]</td>
+<td>频率</td>
+<td>20</td>
+<td>频率标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>FreqUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>频率的单位，如“Hz”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>RbwSymbol[20]</td>
+<td>带宽</td>
+<td>20</td>
+<td>带宽标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>RbwUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>带宽的单位，如“Hz”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>alarmamplSymbol [20]</td>
+<td>幅度</td>
+<td>20</td>
+<td>幅度标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>alarmamplUnit [10]</td>
+<td>动态</td>
+<td>10</td>
+<td>幅度的单位，如“dBm”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>PreciousTimeSymbol[20]</td>
+<td>高精度时间</td>
+<td>20</td>
+<td>子时间标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>PreciousTimeUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>子时间的单位，如“s”</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-13">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 18%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>nStartFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>开始频率</td>
+</tr>
+<tr>
+<td>float</td>
+<td>nStopFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>结束频率</td>
+</tr>
+<tr>
+<td>float</td>
+<td>rbw</td>
+<td>动态</td>
+<td>4</td>
+<td>带宽</td>
+</tr>
+</tbody>
+</table>
+<h3 id="信号告警sina">信号告警SINA</h3>
+<h4 id="静态部分-19">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 31%" />
+<col style="width: 16%" />
+<col style="width: 14%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>35</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（扫描段数）</td>
+</tr>
+<tr>
+<td>float</td>
+<td>level</td>
+<td>动态</td>
+<td>4</td>
+<td>参考电平</td>
+</tr>
+<tr>
+<td>char</td>
+<td>unit [10]</td>
+<td>动态</td>
+<td>10</td>
+<td>参考电平单位</td>
+</tr>
+<tr>
+<td>Long</td>
+<td>nResultNum</td>
+<td>6</td>
+<td>4</td>
+<td>扩展数据数</td>
+</tr>
+<tr>
+<td>char</td>
+<td>TimeSymbol[20]</td>
+<td>时间</td>
+<td>20</td>
+<td>时间标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>TimeUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>时间的单位，如“s”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>FreqSymbol[20]</td>
+<td>频率</td>
+<td>20</td>
+<td>频率标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>FreqUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>频率的单位，如“Hz”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>RbwSymbol[20]</td>
+<td>带宽</td>
+<td>20</td>
+<td>带宽标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>RbwUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>带宽的单位，如“Hz”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>alarmamplSymbol [20]</td>
+<td>幅度</td>
+<td>20</td>
+<td>幅度标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>alarmamplUnit [10]</td>
+<td>动态</td>
+<td>10</td>
+<td>幅度的单位，如“dBm”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>PreciousTimeSymbol[20]</td>
+<td>高精度时间</td>
+<td>20</td>
+<td>子时间标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>PreciousTimeUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>子时间的单位，如“s”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>alarmDesSymbol [20]</td>
+<td>告警描述</td>
+<td>20</td>
+<td>告警描述标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>alarmDesUnit [10]</td>
+<td>动态</td>
+<td>10</td>
+<td>告警描述的单位</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-14">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 18%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>nStartFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>开始频率</td>
+</tr>
+<tr>
+<td>float</td>
+<td>nStopFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>结束频率</td>
+</tr>
+<tr>
+<td>float</td>
+<td>rbw</td>
+<td>动态</td>
+<td>4</td>
+<td>带宽</td>
+</tr>
+</tbody>
+</table>
+<h3 id="信号识别modrec">信号识别MODREC</h3>
+<h4 id="静态部分-20">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 31%" />
+<col style="width: 16%" />
+<col style="width: 14%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>34</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>0</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>float</td>
+<td>level</td>
+<td>动态</td>
+<td>4</td>
+<td>参考电平</td>
+</tr>
+<tr>
+<td>char</td>
+<td>unit [10]</td>
+<td>动态</td>
+<td>10</td>
+<td>参考电平单位</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nResultNum</td>
+<td>9</td>
+<td>4</td>
+<td>扩展数据数</td>
+</tr>
+<tr>
+<td>char</td>
+<td>TimeSymbol[20]</td>
+<td>时间</td>
+<td>20</td>
+<td>时间标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>TimeUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>时间的单位，如“s”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>FreqSymbol[20]</td>
+<td>频率</td>
+<td>20</td>
+<td>频率标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>FreqUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>频率的单位，如“Hz”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>RbwSymbol[20]</td>
+<td>带宽</td>
+<td>20</td>
+<td>带宽标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>RbwUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>带宽的单位，如“Hz”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmsnrSymbol[20]</td>
+<td>信噪比</td>
+<td>20</td>
+<td>信噪比标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmsnrUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>信噪比的单位，如“dB”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmsRateSymbol[20]</td>
+<td>符号速率</td>
+<td>20</td>
+<td>符号速率标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmsRateUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>符号速率的单位，如“kHz”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmdevSymbol[20]</td>
+<td>频偏</td>
+<td>20</td>
+<td>频偏标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmdevUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>频偏的单位，如“kHz”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>ModemSymbol[20]</td>
+<td>调制类型</td>
+<td>20</td>
+<td>调制类型标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>ModemUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>调制类型的单位</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmconSymbol[20]</td>
+<td>可信度</td>
+<td>20</td>
+<td>可信度标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmconUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>可信度的单位，如“%”</td>
+</tr>
+<tr>
+<td>char</td>
+<td>PreciousTimeSymbol[20]</td>
+<td>高精度时间</td>
+<td>20</td>
+<td>子时间标识</td>
+</tr>
+<tr>
+<td>char</td>
+<td>PreciousTimeUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>子时间的单位，如“s”</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>nCentFreq</td>
+<td>动态</td>
+<td>8</td>
+<td>中心频率</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>nSpan</td>
+<td>动态</td>
+<td>8</td>
+<td>跨距</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>nIFBW</td>
+<td>动态</td>
+<td>8</td>
+<td>带宽</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ddc解调-ddcdem">DDC解调 DDCDEM</h3>
+<p>DDC解调即接收机当前夸跨距内的某个频率的解调。</p>
+<h4 id="静态部分-21">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>38</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>中频分析设定频率</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+<td>测量跨距，单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>demfreq</td>
+<td>动态</td>
+<td>8</td>
+<td>解调频率</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Demifbw</td>
+<td>动态</td>
+<td>8</td>
+<td>解调带宽</td>
+</tr>
+</tbody>
+</table>
+<h3 id="空间谱测向-ssdf">空间谱测向 SSDF</h3>
+<h4 id="静态部分-22">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>静态部分<strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>39</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>测量中心频率,单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+<td>跨距,单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>ifbw</td>
+<td>动态</td>
+<td>8</td>
+<td>中频带宽,单位Hz</td>
+</tr>
+</tbody>
+</table>
+<h3 id="多信道监听multichan">多信道监听MULTICHAN</h3>
+<h4 id="静态部分-23">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 15%" />
+<col style="width: 13%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>40</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>表示动态数组个数：监测数据的通道总数</td>
+</tr>
+<tr>
+<td>Long</td>
+<td>AudioLength</td>
+<td>动态</td>
+<td>4</td>
+<td>表示音频数据的长度</td>
+</tr>
+<tr>
+<td>音频数据</td>
+<td>AudioHead</td>
+<td>动态</td>
+<td></td>
+<td>音频描述头数据</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-15">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 13%" />
+<col style="width: 16%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>Index</td>
+<td>动态</td>
+<td>1</td>
+<td>通道索引</td>
+<td rowspan="4">nArrays组该值</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>开始频率</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+<td>跨距</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Ifbw</td>
+<td>动态</td>
+<td>8</td>
+<td>带宽</td>
+</tr>
+</tbody>
+</table>
+<h3 id="旋转云台-acdf">旋转云台 ACDF</h3>
+<h4 id="静态部分-24">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>41</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>测量中心频率,单位Hz</td>
+</tr>
+</tbody>
+</table>
+<h3 id="调制模式识别-demrec"> 调制模式识别 DEMREC</h3>
+<h4 id="静态部分-25">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>43</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目（ITU个数）</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>中频分析设定频率</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+<td>测量跨距，单位Hz</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Ifbw</td>
+<td>动态</td>
+<td>8</td>
+<td>中频带宽，单位Hz</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-16">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 18%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>char</td>
+<td>szITUName[16]</td>
+<td>动态</td>
+<td>16</td>
+<td>ITU数据名称，最大16字符</td>
+</tr>
+<tr>
+<td>float</td>
+<td>fMinValue</td>
+<td>动态</td>
+<td>4</td>
+<td>该值的缺省最小值</td>
+</tr>
+<tr>
+<td>char</td>
+<td>szUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+<td>单位</td>
+</tr>
+</tbody>
+</table>
+<h3 id="双多信道分析-mulchanana">双/多信道分析 MULCHANANA</h3>
+<h4 id="静态部分-26">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>44</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>信道个数</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-17">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 18%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td rowspan="7">nArray组该数据结构</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>ifbw</td>
+<td>动态</td>
+<td>8</td>
+</tr>
+<tr>
+<td>int</td>
+<td>ITU项的个数</td>
+<td>动态（为零表示没有ITU测量项）</td>
+<td>4</td>
+</tr>
+<tr>
+<td>char</td>
+<td>szITUName[16]</td>
+<td>动态</td>
+<td>16</td>
+</tr>
+<tr>
+<td>float</td>
+<td>fMinValue</td>
+<td>动态</td>
+<td>4</td>
+</tr>
+<tr>
+<td>char</td>
+<td>szUnit[10]</td>
+<td>动态</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<h3 id="模拟电视analogtv">模拟电视ANALOGTV</h3>
+<h4 id="静态部分-27">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>46</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>long</td>
+<td>TVNum</td>
+<td>动态</td>
+<td>4</td>
+<td>电视个数</td>
+</tr>
+<tr>
+<td>long</td>
+<td>channel</td>
+<td>动态</td>
+<td>4</td>
+<td>节目个数</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-18">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 18%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>char</td>
+<td>name</td>
+<td>动态</td>
+<td>64</td>
+<td>Channel个节目名称</td>
+</tr>
+</tbody>
+</table>
+<h3 id="数字电视-digitaltv">数字电视 DIGITALTV</h3>
+<p>数字电视协议与模拟电视相同，只是业务数据的类型不同（47）。</p>
+<h3 id="电视图像-tvbmp">电视图像 TVBMP</h3>
+<p>说明：电视图像的szURL只在客户端直接访问设备（EM550等）时使用，现已不采用这种方式改为服务端取图像数据发送到客户端，客户端解析图像数据，此种情形下szURL无用，但保留了该字段。</p>
+<h4 id="静态部分-28">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>48</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>URL字符串长度</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-19">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 18%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>char</td>
+<td>szURL</td>
+<td>动态</td>
+<td>nArrays</td>
+<td>电视图像的URL</td>
+</tr>
+</tbody>
+</table>
+<h3 id="荧光谱-dpx">荧光谱 DPX</h3>
+<h4 id="静态部分-29">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>49</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-20">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 18%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td rowspan="3"></td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>ifbw</td>
+<td>动态</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<h3 id="频点分析freqmeas">频点分析（FREQMEAS）</h3>
+<p>该功能针对单频点，但可以根据设备不同而返回ITU数据、频谱数据、IQ数据、音频数据中的一种或几种，采用通用协议。功能编号为51。</p>
+<h3 id="通用协议"> 通用协议</h3>
+<h4 id="静态部分-30">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>动态</td>
+<td>1</td>
+<td>根据不同功能有不同的值</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-21">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 18%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DWORD</td>
+<td>FLAGS</td>
+<td>动态</td>
+<td>4</td>
+<td
+rowspan="2">nArray组FLAGS，desc的长度由nArray和FLAGS的内容共同确定</td>
+</tr>
+<tr>
+<td>char</td>
+<td>desc</td>
+<td>动态</td>
+<td>动态</td>
+</tr>
+</tbody>
+</table>
+<p>通过一个32位的整数的每一位的值（0或1）标识每一组描述信息的频率、解调频率、起始频率、终止频率、步长、跨距、中频带宽、采样率、增益值、衰减值、解调模式值、解调模式描述等的信息（可扩展）是否存在。如果该值为1，表示描述头信息中该字段存在，否则表示不存在该信息。</p>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+</colgroup>
+<thead>
+<tr>
+<th>15</th>
+<th>14</th>
+<th>13</th>
+<th>12</th>
+<th>11</th>
+<th>10</th>
+<th>9</th>
+<th>8</th>
+<th>7</th>
+<th>6</th>
+<th>5</th>
+<th>4</th>
+<th>3</th>
+<th>2</th>
+<th>1</th>
+<th>0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>扫描时间</td>
+<td>VBW</td>
+<td>RBW</td>
+<td>参考电平</td>
+<td>增益值</td>
+<td>采样率</td>
+<td>ITU项</td>
+<td>解调模式</td>
+<td>测向带宽</td>
+<td>中频带宽</td>
+<td>跨距</td>
+<td>频段参数</td>
+<td>解调频率</td>
+<td>频率</td>
+<td>天线名称</td>
+<td>信道编号</td>
+</tr>
+<tr>
+<td>31</td>
+<td>30</td>
+<td>29</td>
+<td>28</td>
+<td>27</td>
+<td>26</td>
+<td>25</td>
+<td>24</td>
+<td>23</td>
+<td>22</td>
+<td>21</td>
+<td>20</td>
+<td>19</td>
+<td>18</td>
+<td>17</td>
+<td>16</td>
+</tr>
+<tr>
+<td>特殊文本串</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>衰减值</td>
+</tr>
+</tbody>
+</table>
+<p>其中，各项数据结构定义如下</p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 21%" />
+<col style="width: 18%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>名称</strong></th>
+<th><strong>C++数据类型</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>信道编号</td>
+<td>byte</td>
+<td>动态</td>
+<td>1</td>
+<td></td>
+</tr>
+<tr>
+<td>天线名称</td>
+<td>char</td>
+<td>动态</td>
+<td>64</td>
+<td>Hz</td>
+</tr>
+<tr>
+<td>频率</td>
+<td>__int64</td>
+<td>动态</td>
+<td>8</td>
+<td>Hz</td>
+</tr>
+<tr>
+<td>解调频率</td>
+<td>__int64</td>
+<td>动态</td>
+<td>8</td>
+<td>Hz</td>
+</tr>
+<tr>
+<td>频段参数</td>
+<td><p>struct</p>
+<p>{</p>
+<p>__int64 nStartFreq;</p>
+<p>__int64 nStopFreq;</p>
+<p>__int64 nStep;</p>
+<p>long nPoints;</p>
+<p>}</p></td>
+<td>动态</td>
+<td>28</td>
+<td>该结构用于频段扫描、数字扫描、频段信号搜索等频段监测功能的频率描述信息，频率单位为Hz</td>
+</tr>
+<tr>
+<td>跨距</td>
+<td>__int64</td>
+<td>动态</td>
+<td>8</td>
+<td>Hz</td>
+</tr>
+<tr>
+<td>中频带宽</td>
+<td>__int64</td>
+<td></td>
+<td></td>
+<td>Hz</td>
+</tr>
+<tr>
+<td>测向带宽</td>
+<td>__int64</td>
+<td>动态</td>
+<td></td>
+<td>Hz</td>
+</tr>
+<tr>
+<td>解调模式</td>
+<td><p>struct</p>
+<p>{</p>
+<p>int nDemMode;</p>
+<p>char szDemMode[16];</p>
+<p>};</p></td>
+<td>动态</td>
+<td>20</td>
+<td><p>其中</p>
+<p>nDemMode的定义参考下文</p></td>
+</tr>
+<tr>
+<td>ITU项</td>
+<td><p>short nITUItemCount；</p>
+<p>ITUITEM itu[0];</p>
+<p>其中，ITUITEM定义如下：</p>
+<p>struct ITUITEM</p>
+<p>{</p>
+<p>char nITUType；</p>
+<p>char szITUName[16];</p>
+<p>float fMinValue;</p>
+<p>char szUnit[10];</p>
+<p>}</p></td>
+<td>动态</td>
+<td>2 + 31 * nITUItemCount；</td>
+<td>nITUType和RMTP 1.01协议定义的一致， nITUType &lt;
+0时表示类型未定义</td>
+</tr>
+<tr>
+<td>采样率</td>
+<td>__int64</td>
+<td>动态</td>
+<td>8</td>
+<td></td>
+</tr>
+<tr>
+<td>增益值</td>
+<td>int</td>
+<td>动态</td>
+<td>4</td>
+<td><p>低2字节为增益值</p>
+<p>高字节为自动增益速度（-6，最快，-5 较快，-4快速，-3中速，-2
+慢速，-1，自动0 手动，大于0为增益时间 ）</p></td>
+</tr>
+<tr>
+<td>参考电平</td>
+<td>int</td>
+<td>动态</td>
+<td>4</td>
+<td>dBuV</td>
+</tr>
+<tr>
+<td>RBW</td>
+<td>__int64</td>
+<td>动态</td>
+<td>8</td>
+<td>Hz</td>
+</tr>
+<tr>
+<td>VBW</td>
+<td>__int64</td>
+<td>动态</td>
+<td>8</td>
+<td>Hz</td>
+</tr>
+<tr>
+<td>扫描时间</td>
+<td>double</td>
+<td>动态</td>
+<td>8</td>
+<td>ms</td>
+</tr>
+<tr>
+<td>衰减值</td>
+<td>int</td>
+<td>动态</td>
+<td>4</td>
+<td>低2字节为衰减值，高二字节保留</td>
+</tr>
+<tr>
+<td>保留</td>
+<td></td>
+<td></td>
+<td></td>
+<td>保留</td>
+</tr>
+<tr>
+<td>特殊文本串</td>
+<td><p>struct</p>
+<p>{</p>
+<p>int nTextLen;</p>
+<p>char szText[0];</p>
+<p>}</p></td>
+<td>动态</td>
+<td>4 + nTextLen</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>调制模式类型定义参考RMTP1.01的定义，对RMTP1.01未定义但实际用到的（海格调制模式识别定义做了补充9999后面的定义）</p>
+</blockquote>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 36%" />
+<col style="width: 63%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;">01</th>
+<th style="text-align: center;">FM 调频</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">02</td>
+<td style="text-align: center;">BPSK 二相相移键控</td>
+</tr>
+<tr>
+<td style="text-align: center;">03</td>
+<td style="text-align: center;">QPSK 四相相移键控</td>
+</tr>
+<tr>
+<td style="text-align: center;">04</td>
+<td style="text-align: center;">8PSK 八相相移键控</td>
+</tr>
+<tr>
+<td style="text-align: center;">05</td>
+<td style="text-align: center;">16QAM 16进制正交调幅</td>
+</tr>
+<tr>
+<td style="text-align: center;">06</td>
+<td style="text-align: center;">32QAM 32进制正交调幅</td>
+</tr>
+<tr>
+<td style="text-align: center;">07</td>
+<td style="text-align: center;">64QAM 64进制正交调幅</td>
+</tr>
+<tr>
+<td style="text-align: center;">08</td>
+<td style="text-align: center;">128QAM 128进制正交调幅</td>
+</tr>
+<tr>
+<td style="text-align: center;">09</td>
+<td style="text-align: center;">256QAM 256进制正交调幅</td>
+</tr>
+<tr>
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">AM 调幅</td>
+</tr>
+<tr>
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">SSB 单边带</td>
+</tr>
+<tr>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">DSB 双边带</td>
+</tr>
+<tr>
+<td style="text-align: center;">13</td>
+<td style="text-align: center;">RSB 残余边带</td>
+</tr>
+<tr>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">PAM 脉冲调幅</td>
+</tr>
+<tr>
+<td style="text-align: center;">15</td>
+<td style="text-align: center;">FSK 频移键控</td>
+</tr>
+<tr>
+<td style="text-align: center;">16</td>
+<td style="text-align: center;">PSK 脉冲相移键控</td>
+</tr>
+<tr>
+<td style="text-align: center;">17</td>
+<td style="text-align: center;">ASK 振幅键控</td>
+</tr>
+<tr>
+<td style="text-align: center;">18</td>
+<td style="text-align: center;">MSK 最小频移键控</td>
+</tr>
+<tr>
+<td style="text-align: center;">19</td>
+<td style="text-align: center;">GMSK 高斯最小频移键控</td>
+</tr>
+<tr>
+<td style="text-align: center;">20</td>
+<td style="text-align: center;">FM-FDM 频分多路调频</td>
+</tr>
+<tr>
+<td style="text-align: center;">21</td>
+<td style="text-align: center;">512QAM 512进制正交调幅</td>
+</tr>
+<tr>
+<td style="text-align: center;">22</td>
+<td style="text-align: center;">FM-TV 调频电视</td>
+</tr>
+<tr>
+<td style="text-align: center;">23</td>
+<td style="text-align: center;">OFDM 正交频分多路</td>
+</tr>
+<tr>
+<td style="text-align: center;">24</td>
+<td style="text-align: center;">OQPSK 交错四相调制</td>
+</tr>
+<tr>
+<td style="text-align: center;">25</td>
+<td style="text-align: center;">π/4QPSKπ/4移相四相调制</td>
+</tr>
+<tr>
+<td style="text-align: center;">26</td>
+<td style="text-align: center;">π/4DQPSKπ/4移相四相差分相移键控</td>
+</tr>
+<tr>
+<td style="text-align: center;">27</td>
+<td style="text-align: center;">其它</td>
+</tr>
+<tr>
+<td style="text-align: center;">28</td>
+<td style="text-align: center;">1024QAM 1024进制正交调幅</td>
+</tr>
+<tr>
+<td style="text-align: center;">29</td>
+<td style="text-align: center;">PWM 脉冲宽度调制</td>
+</tr>
+<tr>
+<td style="text-align: center;">00</td>
+<td style="text-align: center;">不要求返回调制方式</td>
+</tr>
+<tr>
+<td style="text-align: center;">999</td>
+<td style="text-align: center;">无法取得调制方式</td>
+</tr>
+</tbody>
+</table>
+<h2 id="业务数据">业务数据</h2>
+<p>业务数据:帧头类型nDataType=0</p>
+<h3 id="单频测量-sglfreq-1">单频测量 SGLFREQ</h3>
+<h4 id="静态部分-31">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>10</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(ITU测量结果数目)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>实际工作频率</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-22">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>value</td>
+<td>动态</td>
+<td>4</td>
+<td>测量项结果</td>
+<td rowspan="3">nArrays组该值</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>占用度</td>
+<td>1个占用度值*100</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Value</td>
+<td>动态</td>
+<td>2</td>
+<td>手工门限</td>
+<td>1个手工门限值*100</td>
+</tr>
+</tbody>
+</table>
+<h3 id="中频分析-ifanalysis-1">中频分析 <strong>IFANALYSIS</strong></h3>
+<h4 id="静态部分-32">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>11</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(频谱曲线点数目)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（中频分析该值必须为零）</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>实际工作频率</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Level</td>
+<td>动态</td>
+<td>2</td>
+<td>中心电平（实际值*100）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-23">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="3">nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="单频测向-df-1">单频测向 DF</h3>
+<h4 id="静态部分-33">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>12</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Level</td>
+<td>动态</td>
+<td>2</td>
+<td>电平（实际值*100）</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>DfLevel</td>
+<td>动态</td>
+<td>2</td>
+<td>测向电平（实际值*100）</td>
+</tr>
+<tr>
+<td>Float</td>
+<td>Qulity</td>
+<td>动态</td>
+<td>4</td>
+<td>测向质量</td>
+</tr>
+<tr>
+<td>Float</td>
+<td>Azumith</td>
+<td>动态</td>
+<td>4</td>
+<td>方位角</td>
+</tr>
+<tr>
+<td>Float</td>
+<td>Elevation</td>
+<td>动态</td>
+<td>4</td>
+<td>俯仰角</td>
+</tr>
+<tr>
+<td>Float</td>
+<td>compass</td>
+<td>动态</td>
+<td>4</td>
+<td>罗盘值</td>
+</tr>
+</tbody>
+</table>
+<h3 id="中频测向-ifdf-1">中频测向 <strong>IFDF</strong></h3>
+<h4 id="静态部分-34">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>13</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(频谱曲线点数目)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Level</td>
+<td>动态</td>
+<td>2</td>
+<td>电平（实际值*100）</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>DfLevel</td>
+<td>动态</td>
+<td>2</td>
+<td>测向电平（实际值*100）</td>
+</tr>
+<tr>
+<td>Float</td>
+<td>Qulity</td>
+<td>动态</td>
+<td>4</td>
+<td>测向质量</td>
+</tr>
+<tr>
+<td>Float</td>
+<td>Azumith</td>
+<td>动态</td>
+<td>4</td>
+<td>方位角</td>
+</tr>
+<tr>
+<td>Float</td>
+<td>Elevation</td>
+<td>动态</td>
+<td>4</td>
+<td>俯仰角</td>
+</tr>
+<tr>
+<td>Float</td>
+<td>compass</td>
+<td>动态</td>
+<td>4</td>
+<td>罗盘值</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-24">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="4">nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="离散扫描-msacn-1">离散扫描 MSACN</h3>
+<h4 id="静态部分-35">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>14</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(离散扫描数点数)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（频率索引）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-25">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="3">nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>occ</td>
+<td>动态</td>
+<td>8</td>
+<td>占用度</td>
+<td
+rowspan="3"><p>nArrays组该值（高4字节为有效采样次数，低4字节为总采样次数）</p>
+<p>（可选）</p></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>short</td>
+<td>thr</td>
+<td>动态</td>
+<td>2</td>
+<td>手工背噪</td>
+<td rowspan="3"><p>nArrays组该值（电平实际值*100）</p>
+<p>（可选）</p></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="频段扫描-fscan-1">频段扫描 FSCAN</h3>
+<h4 id="静态部分-36">静态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>15</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(离散扫描数点数)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（频率索引）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-26">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="3">nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>short</td>
+<td>thr</td>
+<td>动态</td>
+<td>8</td>
+<td><p>自动背噪</p>
+<p>与手工背噪不能同时出现</p></td>
+<td rowspan="3"><p>nArrays组该值（电平实际值*100）</p>
+<p>（可选）</p></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>occ</td>
+<td>动态</td>
+<td>8</td>
+<td>占用度</td>
+<td
+rowspan="3"><p>nArrays组该值（高4字节为有效采样次数，低4字节为总采样次数）</p>
+<p>（可选）</p></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>short</td>
+<td>thr</td>
+<td>动态</td>
+<td>2</td>
+<td><p>手工背噪</p>
+<p>与自动背噪不能同时出现</p></td>
+<td rowspan="3"><p>nArrays组该值（电平实际值*100）</p>
+<p>（可选）</p></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="数字扫描-dscan-1">数字扫描 DSCAN</h3>
+<p>数字扫描协议与频段扫描相同，只是业务数据的类型不同。</p>
+<h3 id="频谱扫描pscan-1">频谱扫描PSCAN</h3>
+<p>预留。</p>
+<h3 id="频谱分析spanalysis">频谱分析SPANALYSIS</h3>
+<h4 id="静态部分-37">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 19%" />
+<col style="width: 15%" />
+<col style="width: 18%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>18</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(曲线点数)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移</td>
+</tr>
+<tr>
+<td>short</td>
+<td>Indexcurve</td>
+<td>动态</td>
+<td>2</td>
+<td>曲线索引值</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>中心频率</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+<td>跨距</td>
+</tr>
+<tr>
+<td>long</td>
+<td>DatakindLen</td>
+<td>动态</td>
+<td>4</td>
+<td>特殊监测值的字符串长度</td>
+</tr>
+<tr>
+<td>char</td>
+<td>DataKindsValue</td>
+<td>动态</td>
+<td>DatakindLen</td>
+<td>特殊监测字符串（name:value+unit\n）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-27">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="3">nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="时域分析tdanalysis">时域分析TDANALYSIS</h3>
+<p>时域分析协议与频谱分析相同，只是业务数据的类型不同。</p>
+<h3 id="搜索测向dfsearch-1">搜索测向DFSEARCH</h3>
+<h4 id="静态部分-38">静态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 0%" />
+<col style="width: 17%" />
+<col style="width: 21%" />
+<col style="width: 13%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th colspan="2"><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td colspan="2">Byte</td>
+<td>nBdType</td>
+<td>20</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td colspan="2">short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td colspan="2">long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(本包数据所含数据组数)</td>
+</tr>
+<tr>
+<td>long</td>
+<td colspan="2">nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移</td>
+</tr>
+<tr>
+<td colspan="2">Int</td>
+<td>DataType</td>
+<td>{ 1,2，3}</td>
+<td>4</td>
+<td><p>为1表示动态部分的内容是频点信息</p>
+<p>为2表示动态部分的内容是测向数据</p>
+<p>为3表示是频谱数据</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-28">动态部分</h4>
+<p>当ArrayDataType为1时，动态部分如下</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 14%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 25%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>Frequency</td>
+<td>动态</td>
+<td>8</td>
+<td>测量频率</td>
+<td rowspan="3"></td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Band</td>
+<td>动态</td>
+<td>8</td>
+<td>测向带宽</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>IFBW</td>
+<td>动态</td>
+<td>8</td>
+<td>中频带宽</td>
+</tr>
+</tbody>
+</table>
+<p>当ArrayDataType为2时，动态部分如下</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 14%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 25%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Short</td>
+<td>DfLevel</td>
+<td>动态</td>
+<td>2</td>
+<td>测向电平（实际值*100）</td>
+<td rowspan="5"></td>
+</tr>
+<tr>
+<td>Unsigned Short</td>
+<td>Qulity</td>
+<td>动态</td>
+<td>2</td>
+<td>测向质量（实际值*100）</td>
+</tr>
+<tr>
+<td>Unsigned Short</td>
+<td>Azumith</td>
+<td>动态</td>
+<td>2</td>
+<td>方位角（实际值*100）</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Elevation</td>
+<td>动态</td>
+<td>2</td>
+<td>俯仰角（实际值*100）</td>
+</tr>
+<tr>
+<td>Unsigned short</td>
+<td>Compass</td>
+<td>[ 0,36000]</td>
+<td>2</td>
+<td>罗盘值（实际值*100）</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>occ</td>
+<td>动态</td>
+<td>8</td>
+<td>占用度</td>
+<td
+rowspan="3">（高4字节为有效采样次数，低4字节为总采样次数）（可选）</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>short</td>
+<td>thr</td>
+<td>动态</td>
+<td>2</td>
+<td>手工背噪</td>
+<td rowspan="2"><p>电平实际值*100</p>
+<p>（可选）</p></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>当ArrayDataType为3时，动态部分如下</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Short</td>
+<td>Centerlevel</td>
+<td>动态</td>
+<td>2</td>
+<td>中心电平</td>
+<td>实际电平值*100</td>
+</tr>
+<tr>
+<td>Int</td>
+<td>LevelCount</td>
+<td>动态</td>
+<td>4</td>
+<td>电平个数</td>
+<td></td>
+</tr>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="4"><p>LevelCount</p>
+<p>组该值（频谱电平实际值*100）</p></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="频率测向-scandf-1">频率测向 SCANDF</h3>
+<h4 id="静态部分-39">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>21</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(本包数据所含数据组数)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（频率索引）</td>
+</tr>
+<tr>
+<td>Unsigned short</td>
+<td>Compass</td>
+<td>[ 0,36000]</td>
+<td>2</td>
+<td>罗盘值（实际值*100）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-29">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Short</td>
+<td>DfLevel</td>
+<td>动态</td>
+<td>2</td>
+<td>测向电平（实际值*100）</td>
+<td rowspan="4">nArrays组该结构</td>
+</tr>
+<tr>
+<td>Unsigned Short</td>
+<td>Qulity</td>
+<td>动态</td>
+<td>2</td>
+<td>测向质量（实际值*100）</td>
+</tr>
+<tr>
+<td>Unsigned Short</td>
+<td>Azumith</td>
+<td>动态</td>
+<td>2</td>
+<td>方位角（实际值*100）</td>
+</tr>
+<tr>
+<td><em>Short</em></td>
+<td><em>Elevation</em></td>
+<td>动态</td>
+<td>2</td>
+<td>俯仰角（实际值*100）</td>
+</tr>
+<tr>
+<td>short</td>
+<td>thr</td>
+<td>动态</td>
+<td>2</td>
+<td>自动背噪</td>
+<td rowspan="3"><p>nArrays组该值（电平实际值*100）</p>
+<p>（可选）</p></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>occ</td>
+<td>动态</td>
+<td>8</td>
+<td>占用度</td>
+<td
+rowspan="3"><p>nArrays组该值（高4字节为有效采样次数，低4字节为总采样次数）</p>
+<p>（可选）</p></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>short</td>
+<td>thr</td>
+<td>动态</td>
+<td>2</td>
+<td>手工背噪</td>
+<td rowspan="3"><p>nArrays组该值（电平实际值*100）</p>
+<p>（可选）</p></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="离散信号搜索msearch">离散信号搜索MSEARCH</h3>
+<h4 id="静态部分-40">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Byte</td>
+<td>nBdType</td>
+<td>22</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(本包数据所含数据组数)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（频率索引）</td>
+</tr>
+<tr>
+<td>byte</td>
+<td>ArrayDataType</td>
+<td>{ 0,1}</td>
+<td>1</td>
+<td><p>为0表示动态数组的内容是电平数据</p>
+<p>为1表示是频谱数据</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-30">动态部分</h4>
+<p>当ArrayDataType为0时，动态部分如下</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="4">nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>当ArrayDataType为1时，动态部分如下</p>
+<p>由于是频谱曲线，所以没有背噪和占用度。</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+<td>测量跨距，单位Hz</td>
+<td>该值不是一组是一个</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Ifbw</td>
+<td>动态</td>
+<td>8</td>
+<td>中频带宽，单位Hz</td>
+<td>该值不是一组是一个</td>
+</tr>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="3">nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="信号搜索-fsearch">信号搜索 FSEARCH</h3>
+<h4 id="静态部分-41">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>23</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(本包数据所含数据组数)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（频率索引）</td>
+</tr>
+<tr>
+<td>byte</td>
+<td>ArrayDataType</td>
+<td>{ 0,1}</td>
+<td>1</td>
+<td><p>为0表示动态数组的内容是电平数据</p>
+<p>为1表示是频谱数据</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-31">动态部分</h4>
+<p>当ArrayDataType为0时，动态部分如下</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="5">nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>当ArrayDataType为1时，动态部分如下</p>
+<p>由于是频谱曲线，所以没有背噪和占用度。</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+<td>测量跨距，单位Hz</td>
+<td>该值不是一组是一个</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Ifbw</td>
+<td>动态</td>
+<td>8</td>
+<td>中频带宽，单位Hz</td>
+<td>该值不是一组是一个</td>
+</tr>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="4">nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="itu测量-itu-1">ITU测量 ITU</h3>
+<h4 id="静态部分-42">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>24</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(ITU测量结果数目)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>实际工作频率</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-32">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>value</td>
+<td>动态</td>
+<td>4</td>
+<td>测量项结果</td>
+<td rowspan="3">nArrays组该值</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="中频宽带测向ifdfext-1">中频宽带测向IFDFEXT</h3>
+<h4 id="静态部分-43">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 12%" />
+<col style="width: 16%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Byte</td>
+<td>nBdType</td>
+<td>26</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(本包数据所含数据组数)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（频率索引）</td>
+</tr>
+<tr>
+<td>byte</td>
+<td>ArrayDataType</td>
+<td>{ 0,1}</td>
+<td>1</td>
+<td>为0表示动态数组的内容是测向数据<br />
+为1表示是频谱数据</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-33">动态部分</h4>
+<p>当ArrayDataType为0时，动态部分如下</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 16%" />
+<col style="width: 9%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unsigned long</td>
+<td>Starttime</td>
+<td>动态</td>
+<td>4</td>
+<td>开始时间</td>
+<td></td>
+</tr>
+<tr>
+<td>Unsigned long</td>
+<td>Sweeptime</td>
+<td>动态</td>
+<td>4</td>
+<td>扫描时间</td>
+<td></td>
+</tr>
+<tr>
+<td>Int64</td>
+<td>Centerfreq</td>
+<td>动态</td>
+<td>8</td>
+<td>中心频率(Hz)</td>
+<td></td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Resolve</td>
+<td>动态</td>
+<td>2</td>
+<td>分辨率</td>
+<td></td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Vmb</td>
+<td>动态</td>
+<td>2</td>
+<td>平均噪声</td>
+<td></td>
+</tr>
+<tr>
+<td>Byte</td>
+<td>Polarization</td>
+<td>动态</td>
+<td>1</td>
+<td>极化方式</td>
+<td></td>
+</tr>
+<tr>
+<td>Byte</td>
+<td>HForVUHF</td>
+<td>动态</td>
+<td>1</td>
+<td>扫描频段</td>
+<td></td>
+</tr>
+<tr>
+<td>Unsigned short</td>
+<td>Angle</td>
+<td></td>
+<td>2</td>
+<td>角度</td>
+<td rowspan="5">nArrays组该值</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Quality</td>
+<td></td>
+<td>2</td>
+<td>质量</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Level</td>
+<td></td>
+<td>2</td>
+<td>电平</td>
+</tr>
+<tr>
+<td>short</td>
+<td>Channel</td>
+<td></td>
+<td>2</td>
+<td>通道编号</td>
+</tr>
+<tr>
+<td>Int64</td>
+<td>Chancenterfereq</td>
+<td></td>
+<td>8</td>
+<td>通道中心频率</td>
+</tr>
+</tbody>
+</table>
+<p>当ArrayDataType为1时，动态部分如下</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 16%" />
+<col style="width: 9%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Long</td>
+<td>Cyclenumber</td>
+<td>动态</td>
+<td>4</td>
+<td>周期编号（暂时未用）</td>
+<td></td>
+</tr>
+<tr>
+<td>Byte</td>
+<td>Tequestate</td>
+<td>动态</td>
+<td>1</td>
+<td>仪器状态（暂时未用）</td>
+<td></td>
+</tr>
+<tr>
+<td>Unsigned long</td>
+<td>Starttime</td>
+<td>动态</td>
+<td>4</td>
+<td>开始时间</td>
+<td></td>
+</tr>
+<tr>
+<td>Unsigned long</td>
+<td>Sweeptime</td>
+<td>动态</td>
+<td>4</td>
+<td>扫描时间</td>
+<td></td>
+</tr>
+<tr>
+<td>Int64</td>
+<td>Centerfreq</td>
+<td></td>
+<td>8</td>
+<td>中心频率（Hz）</td>
+<td rowspan="6">nArrays组该值</td>
+</tr>
+<tr>
+<td>Int64</td>
+<td>Resolve</td>
+<td></td>
+<td>8</td>
+<td>分辨率（Hz）</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Pointnumber</td>
+<td></td>
+<td>2</td>
+<td>频谱点数</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Channelno</td>
+<td></td>
+<td>2</td>
+<td>通道编号</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Level</td>
+<td></td>
+<td>2</td>
+<td rowspan="2">Pointnumber组该值</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<h3 id="数字解调-digdem-1">数字解调 DIGDEM</h3>
+<h4 id="静态部分-44">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>29</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(IQ数据总数)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（该值为0）</td>
+</tr>
+<tr>
+<td>char</td>
+<td>Unit[4]</td>
+<td>动态</td>
+<td>4</td>
+<td>IQ数据类型</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Time stamp</td>
+<td>动态</td>
+<td>8</td>
+<td>时间戳</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-34">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>IQ数据（对值中的一个）</td>
+<td rowspan="3">nArrays组该值</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="宽带监测测向">宽带监测测向</h3>
+<h4 id="静态部分-45">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>25</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(本包数据动态部分所含数据组数)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（频率索引）</td>
+</tr>
+<tr>
+<td>byte</td>
+<td>Datatype</td>
+<td>{0，1，2}</td>
+<td>1</td>
+<td><p>0表示接下来的数据是全景频段数据</p>
+<p>1接下来的数据是局部频段数据</p>
+<p>2表示接下来的数据是某频点的频谱数据</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-35">动态部分</h4>
+<p>Datatype为0和1时动态部分如下</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>int</td>
+<td>nPoints</td>
+<td>动态</td>
+<td>4</td>
+<td>整个频段的总点数</td>
+<td></td>
+</tr>
+<tr>
+<td>Unsigned short</td>
+<td>Compass</td>
+<td>[ 0,36000]</td>
+<td>2</td>
+<td>罗盘值（实际值*100）</td>
+<td></td>
+</tr>
+<tr>
+<td>Short</td>
+<td>DfLevel</td>
+<td>动态</td>
+<td>2</td>
+<td>测向电平（实际值*100）</td>
+<td rowspan="4">nArrays组该结构</td>
+</tr>
+<tr>
+<td>Unsigned Short</td>
+<td>Qulity</td>
+<td>动态</td>
+<td>2</td>
+<td>测向质量（实际值*100）</td>
+</tr>
+<tr>
+<td>Unsigned Short</td>
+<td>Azumith</td>
+<td>动态</td>
+<td>2</td>
+<td>方位角（实际值*100）</td>
+</tr>
+<tr>
+<td><em>Short</em></td>
+<td><em>Elevation</em></td>
+<td>动态</td>
+<td>2</td>
+<td>俯仰角（实际值*100）</td>
+</tr>
+<tr>
+<td>short</td>
+<td>thr</td>
+<td>动态</td>
+<td>2</td>
+<td>自动背噪</td>
+<td rowspan="3"><p>nArrays组被噪值（电平实际值*100）</p>
+<p>（可选）</p></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>occ</td>
+<td>动态</td>
+<td>8</td>
+<td>占用度</td>
+<td
+rowspan="3"><p>nArrays组该值（高4字节为有效采样次数，低4字节为总采样次数）</p>
+<p>（可选）</p></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>short</td>
+<td>thr</td>
+<td>动态</td>
+<td>2</td>
+<td>手工背噪</td>
+<td rowspan="3"><p>nArrays组被噪值（电平实际值*100）</p>
+<p>（可选）</p></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>Datatype为2时动态部分如下</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="4">nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="离散测向-1">离散测向</h3>
+<h4 id="静态部分-46">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Byte</td>
+<td>nBdType</td>
+<td>32</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(本包数据所含数据组数)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（频率索引）</td>
+</tr>
+<tr>
+<td>byte</td>
+<td>ArrayDataType</td>
+<td>{ 0,1}</td>
+<td>1</td>
+<td><p>为0表示动态数组的内容是测向数据</p>
+<p>为1表示是频谱数据</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-36">动态部分</h4>
+<p>当ArrayDataType为0时，动态部分如下</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 14%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 25%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Short</td>
+<td>DfLevel</td>
+<td>动态</td>
+<td>2</td>
+<td>测向电平（实际值*100）</td>
+<td rowspan="5">nArray组该结构</td>
+</tr>
+<tr>
+<td>Unsigned Short</td>
+<td>Qulity</td>
+<td>动态</td>
+<td>2</td>
+<td>测向质量（实际值*100）</td>
+</tr>
+<tr>
+<td>Unsigned Short</td>
+<td>Azumith</td>
+<td>动态</td>
+<td>2</td>
+<td>方位角（实际值*100）</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Elevation</td>
+<td>动态</td>
+<td>2</td>
+<td>俯仰角（实际值*100）</td>
+</tr>
+<tr>
+<td>Unsigned short</td>
+<td>Compass</td>
+<td>[ 0,36000]</td>
+<td>2</td>
+<td>罗盘值（实际值*100）</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>occ</td>
+<td>动态</td>
+<td>8</td>
+<td>占用度</td>
+<td
+rowspan="3">（高4字节为有效采样次数，低4字节为总采样次数）（可选）</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>short</td>
+<td>thr</td>
+<td>动态</td>
+<td>2</td>
+<td>手工背噪</td>
+<td rowspan="2"><p>nArray组 电平实际值*100</p>
+<p>（可选）</p></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>当ArrayDataType为1时，动态部分如下</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>span</td>
+<td>动态</td>
+<td>8</td>
+<td>测量跨距，单位Hz</td>
+<td>该值不是一组是一个</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>Ifbw</td>
+<td>动态</td>
+<td>8</td>
+<td>中频带宽，单位Hz</td>
+<td>该值不是一组是一个</td>
+</tr>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="4">nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="信号测量-signalmeas-1">信号测量 SIGNALMEAS</h3>
+<p>同ITU测量</p>
+<h3 id="宽带监测wmon-1">宽带监测WMON</h3>
+<h4 id="静态部分-47">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 15%" />
+<col style="width: 21%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>30</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>0</td>
+<td>4</td>
+<td>相对首索引偏移</td>
+</tr>
+<tr>
+<td>BYTE</td>
+<td>dataType</td>
+<td>{0，1}</td>
+<td>1</td>
+<td><p>0 原始数据</p>
+<p>1 扩展数据</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-37">动态部分</h4>
+<p>当dataType为0时：</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 11%" />
+<col style="width: 19%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>fStartFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>开始频率</td>
+</tr>
+<tr>
+<td>float</td>
+<td>fStopFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>结束频率</td>
+</tr>
+<tr>
+<td>BYTE</td>
+<td>Overlap</td>
+<td>动态</td>
+<td>1</td>
+<td>过载标识</td>
+</tr>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td rowspan="3">电平值（nArrays个）</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>当dataType为1时：</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 10%" />
+<col style="width: 18%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>value</td>
+<td>动态</td>
+<td>4</td>
+<td rowspan="3">扩展数据（nArrays-3个）<br />
+顺序与描述头扩展数据的顺序一致</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmDesc[32]</td>
+<td>动态</td>
+<td>32</td>
+<td>调制类型描述</td>
+</tr>
+<tr>
+<td>float</td>
+<td>value</td>
+<td>动态</td>
+<td>4</td>
+<td>可信度</td>
+</tr>
+<tr>
+<td>float</td>
+<td>value</td>
+<td>动态</td>
+<td>4</td>
+<td>子时间</td>
+</tr>
+</tbody>
+</table>
+<h3 id="能量探测edetn-1">能量探测EDETN</h3>
+<h4 id="静态部分-48">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 15%" />
+<col style="width: 21%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>31</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>0</td>
+<td>4</td>
+<td>相对首索引偏移</td>
+</tr>
+<tr>
+<td>BYTE</td>
+<td>dataType</td>
+<td>{0，1}</td>
+<td>1</td>
+<td><p>0 原始数据</p>
+<p>1 扩展数据</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-38">动态部分</h4>
+<p>当dataType为0时：</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 11%" />
+<col style="width: 19%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>fStartFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>开始频率</td>
+</tr>
+<tr>
+<td>float</td>
+<td>fStopFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>结束频率</td>
+</tr>
+<tr>
+<td>BYTE</td>
+<td>Overlap</td>
+<td>动态</td>
+<td>1</td>
+<td>过载标识</td>
+</tr>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td rowspan="3">电平值（nArrays个）</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>当dataType为1时：</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 10%" />
+<col style="width: 18%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>value</td>
+<td>动态</td>
+<td>4</td>
+<td rowspan="3">扩展数据（nArrays个）<br />
+顺序与描述头扩展数据的顺序一致</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="信号告警sina-1">信号告警SINA</h3>
+<h4 id="静态部分-49">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 15%" />
+<col style="width: 21%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>35</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>0</td>
+<td>4</td>
+<td>相对首索引偏移</td>
+</tr>
+<tr>
+<td>BYTE</td>
+<td>dataType</td>
+<td>{0，1}</td>
+<td>1</td>
+<td><p>0 原始数据</p>
+<p>1 扩展数据</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-39">动态部分</h4>
+<p>当dataType为0时：</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 11%" />
+<col style="width: 19%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>fStartFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>开始频率</td>
+</tr>
+<tr>
+<td>float</td>
+<td>fStopFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>结束频率</td>
+</tr>
+<tr>
+<td>BYTE</td>
+<td>Overlap</td>
+<td>动态</td>
+<td>1</td>
+<td>过载标识</td>
+</tr>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td rowspan="3">电平值（nArrays个）</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>当dataType为1时：</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 10%" />
+<col style="width: 18%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>value</td>
+<td>动态</td>
+<td>4</td>
+<td rowspan="3">扩展数据（nArrays-1个）<br />
+顺序与描述头扩展数据的顺序一致</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmDesc[64]</td>
+<td>动态</td>
+<td>64</td>
+<td>告警描述</td>
+</tr>
+</tbody>
+</table>
+<h3 id="信号识别modrec-1">信号识别MODREC</h3>
+<h4 id="静态部分-50">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 15%" />
+<col style="width: 21%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>34</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>0</td>
+<td>4</td>
+<td>相对首索引偏移</td>
+</tr>
+<tr>
+<td>BYTE</td>
+<td>dataType</td>
+<td>{0，1}</td>
+<td>1</td>
+<td><p>0 原始数据</p>
+<p>1 扩展数据</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-40">动态部分</h4>
+<p>当dataType为0时：</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 11%" />
+<col style="width: 19%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>fStartFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>开始频率</td>
+</tr>
+<tr>
+<td>float</td>
+<td>fStopFreq</td>
+<td>动态</td>
+<td>4</td>
+<td>结束频率</td>
+</tr>
+<tr>
+<td>BYTE</td>
+<td>Overlap</td>
+<td>动态</td>
+<td>1</td>
+<td>过载标识</td>
+</tr>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td rowspan="3">电平值（nArrays个）</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>当dataType为1时：</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 10%" />
+<col style="width: 18%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>value</td>
+<td>动态</td>
+<td>4</td>
+<td rowspan="3">扩展数据（nArrays-3个）<br />
+顺序与描述头扩展数据的顺序一致</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>char</td>
+<td>AlarmDesc[32]</td>
+<td>动态</td>
+<td>32</td>
+<td>调制类型描述</td>
+</tr>
+<tr>
+<td>float</td>
+<td>value</td>
+<td>动态</td>
+<td>4</td>
+<td>可信度</td>
+</tr>
+<tr>
+<td>float</td>
+<td>value</td>
+<td>动态</td>
+<td>4</td>
+<td>子时间</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ddc解调-ddcdem-1">DDC解调 DDCDEM</h3>
+<h4 id="静态部分-51">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>38</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目(频谱曲线点数目)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（该值必须为零）</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>实际工作频率</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Level</td>
+<td>动态</td>
+<td>2</td>
+<td>中心电平（实际值*100）</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>实际解调频率</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-41">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="3">nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="空间谱测向-ssdf-1">空间谱测向 SSDF</h3>
+<h4 id="静态部分-52">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>39</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（该值为零）</td>
+</tr>
+<tr>
+<td>byte</td>
+<td>nType</td>
+<td>{0,1}</td>
+<td>1</td>
+<td><p>0表示测向数据</p>
+<p>1表示频谱数据</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-42">动态部分</h4>
+<p>nType = 0时</p>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 16%" />
+<col style="width: 15%" />
+<col style="width: 19%" />
+<col style="width: 22%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>nMonLevel</td>
+<td>动态</td>
+<td>2</td>
+<td><p>监测电平（EFFF无效）</p>
+<p>实际电平值*100</p></td>
+<td></td>
+</tr>
+<tr>
+<td>float</td>
+<td>compass</td>
+<td>动态</td>
+<td>4</td>
+<td>实际罗盘值</td>
+<td></td>
+</tr>
+<tr>
+<td>Short</td>
+<td>DfLevel</td>
+<td>动态</td>
+<td>2</td>
+<td>测向电平（实际值*100）</td>
+<td rowspan="4">nArrays组该结构</td>
+</tr>
+<tr>
+<td>float</td>
+<td>Qulity</td>
+<td>动态</td>
+<td>4</td>
+<td>实际测向质量</td>
+</tr>
+<tr>
+<td>float</td>
+<td>Azumith</td>
+<td>动态</td>
+<td>4</td>
+<td>实际方位角</td>
+</tr>
+<tr>
+<td>float</td>
+<td>Elevation</td>
+<td>动态</td>
+<td>4</td>
+<td>实际俯仰角</td>
+</tr>
+</tbody>
+</table>
+<p>nType=1时</p>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 16%" />
+<col style="width: 15%" />
+<col style="width: 19%" />
+<col style="width: 22%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Short</td>
+<td>nLevel</td>
+<td>动态</td>
+<td>2</td>
+<td>测向电平（实际值*100）</td>
+<td rowspan="3">nArrays组</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>….</td>
+<td>….</td>
+<td></td>
+</tr>
+<tr>
+<td>Short</td>
+<td>nLevel</td>
+<td>动态</td>
+<td>2</td>
+<td>测向电平（实际值*100）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="多通道监听-multichan">多通道监听 <strong>MULTICHAN</strong></h3>
+<h4 id="静态部分-53">静态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 20%" />
+<col style="width: 10%" />
+<col style="width: 14%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>40</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>当nCdType=0时表示频谱曲线点数目；当=2时表示音频数据的长度</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移，通道索引</td>
+</tr>
+<tr>
+<td>byte</td>
+<td>nCdType</td>
+<td>{0，2}</td>
+<td>1</td>
+<td>2：通道业务类型，音频/<br />
+0：监测数据</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-43">动态部分</h4>
+<p>nCdType=0：</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 28%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__int64</td>
+<td>freq</td>
+<td>动态</td>
+<td>8</td>
+<td>实际工作频率</td>
+<td></td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Level</td>
+<td>动态</td>
+<td>2</td>
+<td>中心电平（实际值*100）</td>
+<td></td>
+</tr>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>电平</td>
+<td rowspan="3">nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>nCdType=2：</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 18%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>音频数据</td>
+<td>AudioData</td>
+<td>动态</td>
+<td>nArrays长度</td>
+<td>音频业务数据</td>
+</tr>
+</tbody>
+</table>
+<h3 id="旋转云台-acdf-1">旋转云台 ACDF</h3>
+<h4 id="静态部分-54">静态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>41</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Level</td>
+<td>动态</td>
+<td>2</td>
+<td>电平（实际值*100）</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>DfLevel</td>
+<td>动态</td>
+<td>2</td>
+<td>测向电平（实际值*100）</td>
+</tr>
+<tr>
+<td>Float</td>
+<td>Qulity</td>
+<td>动态</td>
+<td>4</td>
+<td>测向质量</td>
+</tr>
+<tr>
+<td>Float</td>
+<td>Azumith</td>
+<td>动态</td>
+<td>4</td>
+<td>方位角</td>
+</tr>
+<tr>
+<td>Float</td>
+<td>Elevation</td>
+<td>动态</td>
+<td>4</td>
+<td>俯仰角</td>
+</tr>
+<tr>
+<td>Float</td>
+<td>compass</td>
+<td>动态</td>
+<td>4</td>
+<td>罗盘值</td>
+</tr>
+</tbody>
+</table>
+<h3 id="调制模式识别-demrec-1">调制模式识别 DEMREC</h3>
+<h4 id="静态部分-55">静态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 10%" />
+<col style="width: 18%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>43</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>当cType
+=0时表示频谱曲线点数目；当=1时表示ITU数据个数；当=2时表示调制模式字符串长度</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（为零）</td>
+</tr>
+<tr>
+<td>byte</td>
+<td>cType</td>
+<td>{ 0,1,2 }</td>
+<td>1</td>
+<td><p>0：频谱数据<br />
+1：ITU数据<br />
+2：调制模式识别数据</p>
+<p>3：调制模式识别数据2</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-44">动态部分</h4>
+<p>cType为0，频谱数据：</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>nArrays组该值（频谱电平实际值*100）</td>
+</tr>
+</tbody>
+</table>
+<p>cType为1，ITU数据：</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>value</td>
+<td>动态</td>
+<td>4</td>
+<td>nArrays组</td>
+</tr>
+</tbody>
+</table>
+<p>cType为2，调制模式识别数据：</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>char</td>
+<td>value</td>
+<td>动态</td>
+<td>1</td>
+<td>nArrays指定长度</td>
+</tr>
+</tbody>
+</table>
+<p><span id="_Toc357069185" class="anchor"></span></p>
+<p>cType为3，调制模式识别数据(另外一种格式)：</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>nMode</td>
+<td>动态</td>
+<td>2</td>
+<td rowspan="2">nArray组调制模式和概率</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nConfirmedrate</td>
+<td>动态</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>其中，nMode取值如下定义（为了避免转换，照搬海格定义）：</p>
+<p>enum SignalType_HG</p>
+<p>{</p>
+<p>SignalTypeCW = 0,</p>
+<p>SignalType2ASK,</p>
+<p>SignalType4ASK,</p>
+<p>SignalTypeBPSK,</p>
+<p>SignalTypeQPSK,</p>
+<p>SignalTypeOQPSK,</p>
+<p>SignalTypeUnknown,</p>
+<p>SignalType2FSK,</p>
+<p>SignalType4FSK,</p>
+<p>SignalType8FSK,</p>
+<p>SignalType16_64_256QAM,</p>
+<p>SignalTypeFM,</p>
+<p>SignalTypeAM,</p>
+<p>SignalTypePI_4_QPSK</p>
+<p>};</p>
+<p>cType为4，调制模式识别数据(另外一种格式)：</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float</td>
+<td>nSymbolRate</td>
+<td>动态</td>
+<td>4</td>
+<td>符号速率</td>
+</tr>
+</tbody>
+</table>
+<h3 id="双多信道分析-mulchanana-1">双/多信道分析 MULCHANANA</h3>
+<h4 id="静态部分-56">静态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 10%" />
+<col style="width: 18%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>44</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>当cType
+=0时表示频谱曲线点数目；当=1时表示ITU数据个数；当=2时表示调制模式字符串长度</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（为零）</td>
+</tr>
+<tr>
+<td>byte</td>
+<td>cType</td>
+<td>{ 0,1,2 }</td>
+<td>1</td>
+<td>0：频谱数据<br />
+1：ITU数据<br />
+2：调制模式识别数据</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-45">动态部分</h4>
+<p>cType为0，频谱数据：</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>channel</td>
+<td>[0,n]</td>
+<td>1</td>
+<td><p>0为主信道频谱</p>
+<p>1 ~ n 为1~n信道的频谱数据</p></td>
+</tr>
+<tr>
+<td>short</td>
+<td>level</td>
+<td>动态</td>
+<td>2</td>
+<td>中心电平值（实际值*100）</td>
+</tr>
+<tr>
+<td>short</td>
+<td>value</td>
+<td>动态</td>
+<td>2</td>
+<td>nArrays组该值（频谱电平实际值*100）频谱数据</td>
+</tr>
+</tbody>
+</table>
+<p>cType为1，ITU数据：</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>channel</td>
+<td>[0,n]</td>
+<td>1</td>
+<td><p>0为主信道频谱</p>
+<p>1 ~ n 为1~n信道的ITU数据</p></td>
+</tr>
+<tr>
+<td>float</td>
+<td>value</td>
+<td>动态</td>
+<td>4</td>
+<td>nArrays组</td>
+</tr>
+</tbody>
+</table>
+<p>cType为2，调制模式识别数据：</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>channel</td>
+<td>[0,n]</td>
+<td>1</td>
+<td><p>0为主信道频谱</p>
+<p>1 ~ n 为1~n信道的模式识别数据</p></td>
+</tr>
+<tr>
+<td>float</td>
+<td>value</td>
+<td>[0,100]</td>
+<td>4</td>
+<td>识别概率</td>
+</tr>
+<tr>
+<td>char</td>
+<td>value</td>
+<td>动态</td>
+<td>1</td>
+<td>nArrays指定长度</td>
+</tr>
+</tbody>
+</table>
+<h3 id="模拟电视-analogtv">模拟电视 ANALOGTV</h3>
+<h4 id="静态部分-57">静态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 10%" />
+<col style="width: 18%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>47</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>电视通道索引</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-46">动态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>char</td>
+<td>data</td>
+<td>动态</td>
+<td>nArrays</td>
+<td>视频数据流</td>
+</tr>
+</tbody>
+</table>
+<h3 id="数字电视-digitaltv-1">数字电视 DIGITALTV</h3>
+<p>数字电视协议与模拟电视相同，只是业务数据的类型不同（47）。</p>
+<h3 id="电视图像-tvbmp-1">电视图像 TVBMP</h3>
+<h4 id="静态部分-58">静态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 10%" />
+<col style="width: 18%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>48</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>动态数组数目</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（为零）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-47">动态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>char</td>
+<td>data</td>
+<td>动态</td>
+<td>nArrays</td>
+<td>图像数据流</td>
+</tr>
+</tbody>
+</table>
+<h3 id="荧光谱-dpx-1">荧光谱 DPX</h3>
+<h4 id="静态部分-59">静态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 10%" />
+<col style="width: 18%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>49</td>
+<td>1</td>
+<td>业务数据类型</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>DPX数据组数</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nTotalPoints</td>
+<td>动态</td>
+<td>4</td>
+<td>总点数</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>nSampleRate</td>
+<td>动态</td>
+<td>8</td>
+<td>采样率（为0无意义）</td>
+</tr>
+<tr>
+<td>__int64</td>
+<td>nRBW</td>
+<td>动态</td>
+<td>8</td>
+<td>分辨率（为0无意义）</td>
+</tr>
+<tr>
+<td>double</td>
+<td>dRate</td>
+<td>动态</td>
+<td>8</td>
+<td>采样比率（&lt;=0无意义）</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nMinLevel</td>
+<td>动态</td>
+<td>2</td>
+<td>最小幅度值（实际值*100）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-48">动态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DPXDATA</td>
+<td>dpxdata</td>
+<td>动态</td>
+<td>动态，如下</td>
+<td>nArrays</td>
+</tr>
+</tbody>
+</table>
+<p><span id="_Toc311637073" class="anchor"></span></p>
+<p>其中，DPXDATA数据格式定义如下</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BYTE</td>
+<td>mask</td>
+<td>动态</td>
+<td>8</td>
+<td><p>20 字节（20*8=160Bit）为掩码，其中每一个bit包含</p>
+<p>两个意义：1、bit的索引位置(0-159)表示-40dBuV-120dBuV的幅度值；2、如</p>
+<p>该bit值为1，表示对应幅度值在其后（紧跟20字节掩码）有一个对应的数据，该数据表示该幅度出现的次数</p></td>
+</tr>
+<tr>
+<td>BYTE</td>
+<td>count</td>
+<td>动态</td>
+<td>长度等于160位掩码中非零值的次数</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="频点分析freqmeas-1">频点分析(FREQMEAS)</h3>
+<p>该功能针对单频点，但可以根据设备不同而返回ITU数据、频谱数据、IQ数据、音频数据中的一种或几种，采用通用协议。功能编号为51。</p>
+<h3 id="通用协议-1">通用协议</h3>
+<h4 id="静态部分-60">静态部分</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 10%" />
+<col style="width: 18%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>C++数据类型</th>
+<th>关键字</th>
+<th>值</th>
+<th>长度（BYTE）</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>nBdType</td>
+<td>动态</td>
+<td>1</td>
+<td>不同的功能有不同的值</td>
+</tr>
+<tr>
+<td>short</td>
+<td>nFlags</td>
+<td>动态</td>
+<td>2</td>
+<td>携带的业务数据标志(最多16种二次业务数据)</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nArrays</td>
+<td>动态</td>
+<td>4</td>
+<td>业务数据的组数</td>
+</tr>
+<tr>
+<td>long</td>
+<td>nOffset</td>
+<td>动态</td>
+<td>4</td>
+<td>相对首索引偏移（为零）</td>
+</tr>
+<tr>
+<td>DWORD</td>
+<td>FLAGS</td>
+<td>动态</td>
+<td>4</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>通过一个32位的整数的每一位的值（0或1）标识每一组描述信息的频率、解调频率、起始频率、终止频率、步长、跨距、中频带宽、采样率、增益值、衰减值、解调模式值、解调模式描述等的信息（可扩展）是否存在。如果该值为1，表示描述头信息中该值存在，否则表示不存在该信息。</p>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 8%" />
+<col style="width: 7%" />
+<col style="width: 5%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+</colgroup>
+<thead>
+<tr>
+<th>15</th>
+<th>14</th>
+<th>13</th>
+<th>12</th>
+<th>11</th>
+<th>10</th>
+<th>9</th>
+<th>8</th>
+<th>7</th>
+<th>6</th>
+<th>5</th>
+<th>4</th>
+<th>3</th>
+<th>2</th>
+<th>1</th>
+<th>0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td>频谱</td>
+<td>TDOA结果</td>
+<td>GPS结果</td>
+<td>调制模式识别</td>
+<td>ITU测量结果</td>
+<td>IQ数据</td>
+<td>罗盘值</td>
+<td>俯仰角</td>
+<td>测向质量</td>
+<td>测向角度</td>
+<td>测向电平</td>
+<td>场强</td>
+<td>电平</td>
+<td>中心频率</td>
+<td>信道编号</td>
+</tr>
+<tr>
+<td>31</td>
+<td>30</td>
+<td>29</td>
+<td>28</td>
+<td>27</td>
+<td>26</td>
+<td>25</td>
+<td>24</td>
+<td>23</td>
+<td>22</td>
+<td>21</td>
+<td>20</td>
+<td>19</td>
+<td>18</td>
+<td>17</td>
+<td>16</td>
+</tr>
+<tr>
+<td>本包数据是否含描述头</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>其中，各项数据结构定义如下（除ITU项在描述头中有单位说明之外，单位为注释中说明的单位）</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 20%" />
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>名称</strong></th>
+<th><strong>C++数据类型</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>信道编号</td>
+<td>byte</td>
+<td>动态</td>
+<td>1</td>
+<td></td>
+</tr>
+<tr>
+<td>中心频率</td>
+<td>­__int64</td>
+<td>动态</td>
+<td>8</td>
+<td></td>
+</tr>
+<tr>
+<td>电平</td>
+<td>short</td>
+<td>动态</td>
+<td>2</td>
+<td>0.01dBuV</td>
+</tr>
+<tr>
+<td>场强</td>
+<td>short</td>
+<td>动态</td>
+<td>2</td>
+<td>0.01dBuV/m</td>
+</tr>
+<tr>
+<td>测向电平</td>
+<td>short</td>
+<td>动态</td>
+<td>2</td>
+<td>0.01dBuV</td>
+</tr>
+<tr>
+<td>测向角度</td>
+<td>ushort</td>
+<td>动态</td>
+<td>2</td>
+<td>0.01度，大于36000表示无效</td>
+</tr>
+<tr>
+<td>测向质量</td>
+<td>short</td>
+<td>动态</td>
+<td>2</td>
+<td>%,小于0或大于100表示无效</td>
+</tr>
+<tr>
+<td>俯仰角</td>
+<td>short</td>
+<td>动态</td>
+<td>2</td>
+<td>0.01度小于-9000或大于9000表示无效</td>
+</tr>
+<tr>
+<td>IQ数据</td>
+<td><p>struct</p>
+<p>{</p>
+<p>int nIQPairs;</p>
+<p>IQPAIR data[0];</p>
+<p>};</p>
+<p>struct IQPAIR</p>
+<p>{</p>
+<p>short i;</p>
+<p>short q;</p>
+<p>}</p></td>
+<td>动态</td>
+<td>short*2</td>
+<td></td>
+</tr>
+<tr>
+<td>罗盘值</td>
+<td>short</td>
+<td>动态</td>
+<td>2</td>
+<td>0.01度，大于36000表示无效</td>
+</tr>
+<tr>
+<td>ITU测量结果</td>
+<td><p>struct</p>
+<p>{</p>
+<p>short nITUNum;</p>
+<p>float fValue[0];</p>
+<p>}</p></td>
+<td>动态</td>
+<td>4</td>
+<td>nITUNum为ITU测量个数，应该和描述头中保持一致</td>
+</tr>
+<tr>
+<td>调制模式识别</td>
+<td><p>struct</p>
+<p>{</p>
+<p>int nModIndex;</p>
+<p>float fProp;</p>
+<p>char szMod[32];</p>
+<p>}</p></td>
+<td>动态</td>
+<td>40</td>
+<td><p>nModIndex为调制模式的类型，与RMTP1.01一致；</p>
+<p>fPorp为识别概率；</p>
+<p>szMod为调制模式名字，在碰到为定义调制模式类型时可参考该名字；</p></td>
+</tr>
+<tr>
+<td>GPS结果</td>
+<td><p>struct</p>
+<p>{</p>
+<p>char szTime[16]；</p>
+<p>char szDate[16];</p>
+<p>bool bValid;</p>
+<p>doule dLongi;</p>
+<p>char cLongi;</p>
+<p>double dLati;</p>
+<p>char cLati;</p>
+<p>float fAlti;</p>
+<p>float fSpeed;</p>
+<p>float fDirection</p>
+<p>char cMagOff;</p>
+<p>float fMagOff;</p>
+<p>}</p></td>
+<td>动态</td>
+<td>24</td>
+<td><p>szTime : UTC时间，格式hhmmss.sss;</p>
+<p>szData: UTC日期，格式YYYYMMDD;</p>
+<p>bValid : 定位是否有效 0为无效；</p>
+<p>dLongi : 经度，单位为度；</p>
+<p>cLongi : E-东经，W-西经；</p>
+<p>dLati : 纬度，单位为度；</p>
+<p>cLati : N-北纬，S-南纬；</p>
+<p>fAlti : 海拔，单位为米;</p>
+<p>fSpeed : 速度单位米/秒</p>
+<p>fDirection移动方向[0-360）</p>
+<p>cMagOff : 磁偏角方向，E-东，W-西；</p>
+<p>fMagOff : 磁偏角，单位度；</p></td>
+</tr>
+<tr>
+<td>TDOA结果</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>频谱</td>
+<td><p>struct</p>
+<p>{</p>
+<p>int nPoints;</p>
+<p>short nLevels[0];</p>
+<p>}</p></td>
+<td></td>
+<td></td>
+<td>频谱点数</td>
+</tr>
+</tbody>
+</table>
+<h4 id="动态部分-49">动态部分</h4>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 18%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>C++数据类型</strong></th>
+<th><strong>关键字</strong></th>
+<th><strong>值</strong></th>
+<th><strong>长度（BYTE）</strong></th>
+<th><strong>注释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>char</td>
+<td>desc</td>
+<td>动态</td>
+<td>由FALGS决定</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h1 id="音频数据">音频数据</h1>
+<p>音频数据不定义具体的格式，对网络传输是透明的。</p>
+<h2 id="音频描述头">音频描述头</h2>
+<p>帧头类型nDataType=1</p>
+<h2 id="音频数据-1">音频数据</h2>
+<p>帧头类型nDataType=2</p>
+<h1 id="通知消息">通知消息</h1>
+<p>中间服务通知消息</p>
+<h2 id="报文描述">报文描述</h2>
+<p>帧头类型nDataType= 8</p>
+<h4 id="byte图-3">BYTE图</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 4%" />
+<col style="width: 4%" />
+<col style="width: 4%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;">1</th>
+<th style="text-align: center;">2</th>
+<th style="text-align: center;">3</th>
+<th style="text-align: center;">4</th>
+<th style="text-align: center;">5</th>
+<th style="text-align: center;">6</th>
+<th style="text-align: center;">7</th>
+<th style="text-align: center;">8</th>
+<th style="text-align: center;">9</th>
+<th style="text-align: center;">10</th>
+<th style="text-align: center;">11</th>
+<th style="text-align: center;">12</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td colspan="2" style="text-align: center;">服务ID</td>
+<td colspan="2" style="text-align: center;">通知消息ID</td>
+<td colspan="8" style="text-align: center;">任务ID</td>
+</tr>
+<tr>
+<td colspan="12" style="text-align: center;">连续缓冲区</td>
+</tr>
+</tbody>
+</table>
+<h4 id="c结构定义-3">C++结构定义</h4>
+<table>
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;">C++结构定义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p>#pragma pack(push,1)</p>
+<p>typedef struct tagRmcpNotifyFrame</p>
+<p>{</p>
+<p>RMCPFRAME rmcpFrame ;</p>
+<p>SHORT nServiceID ; //服务ID</p>
+<p>SHORT nNotifyID ; //通知消息ID</p>
+<p>INT64 nTaskID ; //任务ID</p>
+<p>}RMCPNOTIFYFRAME,*LPRMCPNOTIFYFRAME;</p>
+<p>#pragma pack(pop)</p></td>
+</tr>
+</tbody>
+</table>
+<h1 id="gps数据">GPS数据</h1>
+<p>GPS数据</p>
+<h2 id="报文描述-1">报文描述</h2>
+<p>帧头类型nDataType= 11</p>
+<h4 id="byte图-4">BYTE图</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 4%" />
+<col style="width: 4%" />
+<col style="width: 4%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;">1</th>
+<th style="text-align: center;">2</th>
+<th style="text-align: center;">3</th>
+<th style="text-align: center;">4</th>
+<th style="text-align: center;">5</th>
+<th style="text-align: center;">6</th>
+<th style="text-align: center;">7</th>
+<th style="text-align: center;">8</th>
+<th style="text-align: center;">9</th>
+<th style="text-align: center;">10</th>
+<th style="text-align: center;">11</th>
+<th style="text-align: center;">12</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td colspan="4" style="text-align: center;">站点编码</td>
+<td colspan="4" style="text-align: center;">经度</td>
+<td colspan="4" style="text-align: center;">纬度</td>
+</tr>
+</tbody>
+</table>
+<h4 id="c结构定义-4">C++结构定义</h4>
+<table>
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;">C++结构定义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p>#pragma pack(push,1)</p>
+<p>typedef struct tagRmcpGPSFrame</p>
+<p>{</p>
+<p>RMCPFRAME rmcpFrame ;</p>
+<p>UINT nStationID ; //ID</p>
+<p>FLOAT nLongitude ; //经度</p>
+<p>FLOAT nLatitude ; //纬度</p>
+<p>}RMCPGPSRAME,*LPRMCPGPSRAME;</p>
+<p>#pragma pack(pop)</p></td>
+</tr>
+</tbody>
+</table>
+<h2 id="section"></h2>
+</body>
+</html>

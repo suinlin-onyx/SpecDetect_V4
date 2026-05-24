@@ -1,0 +1,19 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
+    <soapenv:Header>
+        <srrc:ProviderResponse>
+            <srrc:bizResCd>BIZ-000001</srrc:bizResCd>
+            <srrc:bizResText>调用成功</srrc:bizResText>
+        </srrc:ProviderResponse>
+    </soapenv:Header>
+    <soapenv:Body>
+        <srrc:responsebody>
+            <srrc:result>
+                <srrc:appid>123456</srrc:appid>
+                <srrc:userid>RX_admin</srrc:userid>
+                <srrc:mfid>53090001140012</srrc:mfid>
+                <srrc:equid>51cd8dfe-e543-40c9-bdc3-a292766fee7f</srrc:equid>
+                <srrc:taskid>378966CC-3BC4-11F1-8000-00D8612F75B8</srrc:taskid>
+            </srrc:result>
+        </srrc:responsebody>
+    </soapenv:Body>
+</soapenv:Envelope>
