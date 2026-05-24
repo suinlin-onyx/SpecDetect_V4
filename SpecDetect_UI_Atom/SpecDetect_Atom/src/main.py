@@ -34,6 +34,7 @@ Logger.init(log_dir=log_dir, log_level=log_level)
 
 # 导入服务（在日志初始化之后）
 from atom.service import AtomService
+from license.manager import verify_license
 
 
 def main():
@@ -67,6 +68,13 @@ def main():
             # 开发模式
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             config_file = os.path.join(base_dir, 'config', 'settings.json')
+
+    # 许可证验证
+    license_dir = os.path.dirname(os.path.abspath(config_file))
+    license_path = os.path.join(license_dir, 'license.dat')
+    if not verify_license(license_path):
+        error("设备授权验证失败：当前设备未授权运行本软件，请联系管理员", LogTag.ATOM)
+        sys.exit(1)
 
     # 创建服务
     service = AtomService(config_file)
