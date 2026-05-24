@@ -11,9 +11,20 @@ import sys
 import os
 import signal
 import argparse
+import ctypes
 
 # 添加 src 目录到路径
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+
+def _show_error_and_exit(title: str, message: str, exit_code: int = 1):
+    """显示错误对话框，按任意键后退出"""
+    try:
+        ctypes.windll.user32.MessageBoxW(0, message, title, 0x10)
+    except Exception:
+        print(f'\n{title}\n{message}', file=sys.stderr)
+        input('\n按任意键退出...')
+    sys.exit(exit_code)
 
 # 初始化日志（最早，避免后续 import 时日志未初始化）
 if getattr(sys, 'frozen', False):
@@ -74,7 +85,10 @@ def main():
     license_path = os.path.join(license_dir, 'license.dat')
     if not verify_license(license_path):
         error("设备授权验证失败：当前设备未授权运行本软件，请联系管理员", LogTag.ATOM)
-        sys.exit(1)
+        _show_error_and_exit(
+            title='SpecDetect Atom - 设备授权验证失败',
+            message='当前设备未授权运行本软件，请联系管理员。\n\n按确定键退出...'
+        )
 
     # 创建服务
     service = AtomService(config_file)
