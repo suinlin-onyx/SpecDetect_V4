@@ -16,3 +16,6 @@ stub/*.dll
 stub/*.exp
 stub/*.lib
 stub/*.obj
+
+# Deployment program directory (generated from src/)
+SpecDetect_Atom/program/

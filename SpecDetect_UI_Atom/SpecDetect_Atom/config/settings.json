@@ -1,4 +1,8 @@
 {
+  "version": {
+    "atom": "1.2.4",
+    "proxy": "1.1.8"
+  },
   "use_legacy_xml": {
     "value": true,
     "desc": "是否从device中读取配置, 默认开启"

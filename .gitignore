@@ -26,3 +26,39 @@ Thumbs.db
 # Project specific
 logs/
 *.pid
+*.mp4
+
+# Build artifacts
+dist/
+build/
+build_onedir/
+*.spec
+*.exe
+*.dll
+*.exp
+*.lib
+*.obj
+stub/
+
+# Deployment program directory (generated from src/)
+SpecDetect_UI_Atom/SpecDetect_Atom/program/
+
+# Test artifacts
+test_extract/
+test_extract2/
+test_extracted/
+
+# Data files
+SpecDetect_UI_Atom/SpecDetect_Atom/data/
+SpecDetect_UI_Atom/SpecDetect_Atom/test_extract/
+SpecDetect_UI_Atom/SpecDetect_Atom/test_extracted/
+SpecDetect_UI_Atom/SpecDetect_Atom/tests/
+SpecDetect_UI_Atom/SpecDetect_Atom/生产环境日志/
+
+# Docs (keep only in docs/)
+SpecDetect_UI_Atom/SpecDetect_Atom/doc/
+
+# Temp
+2026-5-7/
+请求相关的信息/
+短波/

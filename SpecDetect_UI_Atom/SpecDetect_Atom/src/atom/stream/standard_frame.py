@@ -8,7 +8,6 @@
 
 import struct
 import time
-import uuid
 
 
 # === 帧头常量 ===
@@ -52,16 +51,16 @@ def build_frame_header(stc: int, pl: int, el: int = EL_DEFAULT) -> bytes:
     return header
 
 
-def build_uuid_frame(stc: int) -> bytes:
+def build_uuid_frame(taskid: str, stc: int) -> bytes:
     """构建 UUID 注册帧 (DT=102, 65 bytes)
 
-    DATA: 36 字节 ASCII GUID 字符串
+    DATA: 36 字节 ASCII taskid 字符串（来自 SOAP 请求）
 
     Args:
+        taskid: 任务 ID（SOAP 请求携带）
         stc: 通道标识
     """
-    guid = str(uuid.uuid4())
-    data = guid.encode('ascii')
+    data = taskid.encode('ascii')[:36].ljust(36, b'\x00')
     dl = len(data)
     pl = 1 + 4 + dl  # DT(1) + DL(4) + DATA
 
@@ -78,17 +77,23 @@ def build_fscan_frame(levels_int16: list,
                       stc: int) -> bytes:
     """构建标准 FSCAN 频谱帧 (DT=12)
 
-    DATA = metadata(33B) + INT16 LE spectrum × n
+    DATA = metadata(33B) + [dBm_byte, 0xFF] spectrum × n
 
     Args:
         levels_int16: 频谱数据 (int16 列表, 单位 dBm×10)
         metadata: 33 字节私有元数据（来自 frame.py _get_band_metadata）
         stc: 通道标识
     """
-    # 频谱数据 INT16 LE
+    # 频谱数据 [dBm_byte, 0xFF] 编码（与 RXAtomSvcV3 对齐）
     spectrum = b''
     for v in levels_int16:
-        spectrum += struct.pack('<h', int(v))
+        dbm = v / 10.0
+        if dbm < 0:
+            byte_val = int(256 + dbm)
+        else:
+            byte_val = int(dbm)
+        byte_val = max(0, min(255, byte_val))
+        spectrum += bytes([byte_val, 0xFF])
 
     data = metadata + spectrum
     dl = len(data)

@@ -5,7 +5,7 @@ Atom 服务主类
 整合所有模块，协调 SOAP、streamsrc、RMCP 的交互
 """
 
-__version__ = "1.2.6"
+__version__ = "1.2.8"
 
 import socket
 import threading
@@ -284,7 +284,7 @@ class AtomService:
 
             # 发送 UUID 注册帧（与 RXAtomSvcV3 对齐）
             from atom.stream.standard_frame import build_uuid_frame
-            uuid_frame = build_uuid_frame(stc)
+            uuid_frame = build_uuid_frame(taskid, stc)
             sink_socket.sendall(uuid_frame)
             info(f"B_FScan Sink: 已发送 UUID 注册帧 ({len(uuid_frame)}B)", LogTag.STREAM)
         except Exception as e:
@@ -389,9 +389,8 @@ class AtomService:
         从 band_collector 获取数据，封帧后发送到 outputchannel_forwarder。
         与 StreamSrcServer._start_push 类似，但只发送给 outputchannel_forwarder。
         """
-        # 导入标准帧构建函数 + 私有元数据（Sink 模式专用）
-        from atom.stream.standard_frame import build_fscan_frame as build_std_fscan
-        from atom.stream.frame import _get_band_metadata
+        # 使用 frame.py 构建帧（与 RXAtomSvcV3 完全对齐）
+        stc = session.fscan_params.get('stc', 0)
 
         def sink_push_loop():
             session.push_running = True
@@ -412,16 +411,14 @@ class AtomService:
                                 info(f"[SINK] push_loop 运行中 #{push_count}: 等待band数据...", LogTag.STREAM)
                             continue
 
-                        # 使用标准 GWJ004 帧格式 + RXAtomSvcV3 对齐的私有元数据
-                        stc = session.fscan_params.get('stc', 0)
-
                         for band in all_bands:
                             start_idx = band.get('counters', [0, 0, 0])[2]
                             levels = band.get('levels', [])
-                            metadata = _get_band_metadata(start_idx)
-                            frame = build_std_fscan(
-                                levels_int16=levels,
-                                metadata=metadata,
+                            # RMCP int16 (dBm×10) → float dBm
+                            spectrum_dbm = [v / 10.0 for v in levels]
+                            frame = build_fscan_frame(
+                                spectrum_dbm=spectrum_dbm,
+                                start_index=start_idx,
                                 stc=stc,
                             )
                             info(f"[SINK] Band{1 if start_idx == 0 else 2 if start_idx == 512 else 3}: {len(levels)}点 frame={len(frame)}B", LogTag.STREAM)
