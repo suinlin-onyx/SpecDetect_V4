@@ -42,13 +42,13 @@ def _load_from_xml(xml_path: str) -> Dict[str, Any]:
             config['put_time_interval'] = svc.get('puttimeinterval', '60')
             config['judge_busy_by_max_task_num'] = svc.get('judgebusybymaxtasknum', 'false')
             config['show_log'] = svc.get('showlog', 'false')
-            config['soap_port'] = int(svc.get('port', '8282'))
+            config['soap_port'] = int(svc.get('port', '8282') or '8282')
 
         # 解析 streamsrc
         streamsrc = root.find('.//streamsrc')
         if streamsrc is not None:
             config['streamsrc_ip'] = streamsrc.get('ip', '127.0.0.1')
-            config['streamsrc_port'] = int(streamsrc.get('port', '18012'))
+            config['streamsrc_port'] = int(streamsrc.get('port', '18012') or '18012')
 
         # 解析 rxinfo
         rxinfo = root.find('.//rxinfo')
@@ -56,7 +56,7 @@ def _load_from_xml(xml_path: str) -> Dict[str, Any]:
             config['station_id'] = rxinfo.get('id', '')
             config['station_name'] = rxinfo.get('staname', '')
             config['device_host'] = rxinfo.get('serverip', '')
-            config['device_port'] = int(rxinfo.get('serverport', '1449'))
+            config['device_port'] = int(rxinfo.get('serverport', '1449') or '1449')
 
         # 解析 log
         logger = root.find('.//log/logger')
@@ -138,7 +138,7 @@ def _load_single_devinfo(xml_path: str, filename: str) -> Optional[Dict[str, Any
                 'id': station.get('id', ''),
                 'name': station.get('staname', ''),
                 'serverip': station.get('serverip', ''),
-                'serverport': int(station.get('serverport', '1449')),
+                'serverport': int(station.get('serverport', '1449') or '1449'),
                 'protocol': station.get('protocol', 'rmcp'),
                 'testself': station.get('testself', 'no'),
                 'btelnet': station.get('btelnet', 'no'),
@@ -158,7 +158,7 @@ def _load_single_devinfo(xml_path: str, filename: str) -> Optional[Dict[str, Any
             preset['device_info'] = {
                 'id': device_elem.get('id', ''),
                 'name': device_elem.get('name', ''),
-                'maxtaskcount': int(device_elem.get('maxtaskcount', '1')),
+                'maxtaskcount': int(device_elem.get('maxtaskcount', '1') or '1'),
                 'analogaudio': device_elem.get('analogaudio', 'false')
             }
 

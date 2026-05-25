@@ -74,7 +74,7 @@ class DevicePreset:
         preset.host = result.findtext('srrc:host', '', {'srrc': 'http://www.srrc.org.cn'}) or ''
         preset.port = result.findtext('srrc:port', '', {'srrc': 'http://www.srrc.org.cn'}) or ''
         maxtask = result.findtext('srrc:maxtasknumber', '', {'srrc': 'http://www.srrc.org.cn'}) or '1'
-        preset.maxtasknumber = int(maxtask) if maxtask.isdigit() else 1
+        preset.maxtasknumber = int(maxtask) if maxtask and maxtask.isdigit() else 1
 
         # 解析 featurelist
         featurelist = result.find('srrc:featurelist', {'srrc': 'http://www.srrc.org.cn'})
