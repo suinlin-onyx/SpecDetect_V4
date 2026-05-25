@@ -6,6 +6,7 @@ import hmac
 import json
 import os
 import socket
+import sys
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -40,6 +41,11 @@ def _verify_signature(data: dict) -> bool:
 def _find_license_path(license_path: Optional[str] = None) -> str:
     if license_path:
         return license_path
+
+    if getattr(sys, 'frozen', False):
+        exe_dir = os.path.dirname(os.path.abspath(sys.executable))
+        return os.path.join(exe_dir, 'config', LICENSE_FILENAME)
+
     current = os.path.dirname(os.path.abspath(__file__))
     for _ in range(5):
         cfg = os.path.join(current, 'config')
