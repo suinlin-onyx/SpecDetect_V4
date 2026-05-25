@@ -23,3 +23,7 @@ SpecDetect_Atom/program/
 # License files (device-specific, not to be committed)
 **/license.dat
 **/_data.py
+
+# RSA private key (KEEP OFFLINE — never commit)
+keys/
+**/keys/

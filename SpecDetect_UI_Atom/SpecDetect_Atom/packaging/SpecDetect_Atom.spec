@@ -24,6 +24,12 @@ if os.path.isdir(_runtime_dir):
     for _dll in _glob.glob(os.path.join(_runtime_dir, '*.dll')):
         _binaries.append((_dll, '.'))
 
+# Collect Cython-compiled .pyd files
+_license_dir = _os.path.join(_spec_dir, '..', 'src', 'license')
+if _os.path.isdir(_license_dir):
+    for _pyd in _glob.glob(_os.path.join(_license_dir, '*.pyd')):
+        _binaries.append((_pyd, 'license'))
+
 a = Analysis(
     ['../src/main.py'],
     pathex=[],
@@ -46,6 +52,11 @@ a = Analysis(
         'preset.device_preset',
         'preset.templates',
         'log.logger',
+        'cryptography',
+        'cryptography.hazmat.primitives.asymmetric',
+        'cryptography.hazmat.primitives.serialization',
+        'cffi',
+        '_cffi_backend',
         'encodings',
         'encodings.aliases',
         'encodings.ascii',
@@ -62,7 +73,7 @@ a = Analysis(
         'encodings.cp1252',
         'encodings.idna',
     ],
-    hookspath=[],
+    hookspath=[_os.path.join(_spec_dir, 'hooks')],
     runtime_hooks=[_os.path.join(_spec_dir, '..', 'src', 'runtime_hook.py')],
     excludes=[
         'tkinter',
