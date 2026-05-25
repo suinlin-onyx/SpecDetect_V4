@@ -14,7 +14,7 @@ for /f "usebackq tokens=1,2 delims==" %%A in ("%~dp0SpecDetect_UI_Atom\SpecDetec
 )
 
 REM 手动设置默认值（确保变量被定义）
-set "ATOM_VERSION=1.2.6"
+set "ATOM_VERSION=1.3.0"
 set "PROXY_VERSION=1.1.8"
 for /f "usebackq tokens=1,2 delims==" %%A in ("%~dp0SpecDetect_UI_Atom\SpecDetect_Atom\src\_version.env") do (
     set "%%A=%%B"
