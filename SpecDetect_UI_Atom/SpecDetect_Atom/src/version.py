@@ -5,7 +5,8 @@
 所有版本号只在这里定义，其他地方从此文件导入
 """
 
-ATOM_VERSION = "1.3.0"
-PROXY_VERSION = "1.1.8"
+ATOM_VERSION = "1.4.1"
+PROXY_VERSION = "1.1.9"
+RMCP_PROXY_VERSION = "1.0.0"
 
-__all__ = ['ATOM_VERSION', 'PROXY_VERSION']
+__all__ = ['ATOM_VERSION', 'PROXY_VERSION', 'RMCP_PROXY_VERSION']

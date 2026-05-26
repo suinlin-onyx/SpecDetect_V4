@@ -5,7 +5,7 @@ Atom 服务主类
 整合所有模块，协调 SOAP、streamsrc、RMCP 的交互
 """
 
-__version__ = "1.2.8"
+__version__ = "1.4.0"
 
 import socket
 import threading
@@ -557,7 +557,14 @@ class AtomService:
             'func_id': 16,  # B_PScan 的 funcid
         }
 
-        # 创建 pending session
+        # 检查 outputchannel 模式
+        channel_mode = outputchannel.get('mode', 'source') if outputchannel else 'source'
+
+        # Sink 模式：直接连接 outputchannel 指定的地址
+        if channel_mode == 'sink':
+            return self._handle_pscan_sink(request, params, pscan_params, taskid, stc, outputchannel)
+
+        # Source 模式（默认）：创建 pending session，等待 streamsrc 客户端连接
         try:
             session = self.session_manager.create_pending(taskid, pscan_params)
         except RuntimeError as e:
@@ -584,6 +591,66 @@ class AtomService:
             outputchannel_datachannel='stream',
             outputchannel_host=self.config.streamsrc_ip,
             outputchannel_port=self.config.streamsrc_port,
+            outputchannel_stc=stc
+        )
+
+    def _handle_pscan_sink(self, request: dict, params: dict, pscan_params: dict, taskid: str, stc: int, outputchannel: dict) -> bytes:
+        """处理 B_PScan Sink 模式 - Atom 作为客户端主动连接 outputchannel"""
+        sink_host = outputchannel.get('host', '')
+        sink_port = outputchannel.get('port', 0)
+
+        if not sink_host or not sink_port:
+            error(f"B_PScan Sink: 缺少 outputchannel host 或 port", LogTag.SESSION)
+            return self.preset_manager.build_error_response("Sink 模式缺少 outputchannel host 或 port")
+
+        info(f"B_PScan Sink: taskid={taskid}, 连接 {sink_host}:{sink_port}", LogTag.SESSION)
+
+        sink_socket = None
+        try:
+            sink_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sink_socket.settimeout(10)
+            sink_socket.connect((sink_host, sink_port))
+            info(f"B_PScan Sink: 已连接 {sink_host}:{sink_port}", LogTag.SESSION)
+
+            from atom.stream.standard_frame import build_uuid_frame
+            uuid_frame = build_uuid_frame(taskid, stc)
+            sink_socket.sendall(uuid_frame)
+            info(f"B_PScan Sink: 已发送 UUID 注册帧 ({len(uuid_frame)}B)", LogTag.STREAM)
+        except Exception as e:
+            error(f"B_PScan Sink: 连接失败 {sink_host}:{sink_port} - {e}", LogTag.SESSION)
+            if sink_socket:
+                sink_socket.close()
+            return self.preset_manager.build_error_response(f"Sink 连接失败: {e}")
+
+        try:
+            session = self.session_manager.create_pending(taskid, pscan_params)
+        except RuntimeError as e:
+            error(f"创建 session 失败: {e}", LogTag.SESSION)
+            sink_socket.close()
+            return self.preset_manager.build_error_response(str(e))
+
+        session.outputchannel_forwarder = sink_socket
+        session.state = SessionState.ACTIVE
+        self._start_sink_stream(session)
+
+        rf = self._get_response_fields(request)
+        return self.preset_manager.build_response(
+            'B_PScan',
+            appid=rf['appid'],
+            userid=rf['userid'],
+            taskid=taskid,
+            mfid=rf['mfid'],
+            equid=rf['equid'],
+            priority=rf['priority'],
+            executetime=0,
+            startfreq=pscan_params['startfreq'],
+            stopfreq=pscan_params['stopfreq'],
+            step=pscan_params['step'],
+            gain=pscan_params['gain'],
+            outputchannel_mode='sink',
+            outputchannel_datachannel='stream',
+            outputchannel_host=sink_host,
+            outputchannel_port=sink_port,
             outputchannel_stc=stc
         )
 
@@ -650,7 +717,14 @@ class AtomService:
             'func_id': 11,  # B_SglFreqMeas 的 funcid
         }
 
-        # 创建 pending session
+        # 检查 outputchannel 模式
+        channel_mode = outputchannel.get('mode', 'source') if outputchannel else 'source'
+
+        # Sink 模式：直接连接 outputchannel 指定的地址
+        if channel_mode == 'sink':
+            return self._handle_sglfreq_sink(request, params, sglfreq_params, taskid, stc, outputchannel)
+
+        # Source 模式（默认）：创建 pending session，等待 streamsrc 客户端连接
         try:
             session = self.session_manager.create_pending(taskid, sglfreq_params)
         except RuntimeError as e:
@@ -682,6 +756,71 @@ class AtomService:
             outputchannel_datachannel='stream',
             outputchannel_host=self.config.streamsrc_ip,
             outputchannel_port=self.config.streamsrc_port,
+            outputchannel_stc=stc
+        )
+
+    def _handle_sglfreq_sink(self, request: dict, params: dict, sglfreq_params: dict, taskid: str, stc: int, outputchannel: dict) -> bytes:
+        """处理 B_SglFreqMeas Sink 模式 - Atom 作为客户端主动连接 outputchannel"""
+        sink_host = outputchannel.get('host', '')
+        sink_port = outputchannel.get('port', 0)
+
+        if not sink_host or not sink_port:
+            error(f"B_SglFreqMeas Sink: 缺少 outputchannel host 或 port", LogTag.SESSION)
+            return self.preset_manager.build_error_response("Sink 模式缺少 outputchannel host 或 port")
+
+        info(f"B_SglFreqMeas Sink: taskid={taskid}, 连接 {sink_host}:{sink_port}", LogTag.SESSION)
+
+        sink_socket = None
+        try:
+            sink_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sink_socket.settimeout(10)
+            sink_socket.connect((sink_host, sink_port))
+            info(f"B_SglFreqMeas Sink: 已连接 {sink_host}:{sink_port}", LogTag.SESSION)
+
+            from atom.stream.standard_frame import build_uuid_frame
+            uuid_frame = build_uuid_frame(taskid, stc)
+            sink_socket.sendall(uuid_frame)
+            info(f"B_SglFreqMeas Sink: 已发送 UUID 注册帧 ({len(uuid_frame)}B)", LogTag.STREAM)
+        except Exception as e:
+            error(f"B_SglFreqMeas Sink: 连接失败 {sink_host}:{sink_port} - {e}", LogTag.SESSION)
+            if sink_socket:
+                sink_socket.close()
+            return self.preset_manager.build_error_response(f"Sink 连接失败: {e}")
+
+        try:
+            session = self.session_manager.create_pending(taskid, sglfreq_params)
+        except RuntimeError as e:
+            error(f"创建 session 失败: {e}", LogTag.SESSION)
+            sink_socket.close()
+            return self.preset_manager.build_error_response(str(e))
+
+        session.outputchannel_forwarder = sink_socket
+        session.state = SessionState.ACTIVE
+        self._start_sink_stream(session)
+
+        rf = self._get_response_fields(request)
+        return self.preset_manager.build_response(
+            'B_SglFreqMeas',
+            appid=rf['appid'],
+            userid=rf['userid'],
+            taskid=taskid,
+            mfid=rf['mfid'],
+            equid=rf['equid'],
+            priority=rf['priority'],
+            executetime=0,
+            frequency=sglfreq_params['frequency'],
+            ifbw=sglfreq_params['ifbw'],
+            gain=sglfreq_params['gain'],
+            rfworkmode='0',
+            audiotype='off',
+            demodmode='FM',
+            demodbw='200000',
+            spectrumswitch='on',
+            ITUSwitch='on',
+            outputchannel_mode='sink',
+            outputchannel_datachannel='stream',
+            outputchannel_host=sink_host,
+            outputchannel_port=sink_port,
             outputchannel_stc=stc
         )
 

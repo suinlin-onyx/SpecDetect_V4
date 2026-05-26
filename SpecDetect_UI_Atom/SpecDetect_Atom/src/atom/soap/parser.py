@@ -136,7 +136,7 @@ def parse_soap_body(body: bytes, soap_action_header: str = None) -> Optional[Dic
         if match:
             result[field] = match.group(1).strip()
 
-    params = ['startfreq', 'stopfreq', 'step', 'gain', 'rfworkmode', 'scanmode', 'dfmode']
+    params = ['startfreq', 'stopfreq', 'step', 'gain', 'rfworkmode', 'scanmode', 'dfmode', 'keepmode']
     for param in params:
         pattern = f'<[^>]*:{param}[^>]*>([^<]+)</[^>]*:{param}>'
         match = re.search(pattern, body_content, re.IGNORECASE)
@@ -145,7 +145,20 @@ def parse_soap_body(body: bytes, soap_action_header: str = None) -> Optional[Dic
 
     equpara_match = re.search(r'<[^>]*:equpara[^>]*>(.+)</[^>]*:equpara>', body_content, re.IGNORECASE | re.DOTALL)
     if equpara_match:
-        result['equpara'] = equpara_match.group(1)
+        equpara_content = equpara_match.group(1)
+        result['equpara'] = equpara_content
+
+        # 解析 <item><paraname>xxx</paraname><paravalue>yyy</paravalue></item> 格式
+        # 这种格式用于 B_PScan 等接口的参数传递
+        item_pattern = re.compile(
+            r'<[^>]*:item[^>]*>\s*<[^>]*:paraname>([^<]+)</[^>]*:paraname>\s*<[^>]*:paravalue>([^<]*)</[^>]*:paravalue>\s*</[^>]*:item>',
+            re.IGNORECASE | re.DOTALL
+        )
+        for item_match in item_pattern.finditer(equpara_content):
+            name = item_match.group(1).strip()
+            value = item_match.group(2).strip()
+            if name not in result:
+                result[name] = value
 
     # 解析 outputchannel 字段
     outputchannel_match = re.search(
