@@ -1,0 +1,18 @@
+{
+  "proxy": {
+    "listen_host": "0.0.0.0",
+    "listen_port": 9996,
+    "listen_port_2": 9997
+  },
+  "device": {
+    "host": "172.18.114.196",
+    "port": 9999
+  },
+  "log": {
+    "dir": "logs",
+    "level": "DEBUG",
+    "enable_json": true,
+    "enable_raw": true,
+    "enable_connections_csv": true
+  }
+}

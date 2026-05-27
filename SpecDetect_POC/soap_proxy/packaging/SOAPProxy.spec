@@ -1,13 +1,27 @@
 # -*- mode: python ; coding: utf-8 -*-
 import glob as _glob
 import os as _os
+import re as _re
 
 block_cipher = None
 
 _spec_dir = os.path.abspath(os.path.dirname(SPEC))
 
-# runtime dir is at project root (parent of packaging)
-_runtime_dir = os.path.join(_spec_dir, '..', 'runtime')
+# 从 version.py 读取版本号（与 build.bat 对齐）
+_version_path = os.path.join(_spec_dir, '..', '..', '..', 'SpecDetect_UI_Atom', 'SpecDetect_Atom', 'src', 'version.py')
+_proxy_version = '1.2.0'
+if os.path.exists(_version_path):
+    try:
+        with open(_version_path, 'r', encoding='utf-8') as _f:
+            _content = _f.read()
+        _m = _re.search(r'PROXY_VERSION\s*=\s*"([^"]+)"', _content)
+        if _m:
+            _proxy_version = _m.group(1)
+    except Exception:
+        pass
+
+# Collect runtime DLLs for Win7 app-local deployment (same as SGAtom)
+_runtime_dir = os.path.join(_spec_dir, '..', '..', '..', 'SpecDetect_UI_Atom', 'SpecDetect_Atom', 'runtime')
 _binaries = []
 if os.path.isdir(_runtime_dir):
     for _dll in _glob.glob(os.path.join(_runtime_dir, '*.dll')):
@@ -39,7 +53,7 @@ a = Analysis(
     ],
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=[],
+    runtime_hooks=[_os.path.join(_spec_dir, '..', 'runtime_hook.py')],
     excludes=[],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
@@ -56,7 +70,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='SOAPProxy_v1.1.8',
+    name=f'SOAPProxy_v{_proxy_version}',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

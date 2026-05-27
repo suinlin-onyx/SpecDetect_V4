@@ -1,6 +1,6 @@
 """SOAP 透明代理 - 仅转发请求，不做任何修改"""
 
-__version__ = "1.1.7"
+__version__ = "1.1.9"
 
 import socket
 import threading
@@ -775,6 +775,10 @@ def handle_http_client(client_socket, target_host, target_port, client_addr):
                 # 记录原始地址
                 logging.info(f"[{log_id}] [{interface_name}] SINK mode detected: original host={original_host}:{original_port}, proxy_port={proxy_port}, stc={stc}")
 
+                # PScan 特殊处理：raw DSCAN 透传 + 二进制保存（sink proxy 已通用支持）
+                if interface_name == 'B_PScan':
+                    logging.info(f"[{log_id}] [B_PScan] SINK raw DSCAN passthrough mode, binary save enabled")
+
                 # 修改请求中 outputchannel: host=sink_output_host, port=proxy_port
                 # sink_output_host 必须是设备能访问的具体IP
                 request_data = modify_outputchannel(request_data, sink_output_host, proxy_port)
@@ -1196,11 +1200,13 @@ def start_sink_proxy(proxy_port: int, original_host: str, original_port: int,
         # 双向透传
         def forward(src, dst, direction):
             total_bytes = 0
+            frame_count = 0
+            buffer = b''
             try:
                 while True:
                     data = src.recv(8192)
                     if not data:
-                        logging.info(f"[SINK/{interface_name}] {direction}: connection closed, {total_bytes} bytes transferred")
+                        logging.info(f"[SINK/{interface_name}] {direction}: connection closed, {total_bytes} bytes transferred, {frame_count} frames")
                         break
                     dst.sendall(data)
                     total_bytes += len(data)
@@ -1211,6 +1217,30 @@ def start_sink_proxy(proxy_port: int, original_host: str, original_port: int,
                             sf.flush()
                     except Exception:
                         pass
+
+                    # PScan: 检测 streamsrc 帧类型用于日志
+                    if interface_name == 'B_PScan' and direction == 'Atom->Host':
+                        buffer += data
+                        while len(buffer) >= 26:
+                            if buffer[:4] != b'\xEE\xEE\xEE\xEE':
+                                # 查找下一个同步头
+                                sync_pos = buffer.find(b'\xEE\xEE\xEE\xEE')
+                                if sync_pos == -1:
+                                    buffer = buffer[-3:] if len(buffer) >= 3 else buffer
+                                    break
+                                buffer = buffer[sync_pos:]
+                                continue
+                            pl = (buffer[18] << 8) | buffer[19]
+                            dt = buffer[24]
+                            frame_len = 26 + pl
+                            if len(buffer) < frame_len:
+                                break
+                            frame_count += 1
+                            dt_names = {12: 'FSCAN', 13: 'DSCAN', 14: 'SGLFREQ'}
+                            dt_name = dt_names.get(dt, f'DT{dt}')
+                            if frame_count <= 5 or frame_count % 50 == 0:
+                                logging.info(f"[SINK/{interface_name}] {direction}: PScan frame #{frame_count} {dt_name} PL={pl} ({frame_len}B)")
+                            buffer = buffer[frame_len:]
             except Exception as e:
                 logging.error(f"[SINK/{interface_name}] {direction} error: {e}")
             finally:

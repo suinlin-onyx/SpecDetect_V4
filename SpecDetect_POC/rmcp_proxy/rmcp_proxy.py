@@ -9,6 +9,8 @@ RMCP TCP 流量监听代理
 4. 实时输出 - 控制台实时显示请求/响应
 """
 
+__version__ = "1.0.1"
+
 import socket
 import struct
 import threading
@@ -16,14 +18,117 @@ import time
 import os
 import json
 import sys
+import re
 from datetime import datetime
-from config import (
-    PROXY_HOST, PROXY_PORT, PROXY_PORT_2, DEVICE_HOST, DEVICE_PORT,
-    LOG_DIR, LOG_LEVEL, RMCP_FRAME_HEADER_SIZE,
-    MSG_TYPE_REQUEST, MSG_TYPE_RESPONSE, MSG_TYPE_DATA_1, MSG_TYPE_DATA_2,
-    ENABLE_JSON_OUTPUT, ENABLE_RAW_OUTPUT, ENABLE_CONNECTIONS_CSV,
-    FUNCID_TO_NAME, NBDTYPE_TO_NAME
-)
+
+# 默认配置
+DEFAULT_CONFIG = """{
+  "proxy": {
+    "listen_host": "127.0.0.1",
+    "listen_port": 9996,
+    "listen_port_2": 9997
+  },
+  "device": {
+    "host": "100.72.95.36",
+    "port": 1449
+  },
+  "log": {
+    "dir": "logs",
+    "level": "DEBUG",
+    "enable_json": true,
+    "enable_raw": true,
+    "enable_connections_csv": true
+  }
+}
+"""
+
+# RMCP 常量
+RMCP_FRAME_HEADER_SIZE = 18
+MSG_TYPE_REQUEST = 90
+MSG_TYPE_RESPONSE = 6
+MSG_TYPE_DATA_1 = 29
+MSG_TYPE_DATA_2 = 95
+
+# funcid -> SOAP接口名称
+FUNCID_TO_NAME = {
+    11: 'B_SglFreqMeas',
+    12: 'B_FScan',
+    14: 'B_MScan',
+    15: 'B_FScan',
+    16: 'B_PScan',
+}
+
+# nBdType -> RMCP回调类型名称
+NBDTYPE_TO_NAME = {
+    0x0B: 'IFANALYSIS',
+    0x0E: 'SGLFREQ',
+    0x0F: 'FSCAN',
+    0x10: 'DSCAN',
+    0x01: 'PSCAN',
+}
+
+
+def load_config() -> dict:
+    """加载配置文件 rmcp_settings.json
+
+    Returns:
+        dict with keys: proxy.listen_host/port/port_2, device.host/port, log.dir/level/...
+    """
+    import sys as _sys
+
+    is_frozen = getattr(_sys, 'frozen', False)
+    if is_frozen:
+        exe_dir = os.path.dirname(_sys.executable)
+    else:
+        exe_dir = os.path.dirname(os.path.abspath(__file__))
+
+    config_dir = os.path.join(exe_dir, 'config')
+    config_file = os.path.join(config_dir, 'rmcp_settings.json')
+
+    if not os.path.exists(config_file):
+        print(f"[CONFIG] Config not found, creating default: {config_file}", file=sys.stderr)
+        try:
+            os.makedirs(config_dir, exist_ok=True)
+            with open(config_file, 'w', encoding='utf-8') as f:
+                f.write(DEFAULT_CONFIG)
+            print(f"[CONFIG] Default config created", file=sys.stderr)
+        except Exception as e:
+            print(f"[CONFIG] Failed to create default config: {e}", file=sys.stderr)
+
+    try:
+        with open(config_file, 'r', encoding='utf-8') as f:
+            cfg = json.load(f)
+            print(f"[CONFIG] Loaded from: {config_file}", file=sys.stderr)
+            return cfg
+    except Exception as e:
+        print(f"[CONFIG] Failed to load {config_file}: {e}", file=sys.stderr)
+
+    print(f"[CONFIG] Using defaults", file=sys.stderr)
+    return json.loads(DEFAULT_CONFIG)
+
+
+_config = load_config()
+
+# 从配置提取参数
+_proxy_cfg = _config.get('proxy', {})
+PROXY_HOST = _proxy_cfg.get('listen_host', '127.0.0.1')
+PROXY_PORT = _proxy_cfg.get('listen_port', 9996)
+PROXY_PORT_2 = _proxy_cfg.get('listen_port_2', 0)
+
+_device_cfg = _config.get('device', {})
+DEVICE_HOST = _device_cfg.get('host', '127.0.0.1')
+DEVICE_PORT = _device_cfg.get('port', 9999)
+
+_log_cfg = _config.get('log', {})
+ENABLE_JSON_OUTPUT = _log_cfg.get('enable_json', True)
+ENABLE_RAW_OUTPUT = _log_cfg.get('enable_raw', True)
+ENABLE_CONNECTIONS_CSV = _log_cfg.get('enable_connections_csv', True)
+LOG_LEVEL = _log_cfg.get('level', 'DEBUG')
+
+if getattr(sys, 'frozen', False):
+    LOG_DIR = os.path.join(os.path.dirname(sys.executable), _log_cfg.get('dir', 'logs'))
+else:
+    LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), _log_cfg.get('dir', 'logs'))
 
 
 class RMCPFrame:
@@ -371,7 +476,6 @@ class CaptureLogger:
                         xml_str = xml_data[xml_start_idx:].decode('gb2312', errors='ignore')
                         frame_info['xml_content'] = xml_str[:500]
                         # 提取 funcid
-                        import re
                         funcid_match = re.search(r'funcid[=,]?\s*["\']?(\d+)', xml_str)
                         if funcid_match:
                             frame_info['funcid'] = int(funcid_match.group(1))
@@ -971,7 +1075,6 @@ class ProxyConnection:
                 return
 
             xml_str = xml_data[xml_start_idx:].decode('gb2312', errors='ignore')
-            import re
             funcid_match = re.search(r'funcid[=,]?\s*["\']?(\d+)', xml_str)
             if funcid_match:
                 funcid = int(funcid_match.group(1))
@@ -1030,7 +1133,7 @@ class ProxyConnection:
 def start_proxy():
     """启动代理服务器"""
     print("=" * 60)
-    print("RMCP TCP Proxy - Traffic Capture Tool")
+    print(f"RMCP TCP Proxy v{__version__} - Traffic Capture Tool")
     print("=" * 60)
 
     # 获取所有需要监听的端口
@@ -1103,6 +1206,10 @@ def start_proxy():
 
 def main():
     """主函数"""
+    if len(sys.argv) > 1 and sys.argv[1] in ('--version', '-V'):
+        print(f'rmcp_proxy v{__version__}')
+        return
+
     if len(sys.argv) > 1 and sys.argv[1] == '--help':
         print("""
 RMCP TCP Proxy - Traffic Capture Tool
