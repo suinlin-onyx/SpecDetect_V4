@@ -277,8 +277,9 @@ def validate_pscan_frame_params(band: dict, mode: str) -> bool:
         return False
 
     # 抽样验证 levels 范围
+    # PScan 编码与 FScan 不同，范围 ~0-15000
     for i, v in enumerate(levels[:min(50, len(levels))]):
-        if v < -1000 or v > 1000:
+        if v < -2000 or v > 15000:
             log(f"[FILTER] validate_pscan_frame_params: levels[{i}]={v} 超出范围",
                 tag=LogTag.FILTER)
             return False

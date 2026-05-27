@@ -157,17 +157,17 @@
         "rmcp_nbdtype_doc": "0x11",
         "callback_types": [
           {
-            "rmcp_nbdtype": "0x01",
-            "rmcp_name": "PSCAN",
-            "note": "实测1671B数据帧"
+            "rmcp_nbdtype": "0x10",
+            "rmcp_name": "DSCAN",
+            "note": "750-1000MHz实测: dwLength=20031, 10001点, reserved=1(长帧)"
           },
           {
-            "rmcp_nbdtype": "0x10",
-            "rmcp_name": "RESP",
-            "note": "实测51B响应帧"
+            "rmcp_nbdtype": "0x06",
+            "rmcp_name": "RESPONSE",
+            "note": "51B响应帧(nMsgType=6)"
           }
         ],
-        "note": "实测nBdType=0x01(PSCAN数据), 0x10(RESP响应), 与文档0x11不符"
+        "note": "实测funcid=16返回nBdType=0x10(DSCAN), 与文档0x11/0x01不符; 0x10与B_FScan共用DSCAN格式"
       },
       "21": {
         "soap_name": "B_FScanDF",

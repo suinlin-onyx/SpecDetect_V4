@@ -63,8 +63,8 @@ NBDTYPE_TO_NAME = {
     0x0B: 'IFANALYSIS',
     0x0E: 'SGLFREQ',
     0x0F: 'FSCAN',
-    0x10: 'DSCAN',
-    0x01: 'PSCAN',
+    0x10: 'DSCAN',    # B_FScan + B_PScan 共用
+    0x01: 'PSCAN',    # 文档值，实测未出现
 }
 
 

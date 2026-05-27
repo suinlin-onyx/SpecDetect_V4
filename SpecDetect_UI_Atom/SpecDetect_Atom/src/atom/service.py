@@ -5,13 +5,12 @@ Atom 服务主类
 整合所有模块，协调 SOAP、streamsrc、RMCP 的交互
 """
 
-__version__ = "1.4.0"
-
 import socket
 import threading
 import time
 from typing import Optional
 
+import version
 from atom.config import load_config, get_config
 from atom.session_manager import SessionManager
 from atom.session import SessionState, StreamSession, BandCollector
@@ -77,7 +76,7 @@ class AtomService:
         if self._running:
             return
 
-        info(f"Atom 服务启动 v{__version__}", LogTag.ATOM)
+        info(f"Atom 服务启动 v{version.ATOM_VERSION}", LogTag.ATOM)
 
         # 启动会话清理线程
         self.session_manager.start_cleanup_thread()
@@ -552,6 +551,9 @@ class AtomService:
             'step': params.get('step', '25000'),
             'gain': params.get('gain', 'AGC'),
             'keepmode': params.get('keepmode', '0'),
+            'rfworkmode': params.get('rfworkmode', '0'),
+            'mfid': params.get('mfid', ''),
+            'equid': params.get('equid', ''),
             'stc': stc,
             'mode': 'pscan',  # PScan 专用模式
             'func_id': 16,  # B_PScan 的 funcid
@@ -666,6 +668,9 @@ class AtomService:
             'frequency': params.get('frequency', str(DEFAULT_FREQUENCY)),
             'ifbw': params.get('ifbw', str(DEFAULT_IFBW)),
             'gain': params.get('gain', 'AGC'),
+            'rfworkmode': params.get('rfworkmode', '0'),
+            'mfid': params.get('mfid', ''),
+            'equid': params.get('equid', ''),
             'stc': stc,
             'mode': 'mscan',  # 标记为 MSCAN 模式
             'func_id': 14,  # B_MScan 的 funcid
@@ -712,6 +717,9 @@ class AtomService:
             'frequency': params.get('frequency', str(DEFAULT_FREQUENCY)),
             'ifbw': params.get('ifbw', str(DEFAULT_IFBW)),
             'gain': params.get('gain', 'AGC'),
+            'rfworkmode': params.get('rfworkmode', '0'),
+            'mfid': params.get('mfid', ''),
+            'equid': params.get('equid', ''),
             'stc': stc,
             'mode': 'sglfreq',  # 标记为 SglFreqMeas 模式
             'func_id': 11,  # B_SglFreqMeas 的 funcid
@@ -1172,47 +1180,54 @@ class AtomService:
         """PScan 专用接收线程（与 FScan 完全解耦）
 
         PScan 设备行为（RMCP 帧格式）：
-        1. 先发 1 个 RMCP 控制帧 (msg_type=6, n_bd_type=16)
-        2. 后续持续发送 RMCP 数据帧 (msg_type=0, 18B头 + DSCAN payload)
+        1. 先发 1 个 RMCP 控制帧 (msg_type=6)
+        2. 后续持续发送 RMCP 数据帧 (msg_type=0, 18B头 + DSCAN payload, nBdType=0x10)
 
-        receive_pscan_raw() 负责：
-        - 统一处理所有 RMCP 帧（控制帧 + 数据帧）
-        - 从数据帧中提取 DSCAN payload 并解析
-        - 通过 callback 返回统一格式的业务数据
+        使用 get_callback_datas() 通用路径解析完整 RMCP 帧（对齐 FScan/SglFreq）。
 
-        PScan 单 band 模式：不经过 BandCollector（那是 FScan 3-band 用的），
+        只处理 nBdType=16 (0x10=DSCAN) 的数据帧，过滤控制帧和其他类型。
         直接存入 session._pscan_band 供 push_loop 使用。
-
         事件驱动：用 _pscan_data_event 通知 push_loop 有新数据到达。
         """
-        # 初始化事件（push_loop 等待此事件）
         session._pscan_data_event = threading.Event()
 
         def pscan_loop():
             recv_count = 0
 
-            def on_dscan_data(data):
-                nonlocal recv_count
-                recv_count += 1
-                stc = session.fscan_params.get('stc', 0)
+            while not session._stop_event.is_set():
+                try:
+                    callback_datas = rmcp_client.get_callback_datas(buffer_size=8192)
+                    if not callback_datas:
+                        time.sleep(0.01)
+                        continue
 
-                band_info = {
-                    'counters': data['counters'],
-                    'levels': data['levels'],
-                    'stc': stc,
-                    '_tm_stamp': data['tm_stamp'],
-                    'n_bd_type': data['n_bd_type'],
-                    'n_arrays': data['n_arrays'],
-                }
+                    for data in callback_datas:
+                        n_bd_type = data.get('n_bd_type')
 
-                # 直接存入 session（PScan 单 band，不走 BandCollector）
-                session._pscan_band = band_info
+                        # 只处理 DSCAN (0x10=16)，过滤控制帧和其他类型
+                        if n_bd_type != 16:
+                            continue
 
-                # 通知 push_loop 有新数据
-                session._pscan_data_event.set()
+                        recv_count += 1
+                        stc = session.fscan_params.get('stc', 0)
 
-            info(f"[PSCAN] 启动原始DSCAN接收: taskid={session.taskid}", LogTag.RMCP)
-            rmcp_client.receive_pscan_raw(on_dscan_data, session._stop_event)
+                        band_info = {
+                            'counters': data['counters'],
+                            'levels': data['levels'],
+                            'stc': stc,
+                            '_tm_stamp': data['tm_stamp'],
+                            'n_bd_type': data['n_bd_type'],
+                            'n_arrays': data['n_arrays'],
+                        }
+
+                        session._pscan_band = band_info
+                        session._pscan_data_event.set()
+
+                except Exception as e:
+                    if not session._stop_event.is_set():
+                        info(f"[PSCAN] 接收数据异常: {e}", LogTag.RMCP)
+                    break
+
             info(f"[PSCAN] 接收线程结束: taskid={session.taskid}, 共{recv_count}帧", LogTag.RMCP)
 
         thread = threading.Thread(target=pscan_loop, daemon=True)
@@ -1287,11 +1302,12 @@ class AtomService:
         gain = params.get('gain', 'AGC')
         mfid = params.get('mfid', '')
         equid = params.get('equid', '')
+        rfworkmode = params.get('rfworkmode', '0')
 
         # 从配置获取设备信息
         stationid = self.config.station_id or '53090001'
-        deviceid = '00106'  # 默认值
-        devicename = 'MS845'  # 默认值
+        deviceid = '00106'
+        devicename = 'MS845'
 
         # 尝试从 preset 获取设备信息
         preset_key = f"{mfid}_{equid}" if mfid and equid else None
@@ -1300,6 +1316,7 @@ class AtomService:
             if preset:
                 stationid = preset.get('station', {}).get('id', stationid)
                 devicename = preset.get('srrc_info', {}).get('equname', devicename)
+                deviceid = preset.get('device_info', {}).get('id', deviceid)
 
         # 转换频率为可读格式 (与真实设备一致)
         def fmt_freq(hz, unit='MHz'):
@@ -1333,7 +1350,7 @@ class AtomService:
             <item name="frequency" value="{frequency}" />
             <item name="ifbw" value="{ifbw}" />
             <item name="gainctrl" value="{gain}" />
-            <item name="rfworkmode" value="0" />
+            <item name="rfworkmode" value="{rfworkmode}" />
             <item name="antpol" value="垂直" />
             <item name="antetype" value="OFF" />
             <item name="ifatt" value="0" />
@@ -1360,7 +1377,7 @@ class AtomService:
             <item name="stopfreq" value="{stopfreq}" />
             <item name="step" value="{step}" />
             <item name="gainctrl" value="{gain}" />
-            <item name="rfworkmode" value="0" />
+            <item name="rfworkmode" value="{rfworkmode}" />
             <item name="keepmode" value="{keepmode}" />
             <item name="antpol" value="垂直" />
             <item name="antetype" value="OFF" />
@@ -1383,7 +1400,7 @@ class AtomService:
             <item name="frequency" value="{frequency}" />
             <item name="ifbw" value="{ifbw}" />
             <item name="gainctrl" value="{gain}" />
-            <item name="rfworkmode" value="0" />
+            <item name="rfworkmode" value="{rfworkmode}" />
             <item name="audioswitch" value="OFF" />
             <item name="demodmode" value="FM" />
             <item name="demodbw" value="200kHz" />
@@ -1415,7 +1432,7 @@ class AtomService:
             <item name="stopfreq" value="{stopfreq}" />
             <item name="step" value="{step}" />
             <item name="gainctrl" value="{gain}" />
-            <item name="rfworkmode" value="0" />
+            <item name="rfworkmode" value="{rfworkmode}" />
             <item name="scanmode" value="{scanmode}" />
             <item name="antpol" value="垂直" />
             <item name="antetype" value="OFF" />

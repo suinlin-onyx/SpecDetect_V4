@@ -155,40 +155,39 @@ def parse_rmcp_frame(frame: bytes) -> Optional[dict]:
 
 
 def parse_dscan_payload(payload: bytes) -> Optional[dict]:
-    """解析 DSCAN (PScan) payload
+    """解析 DSCAN payload（FScan + PScan 共用）
 
-    RMCP DSCAN 帧结构:
+    DSCAN 帧结构:
     - offset 0: n_bd_type (0x10)
-    - offset 1-2: reserved (2 bytes)
-    - offset 3-10: counters (4 x int16)
-    - offset 11+: int16 data points
+    - offset 1-2: reserved (0=短帧, 1=长帧)
+    - offset 3-4: spectrum_length (长帧) / counters[0] (短帧)
+    - offset 5-10: counters/reserved (6 bytes)
+    - offset 11+: int16 spectrum data
 
-    数据点数: (帧大小 - 18 - 11) / 2 = (1240 - 29) / 2 = 605 个 int16
+    短帧 (FScan): reserved=0, ~605点, 帧大小~1240B
+    长帧 (PScan): reserved=1, ~10001点, dwLength~20031B
     """
     if len(payload) < 11:
         return None
 
     try:
         n_bd_type = payload[0]
-
         if n_bd_type != 16:  # 0x10 = DSCAN
             return None
 
-        # counters 从 offset 3 开始 (与 FSCAN 相同)
+        reserved = struct.unpack('<H', payload[1:3])[0]
         counters = struct.unpack('<4h', payload[3:11])
         spectrum_offset = 11
 
-        # 数据点数从帧大小计算
-        # RMCP 帧头 = 18 bytes
-        # DSCAN 帧大小 = 1240 bytes
-        # payload = 1240 - 18 = 1222 bytes
-        # 数据 = payload - 11 (counters 前的数据) = 1222 - 11 = 1211 bytes
-        # 数据点 = 1211 / 2 = 605 个 int16
-        n_arrays = (len(payload) - 11) // 2
+        if reserved == 1:
+            # 长帧：spectrum_length 在 bytes 3-4，精确点数
+            spectrum_length = struct.unpack('<H', payload[3:5])[0]
+            n_arrays = spectrum_length
+        else:
+            # 短帧：从 payload 大小推算
+            n_arrays = (len(payload) - 11) // 2
 
-        # counters[0] = 1441 (总通道数)，不是帧内数据点数
-        # 所以用帧大小计算更准确
-        if n_arrays == 0 or n_arrays > 2000:
+        if n_arrays == 0 or n_arrays > 12000:
             return None
 
         levels = []

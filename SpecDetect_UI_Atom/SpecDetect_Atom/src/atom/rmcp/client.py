@@ -19,6 +19,7 @@ from .frame import (
     VERSION,
     FILETIME_MIN,
     FILETIME_MAX,
+    MAX_FRAME_SIZE,
 )
 
 
@@ -131,9 +132,9 @@ class RMCPClient:
                 dw_length = struct.unpack('<I', buffer[i:i + 4])[0]
                 tm_stamp = struct.unpack('<Q', buffer[i + 4:i + 12])[0]
 
-                # 宽松验证：dwLength合理(18-10000) + tmStamp在有效范围内
-                # DSCAN帧可能达到8000+字节
-                if 18 <= dw_length <= 10000 and FILETIME_MIN <= tm_stamp <= FILETIME_MAX:
+                # 宽松验证：dwLength合理(18-MAX_FRAME_SIZE) + tmStamp在有效范围内
+                # PScan DSCAN帧可达20031B，用MAX_FRAME_SIZE(65535)做硬上限
+                if 18 <= dw_length <= MAX_FRAME_SIZE and FILETIME_MIN <= tm_stamp <= FILETIME_MAX:
                     candidates.append((i, dw_length, tm_stamp))
 
         if candidates:
