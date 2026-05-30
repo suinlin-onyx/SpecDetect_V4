@@ -72,40 +72,6 @@ _DT_PSCANLEVEL = 101
 _DT_PSCANITU = 8
 _DT_UUID = 33  # UUID 注册帧
 
-# PScan FSCAN 帧常量
-_PSCAN_TOTAL_POINTS = 1441
-_PSCAN_RMCP_POINTS = 605  # 旧值，保留兼容
-_PSCAN_HIGH_FREQ_POINTS = 836
-_PSCAN_HIGH_FREQ_DBM = -88.0
-
-# RMCP 80-180MHz (4001点, 25kHz步长) → streamsrc 137-173MHz (1441点) 频率映射
-# 137MHz = RMCP index (137-80)/0.025 = 2280
-# 173MHz = RMCP index (173-80)/0.025 = 3720
-# slice [2280:3721] = 1441 points
-_PSCAN_RMCPCENTER_START = 2280  # RMCP 80MHz起始，137MHz对应索引
-_PSCAN_RMCPCENTER_END = 3721   # RMCP 80MHz起始，173MHz对应索引+1
-
-# PScan PL与Payload/Indicator映射（与真实设备对齐）
-_PSCAN_PL_PAYLOAD_MAP = {
-    104: 34,
-    360: 162,
-    616: 290,
-    872: 418,
-}
-_PSCAN_PL_START_INDEX_MAP = {
-    104: 0,
-    360: 0,
-    616: 0,
-    872: 0,
-}
-_PSCAN_PL_INDICATOR_MAP = {
-    104: 0x0068,
-    360: 0x0168,
-    616: 0x0268,
-    872: 0x0368,
-}
-
-
 def _get_streamsrc_timestamp() -> bytes:
     """生成与真实设备匹配的 streamsrc 时间戳 (8 bytes)"""
     now = time.localtime()
@@ -147,34 +113,6 @@ def _get_fscan_type(start_index: int) -> bytes:
         return _FSCAN_TYPE_529
     else:
         return _FSCAN_TYPE_434
-
-
-def _get_pscan_indicator(pl: int) -> int:
-    """根据PL值返回PScan FSCAN Indicator"""
-    return _PSCAN_PL_INDICATOR_MAP.get(pl, 0x0068)
-
-
-def _get_pscan_start_index(pl: int) -> int:
-    """根据PL值返回PScan起始频率序号"""
-    return _PSCAN_PL_START_INDEX_MAP.get(pl, 0)
-
-
-def _get_pscan_metadata(start_index: int = 0) -> bytes:
-    """获取PScan FSCAN帧的Metadata (33字节)
-
-    所有帧使用同一份 metadata（与真实设备一致）:
-    - start_index=0 (全频段)
-    - 1441 通道
-    - bytes 16-19: 设备值 (待确认含义)
-    - bytes 29-30: 0x05a1 (1441)
-    """
-    return bytes([
-        0x01, 0xa1, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x80, 0xe8, 0x54, 0xa0, 0x41, 0x00, 0x00, 0x00,
-        0x80, 0x8a, 0x9f, 0xa4, 0x41, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x50, 0xc3, 0x46, 0xa1, 0x05, 0x00,
-        0x00
-    ])
 
 
 def build_uuid_frame(taskid: str, stc: int = None, ts: bytes = None) -> bytes:
@@ -264,52 +202,62 @@ def build_fscan_frame(spectrum_dbm: list, start_index: int = 0, stc: int = None,
     return bytes(frame)
 
 
-def build_pscan_fscan_frame(rmcp_levels: list, pl: int, stc: int = 0, ts: bytes = None) -> bytes:
-    """构建PScan streamsrc FSCAN帧 (DT=12)
+def build_pscan_stream_frame(rmcp_levels: list, stc: int = 0, ts: bytes = None,
+                             frame_idx: int = 0,
+                             start_freq_hz: float = 750000000.0,
+                             stop_freq_hz: float = 1000000000.0,
+                             step_hz: float = 25000.0) -> bytes:
+    """构建PScan streamsrc FSCAN帧 (DT=12)，对齐 RXAtom 输出格式
 
-    与真实设备对齐:
-    - FScanType = 0x0b (IFANALYSIS)
-    - 所有帧使用同一份 metadata (start_index=0, 1441ch)
-    - PL 值决定 indicator 和 payload_points
-    - RMCP 4001点 (80-180MHz) → 选取 137-173MHz 子带 (indices 2280-3720, 1441点)
+    与 RXAtom 真实设备对齐:
+    - 全频段数据在一个帧内，不切子带
+    - int16 LE 编码 (raw_val/10)
+    - 动态 metadata (频率参数从外部传入)
+    - indicator 简单递增: 0x0148 → 0x0248 → 0x0348 → ...
 
     Args:
-        rmcp_levels: RMCP DSCAN数据，int16 (4001点, 80-180MHz)
-        pl: PL值 (360/616/872)
+        rmcp_levels: RMCP DSCAN int16 全频段数据
         stc: 通道标识
         ts: 时间戳 (可选)
+        frame_idx: 帧序号 (控制 indicator 递增)
+        start_freq_hz: 起始频率 Hz
+        stop_freq_hz: 结束频率 Hz
+        step_hz: 步长 Hz
 
     Returns:
-        streamsrc FSCAN帧 bytes (2944B)
+        streamsrc FSCAN帧 bytes
     """
     if ts is None:
         ts = _get_streamsrc_timestamp()
 
-    # 1. 从 RMCP 4001点中选取 137-173MHz 子带 (1441点)
-    #    RMCP 覆盖 80-180MHz, 25kHz步长
-    #    137MHz = index 2280, 173MHz = index 3720
-    sub_band = rmcp_levels[_PSCAN_RMCPCENTER_START:_PSCAN_RMCPCENTER_END]
+    n_points = len(rmcp_levels)
 
-    # 如果 RMCP 数据不足 3721 点，用 0 填充
-    if len(sub_band) < _PSCAN_TOTAL_POINTS:
-        sub_band = list(sub_band) + [0] * (_PSCAN_TOTAL_POINTS - len(sub_band))
+    # 1. Indicator: 0x0148 + frame_idx * 0x0100
+    indicator = 0x0148 + frame_idx * 0x0100
 
-    # 2. 获取参数（所有帧统一 metadata，PL 仅控制 indicator）
-    indicator = _get_pscan_indicator(pl)
-    metadata = _get_pscan_metadata()
+    # 2. Metadata 33B 布局 (对齐 RXAtom 二进制输出):
+    #   [0]     n_bands             UINT8
+    #   [1-2]   n_points_total      UINT16 LE
+    #   [3-4]   reserved            (2B)
+    #   [5-12]  start_freq          double LE
+    #   [13-20] stop_freq           double LE
+    #   [21-24] frame_start_index   UINT32 LE (= 0)
+    #   [25-28] step                float32 LE
+    #   [29-30] n_points_in_frame   UINT16 LE
+    #   [31-32] reserved            (2B)
+    metadata = bytearray(33)
+    metadata[0] = 1  # n_bands
+    struct.pack_into('<H', metadata, 1, n_points)
+    struct.pack_into('<d', metadata, 5, start_freq_hz)
+    struct.pack_into('<d', metadata, 13, stop_freq_hz)
+    struct.pack_into('<I', metadata, 21, 0)         # frame_start_index = 0
+    struct.pack_into('<f', metadata, 25, step_hz)   # step as float32
+    struct.pack_into('<H', metadata, 29, n_points)  # n_points_in_frame
 
-    # 3. 频谱数据编码 (与真实设备对齐: 第二字节 0x00)
+    # 3. 频谱编码: RMCP int16 / 10 → int16 LE
     spectrum_data = b''
-    for i in range(_PSCAN_TOTAL_POINTS):
-        raw_val = sub_band[i]
-        # RMCP int16 ÷ 10 = dBm, 再编码为单字节 (0-255)
-        dbm = raw_val / 10.0
-        if dbm < 0:
-            byte_val = int(256 + dbm)  # 负dBm: 256+dbm (如 -88 → 168)
-        else:
-            byte_val = min(int(dbm), 255)  # 正dBm: 直接取整, 限制255
-        # 与真实设备对齐: 第二字节始终 0x00
-        spectrum_data += bytes([byte_val & 0xFF, 0x00])
+    for raw_val in rmcp_levels:
+        spectrum_data += struct.pack('<h', int(raw_val / 10.0))
 
     # 4. 组装帧
     dl = len(metadata) + len(spectrum_data)
@@ -325,7 +273,7 @@ def build_pscan_fscan_frame(rmcp_levels: list, pl: int, stc: int = 0, ts: bytes 
     frame[20:24] = _FSCAN_TYPE_PSCAN  # 0x0b (IFANALYSIS)
     frame[24] = _DT_FSCAN
     struct.pack_into('<I', frame, 25, dl)
-    frame[29:62] = metadata
+    frame[29:62] = bytes(metadata)
     frame[62:] = spectrum_data
 
     return bytes(frame)

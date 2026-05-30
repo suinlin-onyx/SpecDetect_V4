@@ -105,3 +105,61 @@ def build_fscan_frame(levels_int16: list,
     struct.pack_into('<I', frame, 25, dl)
     frame[29:29 + dl] = data
     return bytes(frame)
+
+
+def build_pscan_frame(levels_raw: list,
+                      stc: int,
+                      start_freq_hz: float = 750000000.0,
+                      stop_freq_hz: float = 1000000000.0,
+                      step_hz: float = 25000.0) -> bytes:
+    """构建标准 PScan 频谱帧 (DT=12, GWJ004 24B 帧头)
+
+    DATA = metadata(33B) + spectrum(int16 LE)
+    频谱编码: RMCP int16 / 10 → int16 LE（与 RXAtom 对齐）
+
+    Args:
+        levels_raw: RMCP DSCAN int16 全频段电平数据
+        stc: 通道标识
+        start_freq_hz: 起始频率 Hz
+        stop_freq_hz: 结束频率 Hz
+        step_hz: 步长 Hz
+
+    Returns:
+        GWJ004 标准帧 bytes
+    """
+    n_points = len(levels_raw)
+
+    # Metadata 33B 布局 (对齐 RXAtom 二进制输出):
+    #   [0]     n_bands             UINT8
+    #   [1-2]   n_points_total      UINT16 LE
+    #   [3-4]   reserved            (2B)
+    #   [5-12]  start_freq          double LE
+    #   [13-20] stop_freq           double LE
+    #   [21-24] frame_start_index   UINT32 LE (= 0)
+    #   [25-28] step                float32 LE
+    #   [29-30] n_points_in_frame   UINT16 LE
+    #   [31-32] reserved            (2B)
+    metadata = bytearray(33)
+    metadata[0] = 1  # n_bands
+    struct.pack_into('<H', metadata, 1, n_points)
+    struct.pack_into('<d', metadata, 5, start_freq_hz)
+    struct.pack_into('<d', metadata, 13, stop_freq_hz)
+    struct.pack_into('<I', metadata, 21, 0)         # frame_start_index = 0
+    struct.pack_into('<f', metadata, 25, step_hz)   # step as float32
+    struct.pack_into('<H', metadata, 29, n_points)  # n_points_in_frame
+
+    # 频谱编码: RMCP int16 / 10 → int16 LE
+    spectrum = b''
+    for raw_val in levels_raw:
+        spectrum += struct.pack('<h', int(raw_val / 10.0))
+
+    data = bytes(metadata) + spectrum
+    dl = len(data)
+    pl = 1 + 4 + dl  # DT(1) + DL(4) + DATA
+
+    frame = bytearray(24 + pl)
+    frame[0:24] = build_frame_header(stc, pl)
+    frame[24] = DT_FSCAN
+    struct.pack_into('<I', frame, 25, dl)
+    frame[29:29 + dl] = data
+    return bytes(frame)
