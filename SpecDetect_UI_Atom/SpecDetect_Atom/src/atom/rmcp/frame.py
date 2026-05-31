@@ -269,15 +269,16 @@ def parse_fscan_payload(payload: bytes) -> Optional[dict]:
 
     支持的 n_bd_type:
     - 15 (FSCAN): 512/417 点, counters@3, spectrum@11
-    - 11/0x0B (IFANALYSIS): 1601 点, counters@3, freq_meta@11, spectrum@19
+    - 11/0x0B (IFANALYSIS): counters[0]=1601, freq_meta@11, marker@19, spectrum@21
 
     IFANALYSIS payload 结构:
     - [0]: n_bd_type (0x0b)
     - [1:3]: reserved
-    - [3:11]: counters (4×int16 LE), counters[0]=n_arrays
+    - [3:11]: counters (4×int16 LE), counters[0]=n_arrays (含标记)
     - [11:15]: center_frequency (int32 LE, Hz)
     - [15:19]: reserved
-    - [19:]: spectrum data (n_arrays × int16 LE)
+    - [19:21]: frame_marker (int16 LE, 帧序号标记, 非频谱数据)
+    - [21:]: spectrum data ((n_arrays-1) × int16 LE, dBm×10)
     """
     if len(payload) < 11:
         return None
@@ -290,7 +291,7 @@ def parse_fscan_payload(payload: bytes) -> Optional[dict]:
             spectrum_offset = 11
         elif n_bd_type in (11, 0x0B):
             counters = struct.unpack('<4h', payload[3:11])
-            spectrum_offset = 19  # 跳过 8 字节频率元数据 (center_freq + reserved)
+            spectrum_offset = 21  # 跳过频率元数据(8B) + 帧序号标记int16(2B)
         else:
             counters = struct.unpack('<4h', payload[3:11])
             spectrum_offset = 11
@@ -304,7 +305,9 @@ def parse_fscan_payload(payload: bytes) -> Optional[dict]:
             if n_arrays != 1:
                 return None
         elif n_bd_type in (11, 0x0B):
-            if n_arrays == 0 or n_arrays > 2000:
+            # counters[0]=1601, 帧序号标记@payload[19:21]已被spectrum_offset=21跳过
+            # payload[21:]的1601个值均为有效频谱数据，不需减1
+            if n_arrays <= 0 or n_arrays > 2000:
                 return None
         else:
             return None

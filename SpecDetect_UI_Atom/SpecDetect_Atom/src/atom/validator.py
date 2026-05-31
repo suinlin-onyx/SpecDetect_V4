@@ -225,7 +225,7 @@ def validate_sglfreq_frame_params(band: dict, mode: str) -> bool:
     levels = band.get('levels', [])
     n_arrays = band.get('n_arrays', 0)
 
-    # SglFreq IFANALYSIS: 通常 1601 点
+    # SglFreq IFANALYSIS: 1601 点 (raw dBμV×100, 含首点标记)
     if n_arrays <= 0 or n_arrays > 2000:
         log(f"[FILTER] validate_sglfreq_frame_params: n_arrays={n_arrays} 超出范围",
             tag=LogTag.FILTER)
@@ -236,11 +236,9 @@ def validate_sglfreq_frame_params(band: dict, mode: str) -> bool:
             tag=LogTag.FILTER)
         return False
 
-    # 抽样验证 levels 范围
-    # SglFreq IFANALYSIS 数据范围极宽: -320dBm ~ +80dBm (dBm×10)
-    # 只检查下限，上限不限制因为 IFANALYSIS 可能收到强信号
+    # 抽样验证 levels 范围 (raw dBμV×100, 可低至 -40dBμV = -4000)
     for i, v in enumerate(levels[:min(50, len(levels))]):
-        if v < -3200:
+        if v < -4000:
             log(f"[FILTER] validate_sglfreq_frame_params: levels[{i}]={v} 超出范围",
                 tag=LogTag.FILTER)
             return False

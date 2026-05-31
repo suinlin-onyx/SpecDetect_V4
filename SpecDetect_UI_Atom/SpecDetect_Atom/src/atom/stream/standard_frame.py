@@ -17,8 +17,9 @@ VER_MINOR = 0
 EL_DEFAULT = 0
 
 # === DT 值 (GWJ004 §5.14) ===
-DT_UUID = 102   # UUID 注册帧
-DT_FSCAN = 12   # FSCAN 频谱数据
+DT_UUID = 102       # UUID 注册帧
+DT_FSCAN = 12       # FSCAN 频谱数据
+DT_SPECTRUM = 7     # 频谱数据 (单频测量结果)
 
 
 def build_standard_ts() -> bytes:
@@ -160,6 +161,54 @@ def build_pscan_frame(levels_raw: list,
     frame = bytearray(24 + pl)
     frame[0:24] = build_frame_header(stc, pl)
     frame[24] = DT_FSCAN
+    struct.pack_into('<I', frame, 25, dl)
+    frame[29:29 + dl] = data
+    return bytes(frame)
+
+
+def build_sglfreq_frame(levels_raw: list,
+                        stc: int,
+                        center_freq_hz: float = 97100000.0,
+                        ifbw_hz: float = 40000000.0) -> bytes:
+    """构建 SglFreq IFANALYSIS 频谱帧 (DT=7, GWJ004 24B 帧头 + 25B streamsrc meta)
+
+    Java 客户端对 DT=7 (spectrum) 帧使用 25B streamsrc 元数据布局，
+    与 PScan/FScan 使用的 33B 布局不同。此处匹配 RXAtom 已验证的格式。
+
+    Body = 25B meta + spectrum(n) × int16 LE
+    n_points = len(levels_raw) = 1601
+
+    Args:
+        levels_raw: RMCP IFANALYSIS int16 频谱数据 (int(v/10) 截断后, 1601点含首点标记)
+        stc: 通道标识
+        center_freq_hz: 中心频率 Hz (保留参数, 25B meta 中不使用)
+        ifbw_hz: 中频带宽 Hz (保留参数)
+    """
+    n_real = len(levels_raw)
+    n_points = n_real  # = 1601, 直接使用所有值 (无合成标记)
+
+    # 25B streamsrc 元数据布局 (与 frame.py build_pscan_spectrum_frame 一致)
+    metadata = bytearray(25)
+    metadata[0] = 0x00                      # streamsrc 格式标识
+    struct.pack_into('<I', metadata, 1, n_points)   # [1:5]: n_points (UINT32 LE)
+    # [5:21]: 设备固定元数据 (与旧 frame.py 对齐)
+    metadata[5:9] = bytes([0x00, 0x00, 0x00, 0x00])
+    metadata[9:17] = bytes([0xd0, 0x12, 0x93, 0x41, 0x00, 0x50, 0xc3, 0x46])
+    metadata[17:21] = bytes([0x00, 0x00, 0x00, 0x00])
+    struct.pack_into('<I', metadata, 21, n_points)  # [21:25]: n_points 重复
+
+    # 频谱编码: 直接写入所有数据 (int16 LE, 与 v1.4.9 RXAtom 一致)
+    spectrum = b''
+    for raw_val in levels_raw:
+        spectrum += struct.pack('<h', raw_val)
+
+    data = bytes(metadata) + spectrum
+    dl = len(data)
+    pl = 1 + 4 + dl
+
+    frame = bytearray(24 + pl)
+    frame[0:24] = build_frame_header(stc, pl)
+    frame[24] = DT_SPECTRUM
     struct.pack_into('<I', frame, 25, dl)
     frame[29:29 + dl] = data
     return bytes(frame)

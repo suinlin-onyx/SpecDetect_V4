@@ -22,7 +22,7 @@ from atom.fscan_processor import FScanProcessor
 from atom.stream.frame import (
     build_fscan_frame, build_fscan_frame_434, build_mscan_frame,
     build_pscan_spectrum_frame, build_pscan_level_frame, build_pscan_itu_frame,
-    build_pscan_fscan_frame, DEFAULT_FREQUENCY, DEFAULT_IFBW
+    DEFAULT_FREQUENCY, DEFAULT_IFBW
 )
 from atom.validator import validate_bd_type, validate_band_structure, validate_frame_params
 from preset.device_preset import DevicePresetManager
@@ -281,11 +281,7 @@ class AtomService:
             sink_socket.connect((sink_host, sink_port))
             info(f"B_FScan Sink: 已连接 {sink_host}:{sink_port}", LogTag.SESSION)
 
-            # 发送 UUID 注册帧（与 RXAtomSvcV3 对齐）
-            from atom.stream.standard_frame import build_uuid_frame
-            uuid_frame = build_uuid_frame(taskid, stc)
-            sink_socket.sendall(uuid_frame)
-            info(f"B_FScan Sink: 已发送 UUID 注册帧 ({len(uuid_frame)}B)", LogTag.STREAM)
+            # UUID 帧延迟到首帧频谱数据就绪后发送，避免 SINK 连接空闲超时
         except Exception as e:
             error(f"B_FScan Sink: 连接失败 {sink_host}:{sink_port} - {e}", LogTag.SESSION)
             if sink_socket:
@@ -410,6 +406,19 @@ class AtomService:
                                 info(f"[SINK] push_loop 运行中 #{push_count}: 等待band数据...", LogTag.STREAM)
                             continue
 
+                        # 延迟发送 UUID 帧：首帧频谱数据就绪后再发，避免 SINK 连接空闲超时
+                        if not getattr(session, '_uuid_sent', False):
+                            from atom.stream.standard_frame import build_uuid_frame
+                            uuid_frame = build_uuid_frame(session.taskid, stc)
+                            try:
+                                session.outputchannel_forwarder.sendall(uuid_frame)
+                                session._uuid_sent = True
+                                info(f"[SINK] FScan: 已发送 UUID 注册帧 ({len(uuid_frame)}B)", LogTag.STREAM)
+                            except Exception as e:
+                                info(f"[SINK] 发送 UUID 帧失败: {e}", LogTag.STREAM)
+                                session._stop_event.set()
+                                break
+
                         for band in all_bands:
                             start_idx = band.get('counters', [0, 0, 0])[2]
                             levels = band.get('levels', [])
@@ -482,22 +491,67 @@ class AtomService:
                         if not band_info or not band_info.get('levels'):
                             continue
 
+                        # 延迟发送 UUID 帧：首帧频谱数据就绪后再发，避免 SINK 连接空闲超时
+                        if not getattr(session, '_uuid_sent', False):
+                            from atom.stream.standard_frame import build_uuid_frame
+                            uuid_frame = build_uuid_frame(session.taskid, stc)
+                            try:
+                                session.outputchannel_forwarder.sendall(uuid_frame)
+                                session._uuid_sent = True
+                                info(f"[SINK] SglFreq: 已发送 UUID 注册帧 ({len(uuid_frame)}B)", LogTag.STREAM)
+                            except Exception as e:
+                                info(f"[SINK] 发送 UUID 帧失败: {e}", LogTag.STREAM)
+                                session._stop_event.set()
+                                break
+
                         session._latest_band_info = band_info
 
+                        # 3帧循环: DT=7 频谱 → DT=101 电平 → DT=8 ITU (与 RXAtom 一致)
                         if self._push_frame:
-                            for frame_idx in range(3):
-                                frame = self._push_frame(session, None)
-                                if frame and session.outputchannel_forwarder:
-                                    try:
-                                        sent = session.outputchannel_forwarder.send(frame)
-                                        if sent > 0:
-                                            session.outputchannel_frame_count += 1
-                                    except Exception as e:
-                                        info(f"[SINK] 发送帧失败: {e}", LogTag.STREAM)
-                                        session._stop_event.set()
-                                        break
+                            # Frame 1: DT=7 频谱帧
+                            spectrum_frame = self._push_frame(session, None)
+                            if spectrum_frame and session.outputchannel_forwarder:
+                                try:
+                                    session.outputchannel_forwarder.send(spectrum_frame)
+                                    session.outputchannel_frame_count += 1
                                     sglfreq_frame_count += 1
-                                    info(f"[SINK] SglFreq#{sglfreq_frame_count} {len(frame)}B", LogTag.STREAM)
+                                    info(f"[SINK] SglFreq#{sglfreq_frame_count} DT=7频谱 {len(spectrum_frame)}B", LogTag.STREAM)
+                                except Exception as e:
+                                    info(f"[SINK] 发送频谱帧失败: {e}", LogTag.STREAM)
+                                    session._stop_event.set()
+                                    break
+
+                            # Frame 2: DT=101 电平帧 (max_raw/10 & 0xFF)
+                            raw_levels = band_info['levels']
+                            max_raw = max(raw_levels)
+                            level_val = int(max_raw / 10) & 0xFF
+                            from atom.stream.frame import build_pscan_level_frame
+                            level_frame = build_pscan_level_frame(level_val, stc=stc)
+                            if level_frame and session.outputchannel_forwarder:
+                                try:
+                                    session.outputchannel_forwarder.send(level_frame)
+                                    session.outputchannel_frame_count += 1
+                                    sglfreq_frame_count += 1
+                                    info(f"[SINK] SglFreq#{sglfreq_frame_count} DT=101电平 {len(level_frame)}B level={level_val}", LogTag.STREAM)
+                                except Exception as e:
+                                    info(f"[SINK] 发送电平帧失败: {e}", LogTag.STREAM)
+                                    session._stop_event.set()
+                                    break
+
+                            # Frame 3: DT=8 ITU帧 (max_raw / 10.0)
+                            itu_val = max_raw / 10.0
+                            from atom.stream.frame import build_pscan_itu_frame
+                            itu_frame = build_pscan_itu_frame(itu_val, stc=stc)
+                            if itu_frame and session.outputchannel_forwarder:
+                                try:
+                                    session.outputchannel_forwarder.send(itu_frame)
+                                    session.outputchannel_frame_count += 1
+                                    sglfreq_frame_count += 1
+                                    info(f"[SINK] SglFreq#{sglfreq_frame_count} DT=8ITU {len(itu_frame)}B ITU={itu_val:.2f}", LogTag.STREAM)
+                                except Exception as e:
+                                    info(f"[SINK] 发送ITU帧失败: {e}", LogTag.STREAM)
+                                    session._stop_event.set()
+                                    break
 
                     elif mode == 'pscan':
                         data_event = getattr(session, '_pscan_data_event', None)
@@ -511,6 +565,19 @@ class AtomService:
 
                         band = getattr(session, '_pscan_band', None)
                         if band and self._push_frame:
+                            # 延迟发送 UUID 帧：首帧频谱数据就绪后再发，避免 SINK 连接空闲超时
+                            if not getattr(session, '_uuid_sent', False):
+                                from atom.stream.standard_frame import build_uuid_frame
+                                uuid_frame = build_uuid_frame(session.taskid, stc)
+                                try:
+                                    session.outputchannel_forwarder.sendall(uuid_frame)
+                                    session._uuid_sent = True
+                                    info(f"[SINK] PScan: 已发送 UUID 注册帧 ({len(uuid_frame)}B)", LogTag.STREAM)
+                                except Exception as e:
+                                    info(f"[SINK] 发送 UUID 帧失败: {e}", LogTag.STREAM)
+                                    session._stop_event.set()
+                                    break
+
                             frame = self._push_frame(session, band)
                             if frame and session.outputchannel_forwarder:
                                 try:
@@ -613,11 +680,7 @@ class AtomService:
             sink_socket.settimeout(10)
             sink_socket.connect((sink_host, sink_port))
             info(f"B_PScan Sink: 已连接 {sink_host}:{sink_port}", LogTag.SESSION)
-
-            from atom.stream.standard_frame import build_uuid_frame
-            uuid_frame = build_uuid_frame(taskid, stc)
-            sink_socket.sendall(uuid_frame)
-            info(f"B_PScan Sink: 已发送 UUID 注册帧 ({len(uuid_frame)}B)", LogTag.STREAM)
+            # UUID 帧延迟到首帧频谱数据就绪后发送，避免 SINK 连接空闲超时
         except Exception as e:
             error(f"B_PScan Sink: 连接失败 {sink_host}:{sink_port} - {e}", LogTag.SESSION)
             if sink_socket:
@@ -785,10 +848,7 @@ class AtomService:
             sink_socket.connect((sink_host, sink_port))
             info(f"B_SglFreqMeas Sink: 已连接 {sink_host}:{sink_port}", LogTag.SESSION)
 
-            from atom.stream.standard_frame import build_uuid_frame
-            uuid_frame = build_uuid_frame(taskid, stc)
-            sink_socket.sendall(uuid_frame)
-            info(f"B_SglFreqMeas Sink: 已发送 UUID 注册帧 ({len(uuid_frame)}B)", LogTag.STREAM)
+            # UUID 帧延迟到首帧频谱数据就绪后发送，避免 SINK 连接空闲超时
         except Exception as e:
             error(f"B_SglFreqMeas Sink: 连接失败 {sink_host}:{sink_port} - {e}", LogTag.SESSION)
             if sink_socket:
@@ -1514,7 +1574,7 @@ class AtomService:
 
             elif mode == 'sglfreq':
                 # === Layer 3: SglFreq 封帧前验证 ===
-                # 从 session 获取最新 RMCP 回调数据
+                # 从 session 获取最新 RMCP IFANALYSIS 回调数据
                 if band is None:
                     band = getattr(session, '_latest_band_info', None)
 
@@ -1526,47 +1586,24 @@ class AtomService:
                     return None
 
                 frequency = int(session.fscan_params.get('frequency', DEFAULT_FREQUENCY))
+                ifbw = int(session.fscan_params.get('ifbw', 40000000))
                 stc = session.fscan_params.get('stc', 0)
 
-                # RMCP IFANALYSIS 回调: levels 为 int16 (dBm×10)
-                # parse_fscan_payload 已跳过频率元数据，levels 直接是频谱值
+                # RMCP IFANALYSIS levels 为 int16 (payload[21:], 1601点), int(v/10) 向零截断写入 int16 LE
+                # 与 v1.4.9 RXAtom 编码一致 (RMCP raw → int(v/10) truncation, NOT floor division)
                 raw_levels = band['levels']
+                dbm_levels = [int(v / 10) for v in raw_levels]
 
-                # 电平值: 取频谱最大值 (int16 dBm×10 → dBm 整数)
-                max_raw = max(raw_levels) if raw_levels else -1000
-                max_dbm = max_raw / 10.0
-                dbm_level = max_raw // 10
+                max_dbm = max(dbm_levels) if dbm_levels else -200
+                info(f"[STREAM<-] SglFreq: {len(dbm_levels)}点, max={max_dbm}dBm", LogTag.STREAM)
 
-                # ITU 值: 使用频谱均值估算 (设备 ITU 算法未公开)
-                avg_raw = sum(raw_levels) / len(raw_levels) if raw_levels else -1000
-                itu_value = abs(avg_raw / 10.0)
-
-                info(f"[STREAM<-] SglFreq 真实数据: {len(raw_levels)}点, max={max_dbm:.1f}dBm, level={dbm_level}, ITU={itu_value:.2f}", LogTag.STREAM)
-
-                # 获取或初始化帧索引
-                frame_idx = getattr(session, '_sglfreq_frame_idx', 0)
-
-                if frame_idx == 0:
-                    # 帧1: 频谱帧 (DT:7, 3256B)
-                    # RMCP levels 是 dBm×10 格式 (如 -849 = -84.9 dBm)
-                    # 转为 dBm 整数后写入 streamsrc 帧
-                    dbm_levels = [v // 10 for v in raw_levels]
-                    frame = build_pscan_spectrum_frame(
-                        dbm_levels, stc=stc
-                    )
-                elif frame_idx == 1:
-                    # 帧2: 电平帧 (DT:101, 40B)
-                    frame = build_pscan_level_frame(
-                        dbm_level, stc=stc
-                    )
-                else:
-                    # 帧3: ITU 帧 (DT:8, 36B)
-                    frame = build_pscan_itu_frame(
-                        itu_value, stc=stc
-                    )
-
-                # 更新帧索引 (0->1->2->0 循环)
-                session._sglfreq_frame_idx = (frame_idx + 1) % 3
+                # GWJ004 标准帧 (DT=12 FSCAN, 24B 标准帧头)
+                from atom.stream.standard_frame import build_sglfreq_frame
+                frame = build_sglfreq_frame(
+                    dbm_levels, stc=stc,
+                    center_freq_hz=frequency,
+                    ifbw_hz=ifbw
+                )
 
                 return frame
 
@@ -1582,17 +1619,15 @@ class AtomService:
 
                     info(f"[STREAM<-] PScan 真实数据: {len(levels_raw)} points", LogTag.STREAM)
 
-                    # PL值轮询：与真实设备一致
-                    if not hasattr(session, '_pscan_pl_sequence'):
-                        session._pscan_pl_sequence = [872, 616, 360, 104, 872, 616]
-                        session._pscan_frame_idx = 0
-                    pl = session._pscan_pl_sequence[session._pscan_frame_idx % len(session._pscan_pl_sequence)]
-                    session._pscan_frame_idx += 1
-
-                    frame = build_pscan_fscan_frame(
+                    # 频率参数从 session 获取
+                    p = session.fscan_params
+                    from atom.stream.standard_frame import build_pscan_frame
+                    frame = build_pscan_frame(
                         levels_raw,
-                        pl=pl,
-                        stc=stc
+                        stc=stc,
+                        start_freq_hz=float(p.get('startfreq', '750000000')),
+                        stop_freq_hz=float(p.get('stopfreq', '1000000000')),
+                        step_hz=float(p.get('step', '25000')),
                     )
                     return frame
                 else:
