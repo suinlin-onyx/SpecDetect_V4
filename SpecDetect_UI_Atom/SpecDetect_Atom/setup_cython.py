@@ -23,6 +23,7 @@ setup(
         [
             os.path.join(_LICENSE_DIR, 'manager.py'),
             os.path.join(_LICENSE_DIR, 'hardware.py'),
+            os.path.join(_LICENSE_DIR, 'crypto.py'),
         ],
         compiler_directives={
             'language_level': '3',

@@ -45,7 +45,7 @@ Logger.init(log_dir=log_dir, log_level=log_level)
 
 # 导入服务（在日志初始化之后）
 from atom.service import AtomService
-from license.manager import verify_license, verify_license_data
+from license.manager import verify_license, verify_license_data, activate_with_code
 
 
 def _verify_license(license_dir: str) -> bool:
@@ -69,7 +69,35 @@ def main():
         default=None,
         help='配置文件路径'
     )
+    parser.add_argument(
+        '--activate',
+        type=str,
+        default=None,
+        metavar='AUTH_CODE',
+        help='输入授权码激活设备（格式: XXXX-XXXX-XXXX-XXXX-XXXX）'
+    )
+    parser.add_argument(
+        '--name',
+        type=str,
+        default='',
+        help='设备名称（配合 --activate 使用，默认取主机名）'
+    )
     args = parser.parse_args()
+
+    # 激活模式
+    if args.activate:
+        import socket
+        print("正在验证授权码...")
+        success, msg = activate_with_code(args.activate, args.name or socket.gethostname())
+        if success:
+            print(msg)
+            print("请重新启动 SGAtom 服务。")
+            sys.exit(0)
+        else:
+            _show_error_and_exit(
+                title='SpecDetect Atom - 激活失败',
+                message=f'{msg}\n\n按确定键退出...'
+            )
 
     # 确定配置文件路径
     config_file = args.config

@@ -14,6 +14,13 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.exceptions import InvalidSignature
 
 from license.hardware import collect_fingerprint
+from license.crypto import (
+    generate_auth_code,
+    verify_auth_code,
+    save_license_v2,
+    load_license_v2,
+    is_v2_format,
+)
 
 # 公钥嵌入 — 仅可用于验签，无法用于签发许可证
 _PUBLIC_KEY_PEM = b"""-----BEGIN PUBLIC KEY-----
@@ -127,6 +134,10 @@ def _verify_devices(devices: List[Dict[str, Any]]) -> bool:
 def verify_license(license_path: Optional[str] = None) -> bool:
     """从 license.dat 文件验证当前设备是否已授权
 
+    支持两种格式:
+    - V1 (旧): RSA 签名的明文 JSON（向后兼容）
+    - V2 (新): AES-256-GCM 加密二进制
+
     对每个已注册设备，比对 4 项硬件指纹（主板/硬盘/CPU/MAC）。
     跳过不可用的标识符（None），4 项中 ≥ 2 项匹配即视为授权通过。
 
@@ -137,8 +148,22 @@ def verify_license(license_path: Optional[str] = None) -> bool:
     if not os.path.exists(path):
         return False
 
+    # V2 加密格式
+    if is_v2_format(path):
+        current_fp = collect_fingerprint()
+        raw = load_license_v2(path, current_fp)
+        if raw is None:
+            return False
+        try:
+            data = json.loads(raw.decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return False
+        # V2 格式自带硬件绑定（密钥派生自指纹），仍需验证签名一致性
+        return _verify_devices(data.get("devices", []))
+
+    # V1 明文 JSON 格式
     try:
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(path, "r", encoding="utf-8") as f:
             data: Dict[str, Any] = json.load(f)
     except (json.JSONDecodeError, OSError):
         return False
@@ -240,6 +265,47 @@ def generate_license(
         json.dump(data, f, indent=2, ensure_ascii=False)
 
     return path, current_fp
+
+
+def activate_with_code(
+    auth_code: str,
+    device_name: str = "",
+    license_path: Optional[str] = None,
+) -> Tuple[bool, str]:
+    """使用授权码激活当前设备，生成加密 V2 许可证
+
+    Args:
+        auth_code: 用户输入的 20 字符授权码
+        device_name: 设备名称，默认取主机名
+        license_path: 许可证输出路径
+
+    Returns:
+        (成功/失败, 消息)
+    """
+    current_fp = collect_fingerprint()
+    hostname = device_name or socket.gethostname()
+
+    if not verify_auth_code(auth_code, hostname, current_fp):
+        return False, "授权码无效，请检查输入或联系管理员重新生成"
+
+    # 生成许可证内容
+    hashed_fp = hash_fingerprint(current_fp)
+    license_data = {
+        "version": 2,
+        "devices": [
+            {
+                "name": hostname,
+                "fingerprint": hashed_fp,
+                "registered_at": datetime.now().isoformat(),
+            }
+        ],
+    }
+    payload = json.dumps(license_data, sort_keys=True, ensure_ascii=False).encode("utf-8")
+
+    path = _find_license_path(license_path)
+    save_license_v2(path, payload, current_fp)
+
+    return True, f"激活成功！许可证已生成到 {path}"
 
 
 def import_devices_from_file(
