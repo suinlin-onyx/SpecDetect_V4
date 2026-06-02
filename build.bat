@@ -142,7 +142,7 @@ echo [7/8] Creating output structure...
 mkdir "%OUTPUT_DIR%" 2>nul
 
 echo [8/8] Copying executables...
-copy /y "%ATOM_BUILD_DIR%\SGAtom.exe" "%OUTPUT_DIR%\SGAtom_v%ATOM_VERSION%.exe"
+copy /y "%ATOM_BUILD_DIR%\SGAtom_v%ATOM_VERSION%.exe" "%OUTPUT_DIR%\SGAtom_v%ATOM_VERSION%.exe"
 copy /y "%PROXY_BUILD_DIR%\SOAPProxy_v%PROXY_VERSION%.exe" "%OUTPUT_DIR%\SOAPProxy_v%PROXY_VERSION%.exe"
 copy /y "%RMCP_BUILD_DIR%\rmcp_proxy_v%RMCP_PROXY_VERSION%.exe" "%OUTPUT_DIR%\rmcp_proxy_v%RMCP_PROXY_VERSION%.exe"
 copy /y "%GEN_LICENSE_BUILD_DIR%\gen_license.exe" "%OUTPUT_DIR%\"

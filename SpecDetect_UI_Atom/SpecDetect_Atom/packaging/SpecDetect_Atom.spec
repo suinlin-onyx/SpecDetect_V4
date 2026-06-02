@@ -7,15 +7,24 @@ Usage:
 """
 import glob as _glob
 import os as _os
+import sys as _sys
 
 block_cipher = None
 
 # Collect all runtime DLLs for Win7 app-local deployment
 # SPECPATH is provided by PyInstaller (spec file's directory)
 try:
-    _spec_dir = os.path.abspath(SPECPATH)
+    _spec_dir = _os.path.abspath(SPECPATH)
 except NameError:
-    _spec_dir = os.path.abspath('.')
+    _spec_dir = _os.path.abspath('.')
+
+# Read version from version.py
+_sys.path.insert(0, _os.path.abspath(_os.path.join(_spec_dir, '..', 'src')))
+try:
+    from version import ATOM_VERSION
+    _ATOM_VERSION = str(ATOM_VERSION)
+except Exception:
+    _ATOM_VERSION = '1.5.7'
 
 # runtime dir is at project root (parent of packaging)
 _runtime_dir = os.path.join(_spec_dir, '..', 'runtime')
@@ -98,7 +107,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='SGAtom',
+    name=f'SGAtom_v{_ATOM_VERSION}',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

@@ -26,6 +26,27 @@ def _show_error_and_exit(title: str, message: str, exit_code: int = 1):
         input('\n按任意键退出...')
     sys.exit(exit_code)
 
+
+_STD_OUT = -11
+_RED = 12
+_GREEN = 10
+_GRAY = 7
+
+
+def _console_color(color: int) -> None:
+    """设置控制台文字颜色（Windows API）"""
+    try:
+        handle = ctypes.windll.kernel32.GetStdHandle(_STD_OUT)
+        ctypes.windll.kernel32.SetConsoleTextAttribute(handle, color)
+    except Exception:
+        pass
+
+
+def _print_red(msg: str) -> None:
+    _console_color(_RED)
+    print(msg)
+    _console_color(_GRAY)
+
 # 初始化日志（最早，避免后续 import 时日志未初始化）
 if getattr(sys, 'frozen', False):
     # exe 模式：日志在 exe 同级 logs 目录
@@ -84,7 +105,7 @@ def main():
     )
     args = parser.parse_args()
 
-    # 激活模式
+    # 激活模式（命令行脚本）
     if args.activate:
         import socket
         print("正在验证授权码...")
@@ -94,10 +115,10 @@ def main():
             print("请重新启动 SGAtom 服务。")
             sys.exit(0)
         else:
-            _show_error_and_exit(
-                title='SpecDetect Atom - 激活失败',
-                message=f'{msg}\n\n按确定键退出...'
-            )
+            _print_red(f"\n  {msg}")
+            print()
+            input("  按任意键退出...")
+            sys.exit(1)
 
     # 确定配置文件路径
     config_file = args.config
@@ -124,11 +145,23 @@ def main():
     # 许可证验证
     license_dir = os.path.dirname(os.path.abspath(config_file))
     if not _verify_license(license_dir):
-        error("设备授权验证失败：当前设备未授权运行本软件，请联系管理员", LogTag.ATOM)
-        _show_error_and_exit(
-            title='SpecDetect Atom - 设备授权验证失败',
-            message='当前设备未授权运行本软件，请联系管理员。\n\n按确定键退出...'
-        )
+        print("\n" + "=" * 46)
+        print("  设备未授权，请输入授权码激活")
+        print("=" * 46)
+        print()
+        import socket
+        code = input("  授权码 (直接回车退出): ").strip()
+        if not code:
+            sys.exit(1)
+        success, msg = activate_with_code(code, socket.gethostname())
+        if success:
+            print(f"\n  {msg}")
+            print("  正在启动服务...\n")
+        else:
+            _print_red(f"\n  {msg}")
+            print()
+            input("  按任意键退出...")
+            sys.exit(1)
 
     # 创建服务
     service = AtomService(config_file)
