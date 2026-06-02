@@ -4,7 +4,7 @@ REM Usage: build.bat (run from soap_proxy root, NOT from packaging/)
 
 setlocal enabledelayedexpansion
 
-set "VERSION=1.1.3"
+set "VERSION=1.2.1"
 set "PYINSTALLER=C:\Users\tuoyi5\AppData\Local\Programs\Python\Python37\Scripts\pyinstaller.exe"
 
 echo ========================================
