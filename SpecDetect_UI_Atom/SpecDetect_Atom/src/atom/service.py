@@ -599,6 +599,14 @@ class AtomService:
             session._stop_event.clear()
             if band_collector:
                 band_collector.clear()
+
+            # 推送线程退出时自动清理 session（客户端断连等异常退出），
+            # 避免 session 永远保持 ACTIVE 导致 B_QueryFaciDevStat 误报 busy。
+            # B_StopMeas 已通过 close_session() 将状态设为 CLOSING/CLOSED，此处跳过。
+            if session.state == SessionState.ACTIVE:
+                info(f"[SINK] push_loop 异常退出，自动清理 session: {session.taskid}", LogTag.STREAM)
+                self.session_manager.close_session(session)
+
             info(f"[SINK] 推送线程结束: taskid={session.taskid}", LogTag.STREAM)
 
         session.push_thread = threading.Thread(target=sink_push_loop, daemon=True)

@@ -159,57 +159,52 @@ class SessionManager:
             return self.taskid_to_session.get(taskid)
 
     def close_session(self, session: StreamSession):
-        """关闭 session
-
-        Args:
-            session: StreamSession 实例
-        """
+        """关闭 session（外部调用：B_StopMeas / push_loop 异常退出）"""
         with self.lock:
-            if session.state == SessionState.CLOSED:
-                return
-
-            # 设置关闭状态
-            session.state = SessionState.CLOSING
-
-            # 先从 StreamSrcServer._clients 移除（要在 close_all() 之前，因为 close_all() 会清空 streamsrc_client）
-            client = session.streamsrc_client
-            if client and self._stream_server:
-                self._stream_server.remove_client(client)
-
-            session.close_all()
-
-            # 从 taskid_to_session 移除
-            if session.taskid in self.taskid_to_session:
-                del self.taskid_to_session[session.taskid]
-
-            # 从 pending_sessions 移除
-            if session in self.pending_sessions:
-                self.pending_sessions.remove(session)
-
-            # 从 sessions 移除
-            for sock, s in list(self.sessions.items()):
-                if s == session:
-                    del self.sessions[sock]
-
-            # 更新状态
-            session.state = SessionState.CLOSED
+            self._do_close(session)
 
     def cleanup_stale(self):
-        """清理超时的 pending session"""
+        """清理超时的 pending session 及僵死的 active session"""
         with self.lock:
             current_time = time.time()
             stale_sessions = []
 
+            # 1. 清理超时的 PENDING session
             for session in self.pending_sessions:
                 if current_time - session.last_data_time > self.stale_timeout:
                     stale_sessions.append(session)
 
             for session in stale_sessions:
-                session.close_all()
-                self.pending_sessions.remove(session)
-                if session.taskid in self.taskid_to_session:
-                    del self.taskid_to_session[session.taskid]
-                session.state = SessionState.CLOSED
+                self._do_close(session)
+
+            # 2. 清理 ACTIVE 但 push_loop 已死且超时的 session（兜底）
+            stale_active = []
+            for session in list(self.sessions.values()):
+                if session.state == SessionState.ACTIVE:
+                    if not session.push_running:
+                        if current_time - session.last_data_time > self.idle_timeout:
+                            stale_active.append(session)
+
+            for session in stale_active:
+                self._do_close(session)
+
+    def _do_close(self, session):
+        """内部清理方法（仅供 cleanup_stale 使用）"""
+        if session.state == SessionState.CLOSED:
+            return
+        session.state = SessionState.CLOSING
+        client = session.streamsrc_client
+        if client and self._stream_server:
+            self._stream_server.remove_client(client)
+        session.close_all()
+        if session in self.pending_sessions:
+            self.pending_sessions.remove(session)
+        if session.taskid in self.taskid_to_session:
+            del self.taskid_to_session[session.taskid]
+        for sock, s in list(self.sessions.items()):
+            if s == session:
+                del self.sessions[sock]
+        session.state = SessionState.CLOSED
 
     def close_all(self):
         """关闭所有 session"""
