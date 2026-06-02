@@ -1,7 +1,0 @@
-<srrc:responsebody><srrc:result>
-    <srrc:appid>{appid}</srrc:appid>
-    <srrc:userid>{userid}</srrc:userid>
-    <srrc:mfid>{mfid}</srrc:mfid>
-    <srrc:equid>{equid}</srrc:equid>
-    <srrc:taskid>{taskid}</srrc:taskid>
-</srrc:result></srrc:responsebody>

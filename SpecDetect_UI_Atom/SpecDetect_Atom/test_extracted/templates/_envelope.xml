@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="gb2312"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn">
-<soapenv:Header><srrc:ProviderResponse><srrc:bizResCd>{bizrescd}</srrc:bizResCd><srrc:bizResText>{bizrestext}</srrc:bizResText></srrc:ProviderResponse></soapenv:Header>
-<soapenv:Body>{body}</soapenv:Body>
-</soapenv:Envelope>

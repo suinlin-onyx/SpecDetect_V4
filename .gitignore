@@ -24,6 +24,7 @@ env/
 Thumbs.db
 
 # Project specific
+log/
 logs/
 *.pid
 *.mp4
@@ -39,6 +40,15 @@ build_onedir/
 *.lib
 *.obj
 stub/
+*.pyd
+*.zip
+
+# Cython generated
+SpecDetect_UI_Atom/SpecDetect_Atom/src/license/*.c
+
+# Runtime redistributables (PyInstaller bundled DLLs)
+runtime/
+**/runtime/
 
 # Deployment program directory (generated from src/)
 SpecDetect_UI_Atom/SpecDetect_Atom/program/
@@ -57,6 +67,17 @@ SpecDetect_UI_Atom/SpecDetect_Atom/生产环境日志/
 
 # Docs (keep only in docs/)
 SpecDetect_UI_Atom/SpecDetect_Atom/doc/
+
+# Capture data (no version control)
+SpecDetect_POC/rmcp_proxy/capture/
+
+# CodeGraph/Cursor (tool configs)
+.codegraph/
+.cursor/
+
+# License data (per-device, not versioned)
+SpecDetect_UI_Atom/SpecDetect_Atom/config/authorized_devices/
+SpecDetect_UI_Atom/SpecDetect_Atom/config/license.dat.hmac_backup
 
 # Temp
 2026-5-7/
