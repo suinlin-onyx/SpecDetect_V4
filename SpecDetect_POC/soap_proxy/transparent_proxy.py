@@ -1,6 +1,6 @@
 """SOAP 透明代理 - 仅转发请求，不做任何修改"""
 
-__version__ = "1.1.9"
+__version__ = "1.2.2"
 
 import socket
 import threading
@@ -1158,16 +1158,7 @@ def start_sink_proxy(proxy_port: int, original_host: str, original_port: int,
     atom_socket = None
 
     try:
-        # ============ 步骤1: 先连接外部目标 ============
-        try:
-            target_socket = socket.create_connection((original_host, original_port), timeout=60)
-            logging.info(f"[SINK/{interface_name}] Connected to external target: {original_host}:{original_port}")
-            session.target_socket = target_socket
-        except Exception as e:
-            logging.error(f"[SINK/{interface_name}] Failed to connect to external {original_host}:{original_port}: {e}")
-            return
-
-        # ============ 步骤2: 再监听本地端口 ============
+        # ============ 步骤1: 先监听本地端口，等待 Atom 连接 ============
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_socket.settimeout(30)  # 30秒超时
@@ -1179,16 +1170,19 @@ def start_sink_proxy(proxy_port: int, original_host: str, original_port: int,
             return
 
         server_socket.listen(5)
-        logging.info(f"[SINK/{interface_name}] Proxy listening: {listen_host}:{proxy_port} -> {original_host}:{original_port} (stc={stc})")
+        logging.info(f"[SINK/{interface_name}] Proxy listening: {listen_host}:{proxy_port} -> {original_host}:{original_port} (stc={stc}) @ {datetime.now():%H:%M:%S.%f}")
 
         # 保存会话
         with sink_session_lock:
             sink_sessions[proxy_port] = session
 
-        # ============ 步骤3: 等待 Atom 连接 ============
+        # ============ 步骤2: 等待 Atom 连接 ============
         try:
+            t_wait_start = datetime.now()
             atom_socket, atom_addr = server_socket.accept()
-            logging.info(f"[SINK/{interface_name}] Atom connected: {atom_addr}")
+            t_accept = datetime.now()
+            wait_duration = (t_accept - t_wait_start).total_seconds()
+            logging.info(f"[SINK/{interface_name}] Atom connected: {atom_addr} @ {t_accept:%H:%M:%S.%f} (waited {wait_duration:.3f}s)")
             session.atom_socket = atom_socket
         except socket.timeout:
             logging.warning(f"[SINK/{interface_name}] Timeout waiting for Atom connection on {proxy_port}")
@@ -1197,19 +1191,58 @@ def start_sink_proxy(proxy_port: int, original_host: str, original_port: int,
             logging.error(f"[SINK/{interface_name}] Error accepting Atom connection: {e}")
             return
 
+        # ============ 步骤3: Atom 就绪后再连接外部目标（缩短外部主机空闲时间） ============
+        try:
+            t0 = datetime.now()
+            target_socket = socket.create_connection((original_host, original_port), timeout=60)
+            t1 = datetime.now()
+            logging.info(f"[SINK/{interface_name}] Connected to external target: {original_host}:{original_port} @ {t0:%H:%M:%S.%f} (took {(t1-t0).total_seconds():.3f}s)")
+            session.target_socket = target_socket
+        except Exception as e:
+            logging.error(f"[SINK/{interface_name}] Failed to connect to external {original_host}:{original_port}: {e}")
+            return
+
         # 双向透传
+        proxy_start_time = datetime.now()
+        logging.info(f"[SINK/DEBUG] Forward threads starting @ {proxy_start_time:%H:%M:%S.%f}")
         def forward(src, dst, direction):
             total_bytes = 0
             frame_count = 0
             buffer = b''
+            recv_count = 0
+            last_recv_time = None
+            first_data_time = None
             try:
                 while True:
                     data = src.recv(8192)
+                    now = datetime.now()
                     if not data:
-                        logging.info(f"[SINK/{interface_name}] {direction}: connection closed, {total_bytes} bytes transferred, {frame_count} frames")
+                        elapsed = (now - proxy_start_time).total_seconds()
+                        logging.info(f"[SINK/{interface_name}] {direction}: connection closed, {total_bytes} bytes transferred, {frame_count} frames (elapsed={elapsed:.2f}s)")
                         break
+
+                    recv_count += 1
+                    if first_data_time is None:
+                        first_data_time = now
+                        gap_since_start = (now - proxy_start_time).total_seconds()
+                        logging.info(f"[SINK/DEBUG] {direction}: FIRST data received at {now:%H:%M:%S.%f}, gap_since_proxy_start={gap_since_start:.3f}s, chunk_size={len(data)}B")
+
+                    # 检测 recv 间隔（用于分析超时）
+                    if last_recv_time is not None:
+                        recv_gap = (now - last_recv_time).total_seconds()
+                        if recv_gap > 2.0:
+                            logging.warning(f"[SINK/DEBUG] {direction}: recv gap={recv_gap:.3f}s (recv #{recv_count-1}→#{recv_count}, total={total_bytes}B)")
+                    last_recv_time = now
+
                     dst.sendall(data)
                     total_bytes += len(data)
+
+                    # 前3次 recv 记录 hex dump（用于对比 SG vs RX 数据格式）
+                    if recv_count <= 3:
+                        preview_len = min(len(data), 128)
+                        logging.info(f"[SINK/DEBUG] {direction}: recv #{recv_count} chunk={len(data)}B total={total_bytes}B @ {now:%H:%M:%S.%f}")
+                        logging.info(f"[SINK/DEBUG] {direction}: recv #{recv_count} hex[{preview_len}B]: {data[:preview_len].hex()}")
+
                     # 保存到 stream 日志（加锁防双线程竞争）
                     try:
                         with sf_lock:
@@ -1242,7 +1275,9 @@ def start_sink_proxy(proxy_port: int, original_host: str, original_port: int,
                                 logging.info(f"[SINK/{interface_name}] {direction}: PScan frame #{frame_count} {dt_name} PL={pl} ({frame_len}B)")
                             buffer = buffer[frame_len:]
             except Exception as e:
-                logging.error(f"[SINK/{interface_name}] {direction} error: {e}")
+                now = datetime.now()
+                elapsed = (now - proxy_start_time).total_seconds()
+                logging.error(f"[SINK/{interface_name}] {direction} error @ {now:%H:%M:%S.%f} elapsed={elapsed:.2f}s: {e}")
             finally:
                 try:
                     src.close()
