@@ -5,8 +5,8 @@
     "listen_port_2": 9997
   },
   "device": {
-    "host": "172.18.114.196",
-    "port": 9999
+    "host": "100.72.95.36",
+    "port": 1449
   },
   "log": {
     "dir": "logs",
