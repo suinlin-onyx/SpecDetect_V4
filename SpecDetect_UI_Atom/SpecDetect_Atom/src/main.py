@@ -71,15 +71,23 @@ from license.manager import verify_license, verify_license_data, activate_with_c
 
 def _verify_license(license_dir: str) -> bool:
     """许可证验证：frozen 模式优先用嵌入式数据，回退到外部文件"""
+    print(f"[DEBUG] _verify_license called, frozen={getattr(sys, 'frozen', False)}, license_dir={license_dir}")
     if getattr(sys, 'frozen', False):
         try:
             from license._data import LICENSE_DATA
-            return verify_license_data(LICENSE_DATA)
-        except ImportError:
+            print(f"[DEBUG] _data import SUCCESS, keys={list(LICENSE_DATA.keys())}")
+            result = verify_license_data(LICENSE_DATA)
+            print(f"[DEBUG] verify_license_data returned {result}")
+            return result
+        except ImportError as e:
+            print(f"[DEBUG] _data import FAILED: {e}")
             info("嵌入式许可证不存在，回退到外部文件", LogTag.ATOM)
 
     license_path = os.path.join(license_dir, 'license.dat')
-    return verify_license(license_path)
+    print(f"[DEBUG] checking license_path={license_path}, exists={os.path.exists(license_path)}")
+    result = verify_license(license_path)
+    print(f"[DEBUG] verify_license returned {result}")
+    return result
 
 
 def main():
@@ -97,19 +105,12 @@ def main():
         metavar='AUTH_CODE',
         help='输入授权码激活设备（格式: XXXX-XXXX-XXXX-XXXX-XXXX）'
     )
-    parser.add_argument(
-        '--name',
-        type=str,
-        default='',
-        help='设备名称（配合 --activate 使用，默认取主机名）'
-    )
     args = parser.parse_args()
 
     # 激活模式（命令行脚本）
     if args.activate:
-        import socket
         print("正在验证授权码...")
-        success, msg = activate_with_code(args.activate, args.name or socket.gethostname())
+        success, msg = activate_with_code(args.activate)
         if success:
             print(msg)
             print("请重新启动 SGAtom 服务。")
@@ -149,11 +150,10 @@ def main():
         print("  设备未授权，请输入授权码激活")
         print("=" * 46)
         print()
-        import socket
         code = input("  授权码 (直接回车退出): ").strip()
         if not code:
             sys.exit(1)
-        success, msg = activate_with_code(code, socket.gethostname())
+        success, msg = activate_with_code(code)
         if success:
             print(f"\n  {msg}")
             print("  正在启动服务...\n")

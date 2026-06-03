@@ -80,28 +80,23 @@ def _fingerprint_key(fingerprint: Dict[str, Optional[str]]) -> str:
 
 
 # ============================================================
-# 授权码生成 / 验证
+# 通用授权码生成 / 验证（与设备无关）
 # ============================================================
 
+_PRODUCT_ID = b"SPECDETECT_ATOM_V2"
 
-def generate_auth_code(
-    device_name: str,
-    fingerprint: Dict[str, Optional[str]],
-    master_key: Optional[bytes] = None,
-) -> str:
-    """离线生成授权码（私密工具使用）
+
+def generate_auth_code(master_key: Optional[bytes] = None) -> str:
+    """生成通用授权码（与设备无关，所有机器通用）
 
     Args:
-        device_name: 设备名称
-        fingerprint: 原始硬件指纹（4项）
         master_key: 主密钥，默认使用嵌入的 _MasterKey
 
     Returns:
-        授权码，格式 XXXX-XXXX-XXXX-XXXX-XXXX（20字符，人工可输入）
+        授权码，格式 XXXX-XXXX-XXXX-XXXX-XXXX（20字符）
     """
     key = master_key or _MasterKey
-    message = f"{device_name}|{_fingerprint_key(fingerprint)}".encode("utf-8")
-    raw = hmac.new(key, message, hashlib.sha256).digest()
+    raw = hmac.new(key, _PRODUCT_ID, hashlib.sha256).digest()
     code = _base32_encode(raw[:_AUTH_CODE_BYTES])
     return "-".join(
         code[i : i + _AUTH_CODE_GROUP]
@@ -109,24 +104,17 @@ def generate_auth_code(
     )
 
 
-def verify_auth_code(
-    auth_code: str,
-    device_name: str,
-    fingerprint: Dict[str, Optional[str]],
-    master_key: Optional[bytes] = None,
-) -> bool:
-    """验证授权码是否匹配当前设备和指纹
+def verify_auth_code(auth_code: str, master_key: Optional[bytes] = None) -> bool:
+    """验证授权码是否有效（与设备无关）
 
     Args:
-        auth_code: 用户输入的授权码（支持带或不带分隔符）
-        device_name: 设备名称
-        fingerprint: 硬件指纹
+        auth_code: 用户输入的授权码
         master_key: 主密钥
 
     Returns:
         True 如果授权码有效
     """
-    expected = generate_auth_code(device_name, fingerprint, master_key)
+    expected = generate_auth_code(master_key)
     normalized_input = auth_code.upper().replace("-", "").replace(" ", "")
     normalized_expected = expected.replace("-", "")
     return hmac.compare_digest(normalized_input, normalized_expected)

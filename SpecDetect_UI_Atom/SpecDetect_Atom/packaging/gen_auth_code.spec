@@ -1,11 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
 """
-PyInstaller spec for gen_license.exe
-设备授权许可证生成工具（嵌入exe版）
+PyInstaller spec for gen_auth_code.exe
+离线授权码生成工具（私密 — 不公开分发）
+
+用法:
+    pyinstaller packaging\gen_auth_code.spec
 """
 
 import glob as _glob
 import os as _os
+import sys as _sys
 
 block_cipher = None
 
@@ -14,7 +18,15 @@ try:
 except NameError:
     _spec_dir = _os.path.abspath('.')
 
-# Collect all runtime DLLs for Win7 app-local deployment
+# Read version
+_sys.path.insert(0, _os.path.abspath(_os.path.join(_spec_dir, '..', 'src')))
+try:
+    from version import ATOM_VERSION
+    _ATOM_VERSION = str(ATOM_VERSION)
+except Exception:
+    _ATOM_VERSION = '1.5.7'
+
+# Collect runtime DLLs
 _runtime_dir = _os.path.join(_spec_dir, '..', 'runtime')
 _binaries = []
 if _os.path.isdir(_runtime_dir):
@@ -28,15 +40,12 @@ if _os.path.isdir(_license_dir):
         _binaries.append((_pyd, 'license'))
 
 a = Analysis(
-    [_os.path.join(_spec_dir, '..', 'src', 'gen_license.py')],
+    [_os.path.join(_spec_dir, '..', 'src', 'gen_auth_code.py')],
     pathex=[],
     binaries=_binaries,
     datas=[],
     hiddenimports=[
-        'license.manager',
-        'license.hardware',
         'license.crypto',
-        'license._data',
         'license',
         'cryptography',
         'cryptography.hazmat.primitives.asymmetric',
@@ -82,7 +91,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='gen_license',
+    name=f'gen_auth_code_v{_ATOM_VERSION}',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

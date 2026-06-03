@@ -34,6 +34,9 @@ dist/
 build/
 build_onedir/
 *.spec
+!SpecDetect_UI_Atom/SpecDetect_Atom/packaging/*.spec
+!SpecDetect_POC/soap_proxy/packaging/*.spec
+!SpecDetect_POC/rmcp_proxy/packaging/*.spec
 *.exe
 *.dll
 *.exp

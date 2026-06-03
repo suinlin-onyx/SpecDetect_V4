@@ -269,23 +269,23 @@ def generate_license(
 
 def activate_with_code(
     auth_code: str,
-    device_name: str = "",
     license_path: Optional[str] = None,
 ) -> Tuple[bool, str]:
     """使用授权码激活当前设备，生成加密 V2 许可证
 
+    授权码是通用的（与设备无关），验证通过后用当前设备指纹生成加密许可证。
+
     Args:
         auth_code: 用户输入的 20 字符授权码
-        device_name: 设备名称，默认取主机名
         license_path: 许可证输出路径
 
     Returns:
         (成功/失败, 消息)
     """
     current_fp = collect_fingerprint()
-    hostname = device_name or socket.gethostname()
+    hostname = socket.gethostname()
 
-    if not verify_auth_code(auth_code, hostname, current_fp):
+    if not verify_auth_code(auth_code):
         return False, "授权码无效，请检查输入或联系管理员重新生成"
 
     # 生成许可证内容

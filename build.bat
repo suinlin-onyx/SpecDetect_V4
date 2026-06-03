@@ -37,9 +37,10 @@ set "ATOM_BUILD_DIR=%ATOM_PROJECT_DIR%\build_onedir"
 set "PROXY_BUILD_DIR=%PROXY_PROJECT_DIR%\build_onedir"
 set "RMCP_BUILD_DIR=%RMCP_PROXY_PROJECT_DIR%\build_onedir"
 set "GEN_LICENSE_BUILD_DIR=%ATOM_PROJECT_DIR%\build_gen_license"
+set "GEN_AUTH_CODE_BUILD_DIR=%ATOM_PROJECT_DIR%\build_gen_auth_code"
 
 echo ========================================
-echo   Unified Build: SGAtom + SOAPProxy + RMCPProxy + gen_license
+echo   Unified Build: SGAtom + SOAPProxy + RMCPProxy + gen_license + gen_auth_code
 echo ========================================
 echo   Atom:   v%ATOM_VERSION%
 echo   Proxy:  v%PROXY_VERSION%
@@ -61,6 +62,7 @@ if exist "%ATOM_BUILD_DIR%" rmdir /s /q "%ATOM_BUILD_DIR%"
 if exist "%PROXY_BUILD_DIR%" rmdir /s /q "%PROXY_BUILD_DIR%"
 if exist "%RMCP_BUILD_DIR%" rmdir /s /q "%RMCP_BUILD_DIR%"
 if exist "%GEN_LICENSE_BUILD_DIR%" rmdir /s /q "%GEN_LICENSE_BUILD_DIR%"
+if exist "%GEN_AUTH_CODE_BUILD_DIR%" rmdir /s /q "%GEN_AUTH_CODE_BUILD_DIR%"
 if exist "%OUTPUT_DIR%" rmdir /s /q "%OUTPUT_DIR%"
 
 REM ========================================
@@ -125,7 +127,7 @@ popd
 REM ========================================
 REM Step 6: Build gen_license
 REM ========================================
-echo [6/9] Building gen_license.exe (onefile)...
+echo [6/10] Building gen_license.exe (onefile)...
 pushd "%ATOM_PROJECT_DIR%"
     "%PYINSTALLER%" --onefile packaging\gen_license.spec --distpath "%GEN_LICENSE_BUILD_DIR%"
     if errorlevel 1 (
@@ -136,18 +138,32 @@ pushd "%ATOM_PROJECT_DIR%"
 popd
 
 REM ========================================
-REM Step 5-8: Copy files
+REM Step 7: Build gen_auth_code
 REM ========================================
-echo [7/8] Creating output structure...
+echo [7/10] Building gen_auth_code.exe (onefile)...
+pushd "%ATOM_PROJECT_DIR%"
+    "%PYINSTALLER%" --onefile packaging\gen_auth_code.spec --distpath "%GEN_AUTH_CODE_BUILD_DIR%"
+    if errorlevel 1 (
+        echo [ERROR] gen_auth_code build failed
+        popd
+        exit /b 1
+    )
+popd
+
+REM ========================================
+REM Copy files
+REM ========================================
+echo [8/10] Creating output structure...
 mkdir "%OUTPUT_DIR%" 2>nul
 
-echo [8/8] Copying executables...
+echo [9/10] Copying executables...
 copy /y "%ATOM_BUILD_DIR%\SGAtom_v%ATOM_VERSION%.exe" "%OUTPUT_DIR%\SGAtom_v%ATOM_VERSION%.exe"
 copy /y "%PROXY_BUILD_DIR%\SOAPProxy_v%PROXY_VERSION%.exe" "%OUTPUT_DIR%\SOAPProxy_v%PROXY_VERSION%.exe"
 copy /y "%RMCP_BUILD_DIR%\rmcp_proxy_v%RMCP_PROXY_VERSION%.exe" "%OUTPUT_DIR%\rmcp_proxy_v%RMCP_PROXY_VERSION%.exe"
 copy /y "%GEN_LICENSE_BUILD_DIR%\gen_license.exe" "%OUTPUT_DIR%\"
+copy /y "%GEN_AUTH_CODE_BUILD_DIR%\gen_auth_code_v%ATOM_VERSION%.exe" "%OUTPUT_DIR%\"
 
-echo [9/9] Copying config files...
+echo [10/10] Copying config files...
 mkdir "%OUTPUT_DIR%\config" 2>nul
 mkdir "%OUTPUT_DIR%\keys" 2>nul
 if exist "%ATOM_PROJECT_DIR%\config\settings.json" copy /y "%ATOM_PROJECT_DIR%\config\settings.json" "%OUTPUT_DIR%\config\"
@@ -164,5 +180,6 @@ echo   SGAtom_v%ATOM_VERSION%.exe
 echo   SOAPProxy_v%PROXY_VERSION%.exe
 echo   rmcp_proxy_v%RMCP_PROXY_VERSION%.exe
 echo   gen_license.exe
+echo   gen_auth_code_v%ATOM_VERSION%.exe
 echo.
 pause

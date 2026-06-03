@@ -92,7 +92,6 @@ a = Analysis(
         'matplotlib',
         'numpy',
         'PIL',
-        'api-ms-win-core-path-l1-1-0',
     ],
     cipher=block_cipher,
     noarchive=False,
