@@ -80,23 +80,25 @@ def _fingerprint_key(fingerprint: Dict[str, Optional[str]]) -> str:
 
 
 # ============================================================
-# 通用授权码生成 / 验证（与设备无关）
+# 序列号授权码 — 每个标识生成不同码，离线可验证
 # ============================================================
 
-_PRODUCT_ID = b"SPECDETECT_ATOM_V2"
+_PREFIX = b"SDA:v2:"  # SpecDetect Auth v2
 
 
-def generate_auth_code(master_key: Optional[bytes] = None) -> str:
-    """生成通用授权码（与设备无关，所有机器通用）
+def generate_auth_code(label: str, master_key: Optional[bytes] = None) -> str:
+    """根据标识生成授权码（不同标识 = 不同码）
 
     Args:
-        master_key: 主密钥，默认使用嵌入的 _MasterKey
+        label: 客户标识（名称、序列号等）
+        master_key: 主密钥
 
     Returns:
         授权码，格式 XXXX-XXXX-XXXX-XXXX-XXXX（20字符）
     """
     key = master_key or _MasterKey
-    raw = hmac.new(key, _PRODUCT_ID, hashlib.sha256).digest()
+    msg = _PREFIX + label.strip().encode("utf-8")
+    raw = hmac.new(key, msg, hashlib.sha256).digest()
     code = _base32_encode(raw[:_AUTH_CODE_BYTES])
     return "-".join(
         code[i : i + _AUTH_CODE_GROUP]
@@ -105,19 +107,45 @@ def generate_auth_code(master_key: Optional[bytes] = None) -> str:
 
 
 def verify_auth_code(auth_code: str, master_key: Optional[bytes] = None) -> bool:
-    """验证授权码是否有效（与设备无关）
+    """暴力枚举验证授权码 — 遍历已知标识直到匹配
+
+    离线场景下无法确定码对应哪个标识，因此遍历所有可能的标识。
+    为避免遍历开销，SGAtom 端使用已知标识列表。
 
     Args:
         auth_code: 用户输入的授权码
         master_key: 主密钥
 
     Returns:
-        True 如果授权码有效
+        True 如果授权码匹配任意已知标识
     """
-    expected = generate_auth_code(master_key)
-    normalized_input = auth_code.upper().replace("-", "").replace(" ", "")
-    normalized_expected = expected.replace("-", "")
-    return hmac.compare_digest(normalized_input, normalized_expected)
+    # 读取已知标识列表（config/authorized_labels.txt，每行一个标识）
+    labels = _load_known_labels()
+    if not labels:
+        # 无标识列表时，用通用标识兜底
+        labels = ["default"]
+    for label in labels:
+        expected = generate_auth_code(label, master_key)
+        normalized_input = auth_code.upper().replace("-", "").replace(" ", "")
+        normalized_expected = expected.replace("-", "")
+        if hmac.compare_digest(normalized_input, normalized_expected):
+            return True
+    return False
+
+
+def _load_known_labels() -> list:
+    """加载已知标识列表"""
+    import sys
+    if getattr(sys, 'frozen', False):
+        base = os.path.dirname(sys.executable)
+    else:
+        # __file__ = src/license/crypto.py → 需要到项目根 SpecDetect_Atom/
+        base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    path = os.path.join(base, 'config', 'authorized_labels.txt')
+    if not os.path.exists(path):
+        return []
+    with open(path, 'r', encoding='utf-8') as f:
+        return [line.strip() for line in f if line.strip() and not line.startswith('#')]
 
 
 # ============================================================
