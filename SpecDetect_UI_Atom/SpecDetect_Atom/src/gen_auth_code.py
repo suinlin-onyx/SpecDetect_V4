@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """离线授权码生成工具（私密 — 不公开/不打包分发）
 
-双击运行，输入客户标识，生成对应授权码。
-不同标识 = 不同码，可在任意机器上激活 SGAtom。
+双击运行，输入序列号，生成对应授权码。
+不同序列号 = 不同码，可在任意机器上激活 SGAtom。
 """
 
 import sys
@@ -20,22 +20,29 @@ def main():
     print("=" * 50)
     print()
 
-    label = input("  请输入客户标识（名称或编号）: ").strip()
-    if not label:
+    serial_input = input("  请输入序列号 (0-9999): ").strip()
+    if not serial_input.isdigit():
         print()
-        print("  标识不能为空。")
+        print("  序列号必须为数字。")
         input("  按任意键退出...")
         return
 
-    code = generate_auth_code(label)
+    serial = int(serial_input)
+    if serial < 0 or serial > 9999:
+        print()
+        print("  序列号范围: 0-9999")
+        input("  按任意键退出...")
+        return
+
+    code = generate_auth_code(serial)
 
     print()
-    print(f"  客户标识: {label}")
+    print(f"  序列号: {serial:04d}")
     print()
-    print(f"  授权码:   {code}")
+    print(f"  授权码: {code}")
     print()
     print("  - 该授权码可在任意一台设备的 SGAtom 上激活")
-    print("  - 不同标识对应不同授权码，请记录对应关系")
+    print("  - 不同序列号对应不同授权码，请记录对应关系")
     print("  - 请通过安全渠道发送，勿公开传播")
     print()
     print("=" * 50)

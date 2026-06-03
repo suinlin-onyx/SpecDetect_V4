@@ -80,72 +80,54 @@ def _fingerprint_key(fingerprint: Dict[str, Optional[str]]) -> str:
 
 
 # ============================================================
-# 序列号授权码 — 每个标识生成不同码，离线可验证
+# 序列号授权码 — 序列号嵌入码中，离线自验证
 # ============================================================
 
-_PREFIX = b"SDA:v2:"  # SpecDetect Auth v2
+_PREFIX = b"SDA:v2:"
+_SEQ_LEN = 4  # 序列号位数（0000-9999）
 
 
-def generate_auth_code(label: str, master_key: Optional[bytes] = None) -> str:
-    """根据标识生成授权码（不同标识 = 不同码）
+def generate_auth_code(serial: int, master_key: Optional[bytes] = None) -> str:
+    """根据序列号生成授权码
 
     Args:
-        label: 客户标识（名称、序列号等）
+        serial: 序列号（0-9999）
         master_key: 主密钥
 
     Returns:
-        授权码，格式 XXXX-XXXX-XXXX-XXXX-XXXX（20字符）
+        授权码，格式 SSSS-XXXX-XXXX-XXXX-XXXX（序列号+16字符签名）
     """
     key = master_key or _MasterKey
-    msg = _PREFIX + label.strip().encode("utf-8")
+    serial_str = f"{serial:0{_SEQ_LEN}d}"
+    msg = _PREFIX + serial_str.encode("utf-8")
     raw = hmac.new(key, msg, hashlib.sha256).digest()
-    code = _base32_encode(raw[:_AUTH_CODE_BYTES])
-    return "-".join(
-        code[i : i + _AUTH_CODE_GROUP]
-        for i in range(0, len(code), _AUTH_CODE_GROUP)
+    sig = _base32_encode(raw[:9])  # 9 bytes → ~15 base32 chars
+    sig_formatted = "-".join(
+        sig[i : i + _AUTH_CODE_GROUP]
+        for i in range(0, len(sig), _AUTH_CODE_GROUP)
     )
+    return f"{serial_str}-{sig_formatted}"
 
 
 def verify_auth_code(auth_code: str, master_key: Optional[bytes] = None) -> bool:
-    """暴力枚举验证授权码 — 遍历已知标识直到匹配
-
-    离线场景下无法确定码对应哪个标识，因此遍历所有可能的标识。
-    为避免遍历开销，SGAtom 端使用已知标识列表。
+    """验证授权码（从码中读取序列号，直接验证）
 
     Args:
         auth_code: 用户输入的授权码
         master_key: 主密钥
 
     Returns:
-        True 如果授权码匹配任意已知标识
+        True 如果授权码有效
     """
-    # 读取已知标识列表（config/authorized_labels.txt，每行一个标识）
-    labels = _load_known_labels()
-    if not labels:
-        # 无标识列表时，用通用标识兜底
-        labels = ["default"]
-    for label in labels:
-        expected = generate_auth_code(label, master_key)
-        normalized_input = auth_code.upper().replace("-", "").replace(" ", "")
-        normalized_expected = expected.replace("-", "")
-        if hmac.compare_digest(normalized_input, normalized_expected):
-            return True
-    return False
-
-
-def _load_known_labels() -> list:
-    """加载已知标识列表"""
-    import sys
-    if getattr(sys, 'frozen', False):
-        base = os.path.dirname(sys.executable)
-    else:
-        # __file__ = src/license/crypto.py → 需要到项目根 SpecDetect_Atom/
-        base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    path = os.path.join(base, 'config', 'authorized_labels.txt')
-    if not os.path.exists(path):
-        return []
-    with open(path, 'r', encoding='utf-8') as f:
-        return [line.strip() for line in f if line.strip() and not line.startswith('#')]
+    normalized = auth_code.upper().replace("-", "").replace(" ", "")
+    # 提取前 N 位作为序列号
+    seq_digits = normalized[:_SEQ_LEN]
+    if not seq_digits.isdigit():
+        return False
+    serial = int(seq_digits)
+    expected = generate_auth_code(serial, master_key)
+    expected_normalized = expected.upper().replace("-", "").replace(" ", "")
+    return hmac.compare_digest(normalized, expected_normalized)
 
 
 # ============================================================
