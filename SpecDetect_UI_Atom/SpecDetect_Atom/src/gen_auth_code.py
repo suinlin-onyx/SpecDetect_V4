@@ -17,11 +17,20 @@ def main():
     code = generate_auth_code()
 
     print()
-    print("=" * 40)
-    print(f"  {code}")
-    print("=" * 40)
+    print("=" * 50)
+    print("  SGAtom 离线授权码生成器")
+    print("=" * 50)
     print()
-    input("按任意键退出...")
+    print("  授权码（请复制发给客户）：")
+    print()
+    print(f"    {code}")
+    print()
+    print("  - 该授权码可用于任意一台设备的 SGAtom 激活")
+    print("  - 每台设备激活后生成独立的加密许可证")
+    print("  - 请通过安全渠道发送，勿公开传播")
+    print()
+    print("=" * 50)
+    input("  按任意键退出...")
 
 
 if __name__ == "__main__":

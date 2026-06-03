@@ -71,23 +71,15 @@ from license.manager import verify_license, verify_license_data, activate_with_c
 
 def _verify_license(license_dir: str) -> bool:
     """许可证验证：frozen 模式优先用嵌入式数据，回退到外部文件"""
-    print(f"[DEBUG] _verify_license called, frozen={getattr(sys, 'frozen', False)}, license_dir={license_dir}")
     if getattr(sys, 'frozen', False):
         try:
             from license._data import LICENSE_DATA
-            print(f"[DEBUG] _data import SUCCESS, keys={list(LICENSE_DATA.keys())}")
-            result = verify_license_data(LICENSE_DATA)
-            print(f"[DEBUG] verify_license_data returned {result}")
-            return result
-        except ImportError as e:
-            print(f"[DEBUG] _data import FAILED: {e}")
-            info("嵌入式许可证不存在，回退到外部文件", LogTag.ATOM)
+            return verify_license_data(LICENSE_DATA)
+        except ImportError:
+            pass
 
     license_path = os.path.join(license_dir, 'license.dat')
-    print(f"[DEBUG] checking license_path={license_path}, exists={os.path.exists(license_path)}")
-    result = verify_license(license_path)
-    print(f"[DEBUG] verify_license returned {result}")
-    return result
+    return verify_license(license_path)
 
 
 def main():
