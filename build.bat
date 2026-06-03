@@ -70,18 +70,20 @@ REM Step 2: Cython compile license module -> .pyd
 REM ========================================
 echo [2/9] Cython compiling license module to .pyd...
 pushd "%ATOM_PROJECT_DIR%"
-    "%PYTHON_EXE%" setup_cython.py build_ext --inplace
-    if errorlevel 1 (
-        echo [WARNING] Cython compile failed, falling back to .py
-    ) else (
-        REM Move .pyd files from nested dir to correct location
-        if exist "src\license\license\*.pyd" (
-            move /y "src\license\license\*.pyd" "src\license\" >nul 2>&1
-            rmdir /s /q "src\license\license" >nul 2>&1
-        )
-        rmdir /s /q build_cython >nul 2>&1
-        del /q "src\license\*.c" >nul 2>&1
+    "%PYTHON_EXE%" setup_cython.py build_ext --inplace 2>nul
+    REM Move .pyd files from nested dir to correct location
+    if exist "src\license\license\*.pyd" (
+        move /y "src\license\license\*.pyd" "src\license\" >nul 2>&1
+        rmdir /s /q "src\license\license" >nul 2>&1
+    )
+    rmdir /s /q build_cython >nul 2>&1
+    del /q "src\license\*.c" >nul 2>&1
+    REM Verify .pyd files exist
+    if exist "src\license\crypto.cp37-win_amd64.pyd" (
         echo [OK] Cython .pyd files ready
+    ) else (
+        echo [WARNING] Cython compile may have failed, checking...
+        dir "src\license\*.pyd" 2>nul
     )
 popd
 

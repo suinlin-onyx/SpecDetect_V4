@@ -20,14 +20,18 @@ def main():
     print("=" * 50)
     print()
 
-    serial_input = input("  请输入序列号 (0-9999): ").strip()
-    if not serial_input.isdigit():
+    serial_input = input("  请输入序列号 (0-9999，直接回车默认 0001): ").strip()
+
+    if not serial_input:
+        serial = 1
+    elif not serial_input.isdigit():
         print()
         print("  序列号必须为数字。")
         input("  按任意键退出...")
         return
+    else:
+        serial = int(serial_input)
 
-    serial = int(serial_input)
     if serial < 0 or serial > 9999:
         print()
         print("  序列号范围: 0-9999")
