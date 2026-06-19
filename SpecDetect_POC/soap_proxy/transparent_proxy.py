@@ -1,6 +1,6 @@
 """SOAP 透明代理 - 仅转发请求，不做任何修改"""
 
-__version__ = "1.2.2"
+__version__ = "1.2.3"
 
 import socket
 import threading
@@ -18,10 +18,11 @@ from typing import Dict, Optional
 
 DEFAULT_CONFIG = """{
   "soap_proxy": {
-    "listen_host": "127.0.0.1",
-    "listen_port": 8284,
+    "listen_host": "0.0.0.0",
+    "listen_port": 8282,
     "target_host": "127.0.0.1",
-    "target_port": 8282
+    "target_port": 8284,
+    "save_bin_QueryFaciDevStat": false
   },
   "log": {
     "dir": "logs"
@@ -749,8 +750,9 @@ def handle_http_client(client_socket, target_host, target_port, client_addr):
         logging.info(f"[{log_id}] {format_soap_readable(request_data)}")
         logging.info(f"[{log_id}] Request JSON: {json.dumps(parsed_req, ensure_ascii=False)}")
 
-        # 保存请求内容到文件（跳过 B_QueryFaciDevStat）
-        if interface_name != 'B_QueryFaciDevStat':
+        # 保存请求内容到文件（B_QueryFaciDevStat 默认跳过，可通过配置开启）
+        save_bin_qfds = _config.get('soap_proxy', {}).get('save_bin_QueryFaciDevStat', False)
+        if interface_name != 'B_QueryFaciDevStat' or save_bin_qfds:
             req_file = os.path.join(LOG_DIR, f"{log_id}_{interface_name}_req.bin")
             with open(req_file, 'wb') as f:
                 f.write(request_data)
@@ -841,8 +843,9 @@ def handle_http_client(client_socket, target_host, target_port, client_addr):
         logging.info(f"[{log_id}] {format_soap_readable(response_data)}")
         logging.info(f"[{log_id}] Response JSON: {json.dumps(parsed_res, ensure_ascii=False)}")
 
-        # 保存响应内容到文件（跳过 B_QueryFaciDevStat）
-        if interface_name != 'B_QueryFaciDevStat':
+        # 保存响应内容到文件（B_QueryFaciDevStat 默认跳过，可通过配置开启）
+        save_bin_qfds = _config.get('soap_proxy', {}).get('save_bin_QueryFaciDevStat', False)
+        if interface_name != 'B_QueryFaciDevStat' or save_bin_qfds:
             res_file = os.path.join(LOG_DIR, f"{log_id}_{interface_name}_res.bin")
             with open(res_file, 'wb') as f:
                 f.write(response_data)

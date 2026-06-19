@@ -1,10 +1,11 @@
 {
   "soap_proxy": {
-    "listen_host": "127.0.0.1",
-    "listen_port": 8284,
+    "listen_host": "0.0.0.0",
+    "listen_port": 8282,
     "target_host": "127.0.0.1",
-    "target_port": 8282,
-    "output_host": "127.0.0.1"
+    "target_port": 8284,
+    "output_host": "127.0.0.1",
+    "save_bin_QueryFaciDevStat": true
   },
   "log": {
     "dir": "logs"
