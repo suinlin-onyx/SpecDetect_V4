@@ -11,6 +11,28 @@
 
 错误响应格式对齐 — `build_error_response` 结构化 XML。见 git commit `9b1a269`。
 
+### ⚠️ Phase 1 引入的回归 — Envelope namespace 过度精简
+
+**commit**: `9b1a269` 中的 `_envelope.xml` 变更
+
+**问题**: 移除了 4 个 namespace 声明（SOAP-ENC/xsi/xsd/ns1），原因为"unused"。但真实 Atom (gSOAP/2.8) 的 SOAP Envelope 始终包含这 6 个 namespace：
+
+```diff
+-<soapenv:Envelope xmlns:soapenv="..." xmlns:SOAP-ENC="..." xmlns:xsi="..." xmlns:xsd="..." xmlns:ns1="base" xmlns:srrc="...">
++<soapenv:Envelope xmlns:soapenv="..." xmlns:srrc="...">
+```
+
+**原因**: gSOAP/2.8 框架生成的 stub 可能验证这些 namespace 声明。缺失时客户端 SOAP 解析器可能拒绝响应。
+
+**影响**: 所有 7 个接口 + error handler 共 27 个 SOAP 响应通道都受影响。
+- idle 响应：669 bytes → 真实 Atom 906 bytes（差 237 bytes，其中 namespace 约 174 bytes）
+- busy 响应：同样缺少 namespace
+- error 响应：同样缺少 namespace
+
+**修复**: 恢复 `_envelope.xml` 为 `7c33a00` 原始版本（6 个 namespace）。
+
+**验证**: 2026-06-19 17:58 测试，sgatom idle 响应 669 bytes vs 真实 Atom 1023 bytes，对比确认 namespace 缺失。
+
 ---
 
 ## Phase 2 待实施 (本次)
@@ -78,6 +100,42 @@ return response  # 立即返回，不等 RMCP
 **修复**: 将 `create_pending` 调用移到 `sink_socket.connect()` 之前。
 
 ---
+
+### P0-4: Envelope namespace 恢复（本 Phase 追加）✅ 已修复
+
+**问题**: commit `9b1a269` 过度精简了 `_envelope.xml` 的 namespace 声明，导致所有 SOAP 响应缺少真实 Atom 必需的标准 namespace。
+
+**影响范围**: 
+| 文件 | 方法 | 影响 |
+|------|------|------|
+| `src/preset/templates/_envelope.xml` | — | 1 行修复 |
+| `src/preset/device_preset.py` | `build_response` (L351) | 所有成功响应 |
+| `src/preset/device_preset.py` | `build_error_response` (L381) | 所有错误响应 |
+| `src/atom/service.py` | 11 个 `build_response` 调用点 | 7 个接口 |
+| `src/atom/service.py` | 16 个 `build_error_response` 调用点 | 7 个接口 |
+
+**修复**: 恢复 `_envelope.xml` 为 6 个 namespace（与 `7c33a00` 一致）。
+
+**测试结果**:
+| 响应类型 | 大小 | 6 namespace | 字段完整性 |
+|----------|------|:--:|:--:|
+| idle | 942 bytes | ✓ | ✓ |
+| busy | 1173 bytes | ✓ | 6 字段全 ✓ |
+| error | 831 bytes | ✓ | ✓ |
+
+### Busy 状态回调格式对比
+
+**真实 Atom (rxatom)** vs **SpecDetect_Atom v1.5.9** busy 响应：
+
+| 对比项 | 真实 Atom | SpecDetect_Atom v1.5.9 |
+|--------|----------|------------------------|
+| envelope namespace | 6 个 (含 SOAP-ENC/xsi/xsd/ns1) | 2 个 (仅 soapenv/srrc) ❌ |
+| 响应大小 | ~1274 bytes | ~1086 bytes |
+| 字段内容 | mfid/mfname/altitude/equid/equname/state + taskid/userid/feature/appid/stc | 同 ✓ |
+| field 完整性 (5 busy 字段) | ✓ | ✓ |
+| XML 格式 | 紧凑（无换行） | 模板有换行缩进（非关键差异） |
+
+**结论**: busy 回调的字段内容是**正确**的（v1.5.9 已包含 appid）。唯一问题是 envelope namespace 缺失——与 idle 相同根因。
 
 ### P1-1: B_QueryFaciDevStat 模板对齐
 
