@@ -1056,21 +1056,23 @@ class AtomService:
                 equname=equname,
                 state='busy',
                 taskid=taskid,
-                userid=busy_userid or userid or self.config.soap_userid,
+                userid=busy_userid or userid,
                 feature=feature,
                 appid=appid,
                 stc=stc
             )
         else:
-            # idle: 不输出 taskid/userid/feature/appid/stc（与真实 Atom 一致）
+            # idle: 保留 equlist/equipment 包装层，不填 taskid/userid/feature/appid/stc
             idle_body = (
                 '<srrc:responsebody><srrc:result>'
                 '<srrc:mfid>{mfid}</srrc:mfid>'
                 '<srrc:mfname>{mfname}</srrc:mfname>'
                 '<srrc:altitude>0.0</srrc:altitude>'
+                '<srrc:equlist><srrc:equipment>'
                 '<srrc:equid>{equid}</srrc:equid>'
                 '<srrc:equname>{equname}</srrc:equname>'
                 '<srrc:state>idle</srrc:state>'
+                '</srrc:equipment></srrc:equlist>'
                 '</srrc:result></srrc:responsebody>'
             )
             return self.preset_manager.build_response(

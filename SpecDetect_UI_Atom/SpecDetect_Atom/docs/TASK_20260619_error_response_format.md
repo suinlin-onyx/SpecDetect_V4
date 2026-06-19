@@ -3,7 +3,7 @@
 **日期**: 2026-06-19
 **优先级**: HIGH
 **版本**: v1.5.8 → v1.5.9
-**状态**: Phase 1 已完成(error响应结构), Phase 2 待实施
+**状态**: Phase 1 已完成(error响应结构), Phase 2 已实施, P0-4/P0-5 已修复(idle 格式对齐)
 
 ---
 
@@ -119,8 +119,8 @@ return response  # 立即返回，不等 RMCP
 **测试结果**:
 | 响应类型 | 大小 | 6 namespace | 字段完整性 |
 |----------|------|:--:|:--:|
-| idle | 942 bytes | ✓ | ✓ |
-| busy | 1173 bytes | ✓ | 6 字段全 ✓ |
+| idle | 1004 bytes (CL 906) | ✓ | ✓ |
+| busy | ~1271 bytes | ✓ | 6 字段全 + equlist ✓ |
 | error | 831 bytes | ✓ | ✓ |
 
 ### Busy 状态回调格式对比
@@ -137,22 +137,36 @@ return response  # 立即返回，不等 RMCP
 
 **结论**: busy 回调的字段内容是**正确**的（v1.5.9 已包含 appid）。唯一问题是 envelope namespace 缺失——与 idle 相同根因。
 
-### P1-1: B_QueryFaciDevStat 模板对齐
+### P0-5: equlist/equipment 包装层恢复（本 Phase 追加）✅ 已修复
 
-**问题**: 模板有 `<equlist><equipment>` 包裹层，且缺少 `{appid}` 字段。
+**根因分析**: 真实 Atom idle 响应通过 hex dump 逐字节对比 + Content-Length 对齐（906 bytes）确认，`<srrc:equlist><srrc:equipment>` 包装层在 idle 状态下仍然存在，包裹 equid/equname/state 三个字段。v1.5.9 错误地将此包装层也一并删除，导致客户端无法从 `//srrc:equipment/srrc:state` 路径读取状态。
 
-**修复**: 代码已写完（uncommitted），需 commit + rebuild。涉及文件：
-- `B_QueryFaciDevStat.xml` — 平级结构，添加 `{appid}`
+**证据**:
+- 真实 Atom idle: 1023 bytes total / CL 906（始终一致）
+- v1.5.9 flat idle: 942 bytes / CL 844（差 62B ≈ equlist 标签 66B）
+- 修复后 idle: 1004 bytes / CL 906（差 19B = Server header）
+
+**修复**:
+- `service.py`: idle body_content 加回 `<srrc:equlist><srrc:equipment>` 包装
+- `B_QueryFaciDevStat.xml`: busy 模板同步加回包装层
+- `service.py`: 移除 `userid or self.config.soap_userid` 默认值链
+
+### P1-1: B_QueryFaciDevStat 模板对齐 ✅ 已完成
+
+**问题**: 模板缺少 `{appid}` 字段。
+
+**修复**: 
+- `B_QueryFaciDevStat.xml` — 添加 `{appid}`
 - `service.py` — 4 个测量接口的 fscan/pscan/mscan/sglfreq_params 添加 appid/userid
 - `service.py` — `_handle_query_faci_dev_stat` 从 session 读取 appid/userid
 
----
+### P1-2: B_QueryFaciDevStat idle 时泄露字段 ✅ 已完成（修正）
 
-### P1-2: B_QueryFaciDevStat idle 时泄露字段
+**问题**: idle 状态时模板输出 taskid/userid/feature/stc。真实 Atom idle 时完全不返回这些字段。
 
-**问题**: idle 状态时模板仍输出 taskid/userid/feature/appid/stc（空值）。真实 Atom idle 时完全不返回这些字段。
+**修正**: 最初方案是拆成 body_content 拍平结构。测试发现客户端不认。根因是真实 Atom idle 保留了 equlist/equipment 包装层。见 P0-5。
 
-**修复**: `_handle_query_faci_dev_stat` 在 idle 时传空字符串给 taskid/feature/stc；`build_response` → `inject_fields` 跳过空值字段（或在模板中条件化）。
+**最终修复**: idle 使用 body_content（保留 equlist 包装，只放 6 个基础字段），busy 使用模板（含所有字段）。
 
 ---
 
@@ -174,8 +188,8 @@ return response  # 立即返回，不等 RMCP
 | PENDING 窗口 | 第2次可创建 | 第2次拒绝 |
 | Sink SOAP 响应 | 等 RMCP 10s | 立即返回 |
 | Sink busy 时 | 先连 Sink 再断开 | 先查 session 再连 |
-| idle 响应 | 泄露 userid/stc | 只返回基础字段 |
-| busy 响应 | 缺 appid | 完整 5 字段 |
+| idle 响应 | 泄露 userid/stc，且丢失 equlist 包装层 | 基础字段 + equlist 包装 ✅ |
+| busy 响应 | 缺 appid，且丢失 equlist 包装层 | 完整 5 字段 + equlist 包装 ✅ |
 
 ---
 
