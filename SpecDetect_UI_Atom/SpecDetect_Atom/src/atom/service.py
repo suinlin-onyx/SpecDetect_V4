@@ -236,7 +236,7 @@ class AtomService:
             session = self.session_manager.create_pending(taskid, fscan_params)
         except RuntimeError as e:
             error(f"创建 session 失败: {e}", LogTag.SESSION)
-            return self.preset_manager.build_error_response(str(e))
+            return self.preset_manager.build_error_response("设备使用冲突")
 
         info(f"B_FScan: taskid={taskid}, stc={stc}, 创建pending session", LogTag.SESSION)
 
@@ -269,7 +269,8 @@ class AtomService:
 
         if not sink_host or not sink_port:
             error(f"B_FScan Sink: 缺少 outputchannel host 或 port", LogTag.SESSION)
-            return self.preset_manager.build_error_response("Sink 模式缺少 outputchannel host 或 port")
+            return self.preset_manager.build_error_response("Sink 模式缺少 outputchannel host 或 port",
+                                                          error_code='BIZ-000002', error_type='error')
 
         info(f"B_FScan Sink: taskid={taskid}, 连接 {sink_host}:{sink_port}", LogTag.SESSION)
 
@@ -286,7 +287,8 @@ class AtomService:
             error(f"B_FScan Sink: 连接失败 {sink_host}:{sink_port} - {e}", LogTag.SESSION)
             if sink_socket:
                 sink_socket.close()
-            return self.preset_manager.build_error_response(f"Sink 连接失败: {e}")
+            return self.preset_manager.build_error_response("Sink 连接失败",
+                                                          error_code='BIZ-000002', error_type='error')
 
         # 创建 active session（不等待 streamsrc 客户端）
         try:
@@ -294,7 +296,7 @@ class AtomService:
         except RuntimeError as e:
             error(f"创建 session 失败: {e}", LogTag.SESSION)
             sink_socket.close()
-            return self.preset_manager.build_error_response(str(e))
+            return self.preset_manager.build_error_response("设备使用冲突")
 
         # 设置 sink forwarder（用于主动发送数据）
         session.outputchannel_forwarder = sink_socket
@@ -646,7 +648,7 @@ class AtomService:
             session = self.session_manager.create_pending(taskid, pscan_params)
         except RuntimeError as e:
             error(f"创建 session 失败: {e}", LogTag.SESSION)
-            return self.preset_manager.build_error_response(str(e))
+            return self.preset_manager.build_error_response("设备使用冲突")
 
         info(f"B_PScan: taskid={taskid}, stc={stc}, 创建pending session", LogTag.SESSION)
 
@@ -678,7 +680,8 @@ class AtomService:
 
         if not sink_host or not sink_port:
             error(f"B_PScan Sink: 缺少 outputchannel host 或 port", LogTag.SESSION)
-            return self.preset_manager.build_error_response("Sink 模式缺少 outputchannel host 或 port")
+            return self.preset_manager.build_error_response("Sink 模式缺少 outputchannel host 或 port",
+                                                          error_code='BIZ-000002', error_type='error')
 
         info(f"B_PScan Sink: taskid={taskid}, 连接 {sink_host}:{sink_port}", LogTag.SESSION)
 
@@ -693,14 +696,15 @@ class AtomService:
             error(f"B_PScan Sink: 连接失败 {sink_host}:{sink_port} - {e}", LogTag.SESSION)
             if sink_socket:
                 sink_socket.close()
-            return self.preset_manager.build_error_response(f"Sink 连接失败: {e}")
+            return self.preset_manager.build_error_response("Sink 连接失败",
+                                                          error_code='BIZ-000002', error_type='error')
 
         try:
             session = self.session_manager.create_pending(taskid, pscan_params)
         except RuntimeError as e:
             error(f"创建 session 失败: {e}", LogTag.SESSION)
             sink_socket.close()
-            return self.preset_manager.build_error_response(str(e))
+            return self.preset_manager.build_error_response("设备使用冲突")
 
         session.outputchannel_forwarder = sink_socket
         session.state = SessionState.ACTIVE
@@ -752,7 +756,7 @@ class AtomService:
             session = self.session_manager.create_pending(taskid, mscan_params)
         except RuntimeError as e:
             error(f"创建 session 失败: {e}", LogTag.SESSION)
-            return self.preset_manager.build_error_response(str(e))
+            return self.preset_manager.build_error_response("设备使用冲突")
 
         info(f"B_MScan: taskid={taskid}, stc={stc}, 创建pending session", LogTag.SESSION)
 
@@ -808,7 +812,7 @@ class AtomService:
             session = self.session_manager.create_pending(taskid, sglfreq_params)
         except RuntimeError as e:
             error(f"创建 session 失败: {e}", LogTag.SESSION)
-            return self.preset_manager.build_error_response(str(e))
+            return self.preset_manager.build_error_response("设备使用冲突")
 
         info(f"B_SglFreqMeas: taskid={taskid}, stc={stc}, 创建pending session", LogTag.SESSION)
 
@@ -845,7 +849,8 @@ class AtomService:
 
         if not sink_host or not sink_port:
             error(f"B_SglFreqMeas Sink: 缺少 outputchannel host 或 port", LogTag.SESSION)
-            return self.preset_manager.build_error_response("Sink 模式缺少 outputchannel host 或 port")
+            return self.preset_manager.build_error_response("Sink 模式缺少 outputchannel host 或 port",
+                                                          error_code='BIZ-000002', error_type='error')
 
         info(f"B_SglFreqMeas Sink: taskid={taskid}, 连接 {sink_host}:{sink_port}", LogTag.SESSION)
 
@@ -861,14 +866,15 @@ class AtomService:
             error(f"B_SglFreqMeas Sink: 连接失败 {sink_host}:{sink_port} - {e}", LogTag.SESSION)
             if sink_socket:
                 sink_socket.close()
-            return self.preset_manager.build_error_response(f"Sink 连接失败: {e}")
+            return self.preset_manager.build_error_response("Sink 连接失败",
+                                                          error_code='BIZ-000002', error_type='error')
 
         try:
             session = self.session_manager.create_pending(taskid, sglfreq_params)
         except RuntimeError as e:
             error(f"创建 session 失败: {e}", LogTag.SESSION)
             sink_socket.close()
-            return self.preset_manager.build_error_response(str(e))
+            return self.preset_manager.build_error_response("设备使用冲突")
 
         session.outputchannel_forwarder = sink_socket
         session.state = SessionState.ACTIVE
@@ -936,7 +942,8 @@ class AtomService:
         # 使用 preset_manager 从 devinfo 加载 responsebody
         devinfo_xml = self.preset_manager.load_responsebody(mfid, equid)
         if not devinfo_xml:
-            return self.preset_manager.build_error_response("设备信息未找到")
+            return self.preset_manager.build_error_response("设备信息未找到",
+                                                            error_code='BIZ-000002', error_type='error')
 
         # 生成 taskid
         taskid = f"DEV-{int(time.time())}"
@@ -972,7 +979,8 @@ class AtomService:
         devinfo_xml = self.preset_manager.load_responsebody(mfid, equid)
         if not devinfo_xml:
             info(f"B_QueryFaciDevStat 未找到 devinfo 文件, key={mfid}_{equid}", LogTag.SOAP)
-            return self.preset_manager.build_error_response("设备信息未找到")
+            return self.preset_manager.build_error_response("设备信息未找到",
+                                                            error_code='BIZ-000002', error_type='error')
 
         # 从 devinfo 中提取 equname
         equname_match = re.search(r'<[^>]*:equname[^>]*>([^<]+)</[^>]*:equname>', devinfo_xml, re.IGNORECASE)
@@ -1032,7 +1040,8 @@ class AtomService:
         """处理未定义的接口"""
         if method and method.startswith('B_'):
             info(f"请求接口: {method}", LogTag.SOAP)
-        return self.preset_manager.build_error_response("请求失败")
+        return self.preset_manager.build_error_response("请求失败",
+                                                     error_code='BIZ-000002', error_type='error')
 
     def _match_and_start_stream(self, session: StreamSession):
         """匹配 session 并启动数据流

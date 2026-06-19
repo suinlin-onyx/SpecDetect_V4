@@ -354,24 +354,33 @@ class DevicePresetManager:
 
         return self._build_http_response(soap_body)
 
-    def build_error_response(self, error_msg: str) -> bytes:
+    def build_error_response(self, error_msg: str,
+                             error_code: str = 'BIZ-00002-conflict',
+                             error_type: str = 'cancel',
+                             biz_res_cd: str = None,
+                             biz_res_text: str = None) -> bytes:
         """构建错误响应
 
         Args:
-            error_msg: 错误信息
+            error_msg: 错误描述 (映射到 <srrc:text>)
+            error_code: 业务错误码 (默认 BIZ-00002-conflict)
+            error_type: 错误类型 (默认 cancel)
+            biz_res_cd: Header bizResCd (默认与 error_code 相同)
+            biz_res_text: Header bizResText (默认与 error_msg 相同)
 
         Returns:
-            HTTP 响应字节 (gb2312 编码)
+            HTTP 响应字节
         """
         self._ensure_templates_loaded()
 
-        # 获取错误 Body
-        body = self._error_template.replace('{error_msg}', error_msg)
+        body = self._error_template \
+            .replace('{error_type}', error_type) \
+            .replace('{error_code}', error_code) \
+            .replace('{error_text}', error_msg)
 
-        # 包装到 Envelope
         soap_body = self._envelope_template.replace('{body}', body)
-        soap_body = soap_body.replace('{bizrescd}', 'BIZ-000001')
-        soap_body = soap_body.replace('{bizrestext}', '调用失败')
+        soap_body = soap_body.replace('{bizrescd}', biz_res_cd or error_code)
+        soap_body = soap_body.replace('{bizrestext}', biz_res_text or error_msg)
 
         return self._build_http_response(soap_body)
 

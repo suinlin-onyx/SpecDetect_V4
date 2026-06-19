@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns1="base" xmlns:srrc="http://www.srrc.org.cn"><soapenv:Header><srrc:ProviderResponse><srrc:bizResCd>{bizrescd}</srrc:bizResCd><srrc:bizResText>{bizrestext}</srrc:bizResText></srrc:ProviderResponse></soapenv:Header>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:srrc="http://www.srrc.org.cn"><soapenv:Header><srrc:ProviderResponse><srrc:bizResCd>{bizrescd}</srrc:bizResCd><srrc:bizResText>{bizrestext}</srrc:bizResText></srrc:ProviderResponse></soapenv:Header>
 <soapenv:Body>{body}</soapenv:Body>
 </soapenv:Envelope>

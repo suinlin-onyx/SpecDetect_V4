@@ -1,6 +1,6 @@
 {
   "version": {
-    "atom": "1.2.4",
+    "atom": "1.5.8",
     "proxy": "1.1.8"
   },
   "use_legacy_xml": {
@@ -91,7 +91,7 @@
   "session": {
     "stale_timeout": 30,
     "idle_timeout": 30,
-    "max_sessions": 5,
+    "max_sessions": 1,
     "put_time_interval": 60,
     "judge_busy_by_max_task_num": false
   },

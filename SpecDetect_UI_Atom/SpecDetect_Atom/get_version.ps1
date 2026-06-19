@@ -1,6 +1,11 @@
-$line = Select-String -Path 'src\atom\service.py' -Pattern '^__version__' | Select-Object -First 1
-if ($line) {
-    $line.Line.Split('=')[1].Trim().Replace('"', '')
+$versionPy = Join-Path $PSScriptRoot 'src\version.py'
+if (Test-Path $versionPy) {
+    $content = Get-Content -Path $versionPy -Raw
+    if ($content -match 'ATOM_VERSION\s*=\s*"([^"]+)"') {
+        $matches[1]
+    } else {
+        '1.1.4'
+    }
 } else {
     '1.1.4'
 }

@@ -1,1 +1,1 @@
-<srrc:error>{error_msg}</srrc:error>
+<srrc:responsebody><srrc:error><srrc:type>{error_type}</srrc:type><srrc:code>{error_code}</srrc:code><srrc:text>{error_text}</srrc:text></srrc:error></srrc:responsebody>
