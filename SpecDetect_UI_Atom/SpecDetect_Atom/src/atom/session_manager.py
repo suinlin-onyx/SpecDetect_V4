@@ -66,6 +66,10 @@ class SessionManager:
             StreamSession 实例
         """
         with self.lock:
+            # PENDING session 也计入占用（max_sessions=1 时防止窗口绕过）
+            if self.pending_sessions:
+                raise RuntimeError("设备使用冲突")
+
             # 检查 session 数量限制
             active_count = sum(1 for s in self.sessions.values() if s.state == SessionState.ACTIVE)
             if active_count >= self.max_sessions:

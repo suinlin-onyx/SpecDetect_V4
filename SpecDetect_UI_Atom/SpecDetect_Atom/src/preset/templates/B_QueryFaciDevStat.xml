@@ -3,16 +3,13 @@
     <srrc:mfid>{mfid}</srrc:mfid>
     <srrc:mfname>{mfname}</srrc:mfname>
     <srrc:altitude>0.0</srrc:altitude>
-    <srrc:equlist>
-      <srrc:equipment>
-        <srrc:equid>{equid}</srrc:equid>
-        <srrc:equname>{equname}</srrc:equname>
-        <srrc:state>{state}</srrc:state>
-      </srrc:equipment>
-    </srrc:equlist>
+    <srrc:equid>{equid}</srrc:equid>
+    <srrc:equname>{equname}</srrc:equname>
+    <srrc:state>{state}</srrc:state>
     <srrc:taskid>{taskid}</srrc:taskid>
     <srrc:userid>{userid}</srrc:userid>
     <srrc:feature>{feature}</srrc:feature>
+    <srrc:appid>{appid}</srrc:appid>
     <srrc:stc>{stc}</srrc:stc>
   </srrc:result>
 </srrc:responsebody>

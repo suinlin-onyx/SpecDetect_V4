@@ -222,6 +222,8 @@ class AtomService:
             'equid': params.get('equid', ''),
             'stc': stc,  # 保存 STC 以便在数据帧中使用
             'func_id': params.get('func_id', 15),  # FSCAN 功能 ID
+            'appid': params.get('appid', ''),
+            'userid': params.get('userid', ''),
         }
 
         # 检查 outputchannel 模式
@@ -274,6 +276,13 @@ class AtomService:
 
         info(f"B_FScan Sink: taskid={taskid}, 连接 {sink_host}:{sink_port}", LogTag.SESSION)
 
+        # 先创建 session（检查设备是否忙），再连接 Sink 目标
+        try:
+            session = self.session_manager.create_pending(taskid, fscan_params)
+        except RuntimeError as e:
+            error(f"创建 session 失败: {e}", LogTag.SESSION)
+            return self.preset_manager.build_error_response("设备使用冲突")
+
         # 创建到 outputchannel 的 socket 连接
         sink_socket = None
         try:
@@ -287,16 +296,9 @@ class AtomService:
             error(f"B_FScan Sink: 连接失败 {sink_host}:{sink_port} - {e}", LogTag.SESSION)
             if sink_socket:
                 sink_socket.close()
+            self.session_manager.close_session(session)
             return self.preset_manager.build_error_response("Sink 连接失败",
                                                           error_code='BIZ-000002', error_type='error')
-
-        # 创建 active session（不等待 streamsrc 客户端）
-        try:
-            session = self.session_manager.create_pending(taskid, fscan_params)
-        except RuntimeError as e:
-            error(f"创建 session 失败: {e}", LogTag.SESSION)
-            sink_socket.close()
-            return self.preset_manager.build_error_response("设备使用冲突")
 
         # 设置 sink forwarder（用于主动发送数据）
         session.outputchannel_forwarder = sink_socket
@@ -304,12 +306,9 @@ class AtomService:
         # 立即激活 session（不等待 streamsrc 客户端）
         session.state = SessionState.ACTIVE
 
-        # 启动 sink 模式数据流
-        self._start_sink_stream(session)
-
-        # 返回响应（mode=sink）
+        # 收集响应字段
         rf = self._get_response_fields(request)
-        return self.preset_manager.build_response(
+        response = self.preset_manager.build_response(
             'B_FScan',
             appid=rf['appid'],
             userid=rf['userid'],
@@ -329,6 +328,11 @@ class AtomService:
             outputchannel_port=sink_port,
             outputchannel_stc=stc
         )
+
+        # 后台启动 RMCP 连接（不阻塞 SOAP 响应）
+        threading.Thread(target=self._start_sink_stream, args=(session,), daemon=True).start()
+
+        return response
 
     def _start_sink_stream(self, session: StreamSession):
         """启动 Sink 模式数据流
@@ -353,6 +357,12 @@ class AtomService:
         if not rmcp_client.connect():
             error(f"连接设备失败: {self.config.device_host}:{self.config.device_port}", LogTag.RMCP)
             session.close_all()
+            return
+
+        # 检查 session 是否在 RMCP 连接期间被关闭（防止 B_StopMeas 竞态）
+        if getattr(session, '_closing', False):
+            info(f"session 已被关闭，放弃 RMCP 连接: {session.taskid}", LogTag.STREAM)
+            rmcp_client.disconnect()
             return
 
         session.attach_target(rmcp_client)
@@ -634,6 +644,8 @@ class AtomService:
             'stc': stc,
             'mode': 'pscan',  # PScan 专用模式
             'func_id': 16,  # B_PScan 的 funcid
+            'appid': params.get('appid', ''),
+            'userid': params.get('userid', ''),
         }
 
         # 检查 outputchannel 模式
@@ -685,6 +697,13 @@ class AtomService:
 
         info(f"B_PScan Sink: taskid={taskid}, 连接 {sink_host}:{sink_port}", LogTag.SESSION)
 
+        # 先创建 session（检查设备是否忙），再连接 Sink 目标
+        try:
+            session = self.session_manager.create_pending(taskid, pscan_params)
+        except RuntimeError as e:
+            error(f"创建 session 失败: {e}", LogTag.SESSION)
+            return self.preset_manager.build_error_response("设备使用冲突")
+
         sink_socket = None
         try:
             sink_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -696,22 +715,16 @@ class AtomService:
             error(f"B_PScan Sink: 连接失败 {sink_host}:{sink_port} - {e}", LogTag.SESSION)
             if sink_socket:
                 sink_socket.close()
+            self.session_manager.close_session(session)
             return self.preset_manager.build_error_response("Sink 连接失败",
                                                           error_code='BIZ-000002', error_type='error')
 
-        try:
-            session = self.session_manager.create_pending(taskid, pscan_params)
-        except RuntimeError as e:
-            error(f"创建 session 失败: {e}", LogTag.SESSION)
-            sink_socket.close()
-            return self.preset_manager.build_error_response("设备使用冲突")
-
         session.outputchannel_forwarder = sink_socket
         session.state = SessionState.ACTIVE
-        self._start_sink_stream(session)
 
+        # 收集响应字段
         rf = self._get_response_fields(request)
-        return self.preset_manager.build_response(
+        response = self.preset_manager.build_response(
             'B_PScan',
             appid=rf['appid'],
             userid=rf['userid'],
@@ -731,6 +744,11 @@ class AtomService:
             outputchannel_stc=stc
         )
 
+        # 后台启动 RMCP 连接（不阻塞 SOAP 响应）
+        threading.Thread(target=self._start_sink_stream, args=(session,), daemon=True).start()
+
+        return response
+
     def _handle_mscan(self, request: dict) -> bytes:
         """处理 B_MScan - 单频点扫描"""
         params = request.get('params', {})
@@ -749,6 +767,8 @@ class AtomService:
             'stc': stc,
             'mode': 'mscan',  # 标记为 MSCAN 模式
             'func_id': 14,  # B_MScan 的 funcid
+            'appid': params.get('appid', ''),
+            'userid': params.get('userid', ''),
         }
 
         # 创建 pending session
@@ -798,6 +818,8 @@ class AtomService:
             'stc': stc,
             'mode': 'sglfreq',  # 标记为 SglFreqMeas 模式
             'func_id': 11,  # B_SglFreqMeas 的 funcid
+            'appid': params.get('appid', ''),
+            'userid': params.get('userid', ''),
         }
 
         # 检查 outputchannel 模式
@@ -854,6 +876,13 @@ class AtomService:
 
         info(f"B_SglFreqMeas Sink: taskid={taskid}, 连接 {sink_host}:{sink_port}", LogTag.SESSION)
 
+        # 先创建 session（检查设备是否忙），再连接 Sink 目标
+        try:
+            session = self.session_manager.create_pending(taskid, sglfreq_params)
+        except RuntimeError as e:
+            error(f"创建 session 失败: {e}", LogTag.SESSION)
+            return self.preset_manager.build_error_response("设备使用冲突")
+
         sink_socket = None
         try:
             sink_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -866,22 +895,16 @@ class AtomService:
             error(f"B_SglFreqMeas Sink: 连接失败 {sink_host}:{sink_port} - {e}", LogTag.SESSION)
             if sink_socket:
                 sink_socket.close()
+            self.session_manager.close_session(session)
             return self.preset_manager.build_error_response("Sink 连接失败",
                                                           error_code='BIZ-000002', error_type='error')
 
-        try:
-            session = self.session_manager.create_pending(taskid, sglfreq_params)
-        except RuntimeError as e:
-            error(f"创建 session 失败: {e}", LogTag.SESSION)
-            sink_socket.close()
-            return self.preset_manager.build_error_response("设备使用冲突")
-
         session.outputchannel_forwarder = sink_socket
         session.state = SessionState.ACTIVE
-        self._start_sink_stream(session)
 
+        # 收集响应字段
         rf = self._get_response_fields(request)
-        return self.preset_manager.build_response(
+        response = self.preset_manager.build_response(
             'B_SglFreqMeas',
             appid=rf['appid'],
             userid=rf['userid'],
@@ -905,6 +928,11 @@ class AtomService:
             outputchannel_port=sink_port,
             outputchannel_stc=stc
         )
+
+        # 后台启动 RMCP 连接（不阻塞 SOAP 响应）
+        threading.Thread(target=self._start_sink_stream, args=(session,), daemon=True).start()
+
+        return response
 
     def _handle_stopmeas(self, request: dict) -> bytes:
         """处理 B_StopMeas"""
@@ -1001,18 +1029,13 @@ class AtomService:
 
         # 检查是否有活动测量
         active_sessions = self.session_manager.get_active_sessions()
-        state = 'idle'
-        taskid = ''
-        feature = ''
-        stc = 0
 
         if active_sessions:
-            # 使用最新的活动 session 信息
             session = active_sessions[0]
-            state = 'busy'
             taskid = session.taskid
             stc = session.fscan_params.get('stc', 0)
-            # 根据 mode 确定 feature
+            appid = session.fscan_params.get('appid', '')
+            busy_userid = session.fscan_params.get('userid', '')
             mode = session.fscan_params.get('mode', 'fscan')
             if mode == 'fscan':
                 feature = 'B_FScan'
@@ -1022,19 +1045,43 @@ class AtomService:
                 feature = 'B_MScan'
             elif mode == 'sglfreq':
                 feature = 'B_SglFreqMeas'
+            else:
+                feature = ''
 
-        return self.preset_manager.build_response(
-            'B_QueryFaciDevStat',
-            mfid=mfid,
-            mfname=mfname,
-            equid=equid,
-            equname=equname,
-            state=state,
-            taskid=taskid,
-            userid=userid or self.config.soap_userid,
-            feature=feature,
-            stc=stc
-        )
+            return self.preset_manager.build_response(
+                'B_QueryFaciDevStat',
+                mfid=mfid,
+                mfname=mfname,
+                equid=equid,
+                equname=equname,
+                state='busy',
+                taskid=taskid,
+                userid=busy_userid or userid or self.config.soap_userid,
+                feature=feature,
+                appid=appid,
+                stc=stc
+            )
+        else:
+            # idle: 不输出 taskid/userid/feature/appid/stc（与真实 Atom 一致）
+            idle_body = (
+                '<srrc:responsebody><srrc:result>'
+                '<srrc:mfid>{mfid}</srrc:mfid>'
+                '<srrc:mfname>{mfname}</srrc:mfname>'
+                '<srrc:altitude>0.0</srrc:altitude>'
+                '<srrc:equid>{equid}</srrc:equid>'
+                '<srrc:equname>{equname}</srrc:equname>'
+                '<srrc:state>idle</srrc:state>'
+                '</srrc:result></srrc:responsebody>'
+            )
+            return self.preset_manager.build_response(
+                'B_QueryFaciDevStat',
+                body_content=idle_body,
+                mfid=mfid,
+                mfname=mfname,
+                equid=equid,
+                equname=equname,
+                state='idle'
+            )
 
     def _handle_undefined_interface(self, method: str) -> bytes:
         """处理未定义的接口"""
