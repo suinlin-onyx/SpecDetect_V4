@@ -207,6 +207,66 @@ return response  # 立即返回，不等 RMCP
 - B_QueryFaciDevStat idle/busy 字段完整性测试
 - 4 接口 conflict 回调回归测试
 
+---
+
+### P0-6: RMCP 路由根据请求 mfid/equid 匹配设备预设（待实施）
+
+**问题**: Source 模式 (`_match_and_start_stream` L1119) 和 Sink 模式 (`_start_sink_stream` L351) 创建 `RMCPClient` 时固定使用 `config.device_host`/`config.device_port`，未根据请求传入的 mfid/equid 查找对应 preset 的 `station.serverip`/`station.serverport`。
+
+settings.json 中每个 preset 已声明 `station.serverip`/`station.serverport`（如 刺树丫站→172.18.114.226:9999, 测试站→100.72.95.36:1449），但从未被消费。
+
+**影响范围**: 4 个测量接口（B_FScan/B_PScan/B_MScan/B_SglFreqMeas）的 RMCP 连接目标。
+
+**修复方案**:
+- `config.py`: 新增 `get_device_station(mfid, equid)` → 返回 `(serverip, serverport)` 或 None
+- `service.py`: Source/Sink 路径改为从 preset 查找，fallback 到 `device_host`/`device_port`
+
+**风险评估**:
+
+| 风险 | 等级 | 缓解 |
+|------|:--:|------|
+| mfid/equid 不匹配 | LOW | fallback 到 device_host/device_port |
+| serverip/serverport 为空 | LOW | fallback |
+| 协议/格式影响 | NONE | 仅 TCP 目标地址变更 |
+
+**成本**: ~18 行代码，config.py (~8) + service.py (~10)
+
+---
+
+### P0-7: XML 模板紧凑化（消除 whitespace 文本节点）✅ 已修复
+
+**问题**: `_envelope.xml` 和 `B_QueryFaciDevStat.xml` 模板中的换行/缩进在 SOAP XML 中产生 whitespace 文本节点。导致 `<srrc:state>` 的 textContent 为 `"\n        busy\n      "` 而不是 `"busy"`。客户端若做精确字符串比较将无法匹配。
+
+**证据**: v1.5.11 测试中客户端解析成功但显示 idle（绿色），说明 state 值未匹配到 "busy"。真实 Atom 使用紧凑 XML（无换行），textContent 干净。
+
+**修复**:
+- `_envelope.xml`: 移除 `</soapenv:Header>` 后换行，单行紧凑
+- `B_QueryFaciDevStat.xml`: 改为单行紧凑格式
+- 测试确认: state textContent = `'busy'`（干净），body 无换行
+
+**效果**:
+| | v1.5.11 | v1.5.12 | 真实 Atom |
+|------|:--:|:--:|:--:|
+| body 换行 | 有 | 无 ✅ | 无 |
+| state text | `'\n        busy\n      '` | `'busy'` ✅ | `'busy'` |
+| busy CL | 1180 | 1179 | 1156 |
+
+---
+
+### P0-8: Server 响应头添加 `gSOAP/2.8`（待实施）
+
+**问题**: 真实 Atom 返回 `Server: gSOAP/2.8` 响应头，SpecDetect_Atom 无此头。某些客户端可能验证此头。
+
+**修复方案**: `device_preset.py` 的 `_build_http_response()` 中添加 `Server: gSOAP/2.8` 行。
+
+**成本**: ~1 行代码，无风险。
+
+### Step 2: 测试 (tdd-guide)
+- PENDING 窗口测试
+- Sink 响应延迟测试
+- B_QueryFaciDevStat idle/busy 字段完整性测试
+- 4 接口 conflict 回调回归测试
+
 ### Step 3: 审查 (code-reviewer)
 - session 状态机完整性
 - 线程安全（_start_sink_stream 改后台线程）
