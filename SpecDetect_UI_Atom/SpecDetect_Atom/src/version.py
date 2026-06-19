@@ -5,7 +5,7 @@
 所有版本号只在这里定义，其他地方从此文件导入
 """
 
-ATOM_VERSION = "1.5.12"
+ATOM_VERSION = "1.5.13"
 PROXY_VERSION = "1.2.2"
 RMCP_PROXY_VERSION = "1.0.1"
 
