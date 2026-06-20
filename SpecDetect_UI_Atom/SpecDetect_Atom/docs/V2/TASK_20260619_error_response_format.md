@@ -3,7 +3,7 @@
 **日期**: 2026-06-19
 **优先级**: HIGH
 **版本**: v1.5.8 → v1.5.9
-**状态**: Phase 1 已完成(error响应结构), Phase 2 已实施, P0-4/P0-5 已修复(idle 格式对齐)
+**状态**: Phase 1 已完成(error响应结构), Phase 2 已实施, P0-4/P0-5/P0-7 已修复, P0-1/P0-2/P0-3/P0-6/P0-8/P0-9 待实施
 
 ---
 
@@ -261,6 +261,91 @@ settings.json 中每个 preset 已声明 `station.serverip`/`station.serverport`
 
 **成本**: ~1 行代码，无风险。
 
+
+### P0-9: 提取 DeviceStatusProvider 模块（状态管理解耦）（待实施）
+
+**问题**: `B_QueryFaciDevStat` 的 97 行 handler 混合了 5 个高耦合关注点：
+1. state 判定逻辑（idle/busy 条件分支）
+2. `fscan_params` 裸 dict 访问（无类型安全保障）
+3. `mode` → `feature` 映射逻辑
+4. 站名读取绕过 Config API（直接读 settings.json keys）
+5. idle XML 响应绕过模板系统（硬编码 XML 字符串）
+
+当前 `_handle_query_faci_dev_stat` 在 `service.py` 中约 97 行，职责过载，无法独立测试。
+
+**修复方案**（三步）:
+
+**Step 1**: idle 体改用模板，消除 `service.py:1066-1077` 硬编码 XML 字符串。将 idle body_content 替换为模板渲染，统一通过 `preset_manager.build_response()` 构建。
+
+**Step 2**: 提取 `DeviceStatusProvider` 类到新模块 `src/atom/device_status.py`：
+
+```python
+# src/atom/device_status.py (~80-100 行)
+
+@dataclass
+class StatusResult:
+    """设备状态查询结果，类型安全封装"""
+    state: str                         # "idle" | "busy"
+    mfid: str
+    mfname: str
+    altitude: str
+    equid: str
+    equname: str
+    taskid: str = ""                   # busy 时填充
+    userid: str = ""                   # busy 时填充
+    feature: str = ""                  # busy 时填充
+    appid: str = ""                    # busy 时填充
+    stc: str = ""                      # busy 时填充
+
+
+class DeviceStatusProvider:
+    """设备状态提供者，封装 idle/busy 判定和字段收集逻辑"""
+
+    def __init__(self, session_manager, station_manager, device_preset, mode_feature_map):
+        self.session_manager = session_manager
+        self.station_manager = station_manager
+        self.device_preset = device_preset
+        self.mode_feature_map = mode_feature_map  # mode → feature 映射表
+
+    def get_status(self, mfid: str, equid: str) -> StatusResult:
+        """查询设备状态，返回类型安全的 StatusResult"""
+        ...
+
+    def _get_station_fields(self, mfid: str) -> dict:
+        """通过 station_manager 获取站名/高度，不直接读 settings.json"""
+        ...
+
+    def _get_busy_fields(self, mfid: str, equid: str) -> dict:
+        """从活跃 session 提取 taskid/userid/feature/appid/stc"""
+        ...
+
+    def _resolve_feature(self, session) -> str:
+        """从 session mode 映射到 feature 字符串"""
+        ...
+```
+
+**Step 3**: 新增 `StatusResult` dataclass，替代裸 dict 访问。确保类型安全检查在编译/静态分析阶段即可捕获字段缺失错误。
+
+**成本**: ~100 行重新分布，零新外部依赖，net-zero 行数增长（service.py 减少 ~80 行，device_status.py 新增 ~80-100 行）。
+
+**收益**:
+- Provider 可独立单元测试（mock session_manager/station_manager）
+- 状态源可替换（如后续接入 RMCP 嗅探获取真实设备状态）
+- 类型安全：`StatusResult` dataclass 消除 `fscan_params.get('key', fallback)` 模式
+- service.py handler 从 97 行缩减到 ~20 行（薄调用层）
+
+**文件**:
+| 文件 | 操作 | 行数变化 |
+|------|------|----------|
+| `src/atom/device_status.py` | **新增** | +80~100 行 |
+| `src/atom/service.py` | 修改 | 97 行 → ~20 行（-77 行） |
+
+**测试策略**:
+- `DeviceStatusProvider` 单元测试：mock session_manager，验证 idle/busy 分支
+- `StatusResult` 字段完整性测试
+- B_QueryFaciDevStat 集成回归测试（idle/busy/custom 三种状态）
+
+
 ### Step 2: 测试 (tdd-guide)
 - PENDING 窗口测试
 - Sink 响应延迟测试
@@ -283,9 +368,10 @@ settings.json 中每个 preset 已声明 `station.serverip`/`station.serverport`
 | 文件 | Phase | 变更类型 |
 |------|-------|----------|
 | `session_manager.py` | P2 | PENDING 计数 |
-| `service.py` | P2 | Sink 响应时序 + Sink 连接顺序 + appid/userid |
+| `service.py` | P2 | Sink 响应时序 + Sink 连接顺序 + appid/userid + DeviceStatusProvider 提取 |
 | `B_QueryFaciDevStat.xml` | P2 | 模板重构（已完成，uncommitted） |
 | `device_preset.py` | P2 | inject_fields 空值跳过 |
+| `device_status.py` | P2 | **新增** — DeviceStatusProvider 模块 + StatusResult dataclass |
 | `version.py` | P4 | 1.5.8 → 1.5.9 |
 | `settings.json` | P4 | 版本同步 |
 | `version_info.txt` | P4 | 版本同步 |
